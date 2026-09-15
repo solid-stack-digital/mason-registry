@@ -1,0 +1,12 @@
+{
+  "name": "otp",
+  "type": "feature",
+  "description": "One-time password generation, validation, and email dispatching",
+  "version": "1.0.0",
+  "dependencies": {
+    "npm": [],
+    "shared": ["time", "uuid"],
+    "features": ["mailing"]
+  },
+  "files": []
+}

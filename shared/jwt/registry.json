@@ -1,0 +1,12 @@
+{
+  "name": "jwt",
+  "type": "shared",
+  "description": "JSON Web Token (JWT) signing, verification, and expiration handling",
+  "version": "1.0.0",
+  "dependencies": {
+    "npm": [],
+    "shared": ["time"],
+    "features": []
+  },
+  "files": []
+}

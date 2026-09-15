@@ -1,0 +1,12 @@
+{
+  "name": "mailing",
+  "type": "feature",
+  "description": "Email sending, mailer interface, memory mailer, and template dispatcher",
+  "version": "1.0.0",
+  "dependencies": {
+    "npm": [],
+    "shared": ["time"],
+    "features": []
+  },
+  "files": []
+}

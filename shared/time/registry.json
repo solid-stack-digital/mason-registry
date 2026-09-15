@@ -1,0 +1,12 @@
+{
+  "name": "time",
+  "type": "shared",
+  "description": "Clock and Time abstraction for deterministic date/time manipulation",
+  "version": "1.0.0",
+  "dependencies": {
+    "npm": [],
+    "shared": [],
+    "features": []
+  },
+  "files": []
+}

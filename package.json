@@ -1,0 +1,20 @@
+{
+  "name": "@solid-stack/mason-registry",
+  "version": "1.0.0",
+  "description": "Official code registry for Solid Stack Clean Architecture shared modules and features",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "tsx scripts/build.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@solid-stack/agnos-express": "^1.0.2",
+    "@solid-stack/di": "^1.0.4",
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.13.5",
+    "express": "^5.2.1",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3"
+  }
+}

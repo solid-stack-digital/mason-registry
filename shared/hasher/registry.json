@@ -1,0 +1,12 @@
+{
+  "name": "hasher",
+  "type": "shared",
+  "description": "Cryptographic password hashing and verification abstraction using scrypt",
+  "version": "1.0.0",
+  "dependencies": {
+    "npm": [],
+    "shared": [],
+    "features": []
+  },
+  "files": []
+}

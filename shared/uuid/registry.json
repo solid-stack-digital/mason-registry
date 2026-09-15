@@ -1,0 +1,12 @@
+{
+  "name": "uuid",
+  "type": "shared",
+  "description": "UUID v4 generation abstraction for clean architecture entities",
+  "version": "1.0.0",
+  "dependencies": {
+    "npm": [],
+    "shared": [],
+    "features": []
+  },
+  "files": []
+}
