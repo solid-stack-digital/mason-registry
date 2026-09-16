@@ -19,5 +19,6 @@
     "infrastructure/HmacJwtEngine.ts",
     "infrastructure/StubJwtEngine.ts",
     "ports/IJwtEngine.ts"
-  ]
+  ],
+  "integrity": "sha256-389381d1828c873ce4bef4d4f97b340733c2bd744d3e1d7fa001e80cd2c4033b"
 }

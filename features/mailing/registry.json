@@ -16,5 +16,6 @@
     "infrastructure/MemoryMailer.ts",
     "infrastructure/StubMailer.ts",
     "useCases/SendEmail.ts"
-  ]
+  ],
+  "integrity": "sha256-d97ced35396b6d9be019ecc68a5b2c8bdf0da740ea9d3df5724b5f7ff474a8b3"
 }

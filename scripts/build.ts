@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -11,6 +12,7 @@ interface ModuleManifest {
   type: "shared" | "feature";
   description: string;
   version: string;
+  integrity?: string;
   dependencies: {
     npm: string[];
     shared: string[];
@@ -24,6 +26,7 @@ interface IndexEntry {
   name: string;
   description: string;
   version?: string;
+  integrity?: string;
   [key: string]: any;
 }
 
@@ -63,6 +66,22 @@ function collectFiles(dir: string, baseDir: string = dir): string[] {
   return files.sort();
 }
 
+function computeDirectoryHash(dirPath: string, files?: string[]): string {
+  const hash = createHash("sha256");
+  const fileList = (files ?? collectFiles(dirPath)).sort();
+
+  for (const relativePath of fileList) {
+    const absolutePath = path.join(dirPath, relativePath);
+    if (!fs.existsSync(absolutePath)) continue;
+    const content = fs.readFileSync(absolutePath, "utf8");
+    const normalizedContent = content.replace(/\r\n/g, "\n");
+    hash.update(relativePath);
+    hash.update(normalizedContent);
+  }
+
+  return `sha256-${hash.digest("hex")}`;
+}
+
 function processDirectory(type: "shared" | "feature"): IndexEntry[] {
   const targetDir = path.join(rootDir, type === "shared" ? "shared" : "features");
   if (!fs.existsSync(targetDir)) return [];
@@ -98,17 +117,22 @@ function processDirectory(type: "shared" | "feature"): IndexEntry[] {
     const files = collectFiles(modDir);
     manifest.files = files;
 
+    // Compute composite integrity hash
+    const integrity = computeDirectoryHash(modDir, files);
+    manifest.integrity = integrity;
+
     // Ensure manifest name and type are set properly
     manifest.name = manifest.name || mod.name;
     manifest.type = type;
 
     fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + "\n", "utf-8");
-    console.log(`[${type}] ${manifest.name}: ${files.length} files`);
+    console.log(`[${type}] ${manifest.name}: ${files.length} files (${integrity.slice(0, 18)}...)`);
 
     indexEntries.push({
       name: manifest.name,
       description: manifest.description,
       version: manifest.version,
+      integrity,
     });
   }
 

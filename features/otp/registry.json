@@ -29,5 +29,6 @@
     "useCases/ResendEmailOtp.ts",
     "useCases/SendEmailOtp.ts",
     "useCases/ValidateOtp.ts"
-  ]
+  ],
+  "integrity": "sha256-2149a267818b3aae345b39e538a4dac011aea89f7026e6df1248ffd4938bf641"
 }

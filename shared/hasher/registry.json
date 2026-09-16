@@ -14,5 +14,6 @@
     "infrastructure/ScryptHashEngine.ts",
     "infrastructure/StubHashEngine.ts",
     "ports/IHashEngine.ts"
-  ]
+  ],
+  "integrity": "sha256-09ebf144dd06e48a944ffae7522dc867fee954437aab39bac005650c7c1a6f19"
 }
