@@ -11,6 +11,7 @@
     "features": []
   },
   "files": [
+    "Jwt.test.ts",
     "Jwt.ts",
     "diProvider.ts",
     "errors/JwtError.ts",

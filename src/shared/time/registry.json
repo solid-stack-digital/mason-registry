@@ -9,6 +9,7 @@
     "features": []
   },
   "files": [
+    "Clock.test.ts",
     "Clock.ts",
     "diProvider.ts",
     "domain/Duration.ts",

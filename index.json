@@ -43,6 +43,12 @@
       "description": "One-time password generation, validation, and email dispatching",
       "version": "1.0.0",
       "integrity": "sha256-2149a267818b3aae345b39e538a4dac011aea89f7026e6df1248ffd4938bf641"
+    },
+    {
+      "name": "resources",
+      "description": "resources feature module",
+      "version": "1.0.0",
+      "integrity": "sha256-632ef2200f936af3e69e2456da66862f5f4c49bb1cb2b62bb3cf11620f0f5d58"
     }
   ]
 }

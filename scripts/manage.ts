@@ -67,10 +67,34 @@ export function collectFiles(dir: string, baseDir: string = dir): string[] {
     const relPath = path.relative(baseDir, fullPath).replace(/\\/g, "/");
 
     if (entry.isDirectory()) {
-      if (entry.name === "__tests__" || entry.name.startsWith(".")) {
+      if (entry.name.startsWith(".")) {
         continue;
       }
       files.push(...collectFiles(fullPath, baseDir));
+    } else if (entry.isFile()) {
+      if (entry.name === "registry.json" || entry.name.startsWith(".")) {
+        continue;
+      }
+      files.push(relPath);
+    }
+  }
+
+  return files.sort();
+}
+
+export function collectSourceFiles(dir: string, baseDir: string = dir): string[] {
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  const files: string[] = [];
+
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+    const relPath = path.relative(baseDir, fullPath).replace(/\\/g, "/");
+
+    if (entry.isDirectory()) {
+      if (entry.name === "__tests__" || entry.name.startsWith(".")) {
+        continue;
+      }
+      files.push(...collectSourceFiles(fullPath, baseDir));
     } else if (entry.isFile()) {
       if (
         entry.name === "registry.json" ||
@@ -89,7 +113,7 @@ export function collectFiles(dir: string, baseDir: string = dir): string[] {
 
 export function computeDirectoryHash(dirPath: string, files?: string[]): string {
   const hash = createHash("sha256");
-  const fileList = (files ?? collectFiles(dirPath)).sort();
+  const fileList = (files ?? collectSourceFiles(dirPath)).sort();
 
   for (const relativePath of fileList) {
     const absolutePath = path.join(dirPath, relativePath);
@@ -120,10 +144,25 @@ export function saveMasterIndex(index: MasterIndex): void {
   fs.writeFileSync(indexPath, JSON.stringify(index, null, 2) + "\n", "utf-8");
 }
 
+function getTargetFolder(type: "shared" | "feature"): string {
+  let config: any = null;
+  const configPath = path.join(rootDir, "mason.config.json");
+  if (fs.existsSync(configPath)) {
+    try {
+      config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+    } catch {}
+  }
+  const configured = type === "shared" ? config?.paths?.shared : config?.paths?.features;
+  if (configured) return path.resolve(rootDir, configured);
+  const inSrc = path.join(rootDir, "src", type === "shared" ? "shared" : "features");
+  if (fs.existsSync(inSrc)) return inSrc;
+  return path.join(rootDir, type === "shared" ? "shared" : "features");
+}
+
 export function discoverDiskModules(): Array<{ name: string; type: "shared" | "feature"; dir: string }> {
   const results: Array<{ name: string; type: "shared" | "feature"; dir: string }> = [];
 
-  const sharedDir = path.join(rootDir, "shared");
+  const sharedDir = getTargetFolder("shared");
   if (fs.existsSync(sharedDir)) {
     const entries = fs.readdirSync(sharedDir, { withFileTypes: true });
     for (const entry of entries) {
@@ -133,7 +172,7 @@ export function discoverDiskModules(): Array<{ name: string; type: "shared" | "f
     }
   }
 
-  const featuresDir = path.join(rootDir, "features");
+  const featuresDir = getTargetFolder("feature");
   if (fs.existsSync(featuresDir)) {
     const entries = fs.readdirSync(featuresDir, { withFileTypes: true });
     for (const entry of entries) {
@@ -342,7 +381,7 @@ export async function registerModule(typeArg?: string, nameArg?: string): Promis
     }
   }
 
-  const folder = path.join(rootDir, type === "shared" ? "shared" : "features");
+  const folder = getTargetFolder(type);
   const modDir = path.join(folder, name);
 
   if (!fs.existsSync(modDir)) {
@@ -351,7 +390,7 @@ export async function registerModule(typeArg?: string, nameArg?: string): Promis
   }
 
   const files = collectFiles(modDir);
-  const integrity = computeDirectoryHash(modDir, files);
+  const integrity = computeDirectoryHash(modDir);
 
   const manifestPath = path.join(modDir, "registry.json");
   let manifest: ModuleManifest;
@@ -442,7 +481,7 @@ export async function commitModule(typeArg?: string, nameArg?: string, messageAr
     );
   }
 
-  const folder = path.join(rootDir, type === "shared" ? "shared" : "features");
+  const folder = getTargetFolder(type);
   const modDir = path.join(folder, name);
 
   if (!fs.existsSync(modDir)) {
@@ -525,7 +564,7 @@ export async function registerModuleChanges(typeArg?: string, nameArg?: string, 
     );
   }
 
-  const folder = path.join(rootDir, type === "shared" ? "shared" : "features");
+  const folder = getTargetFolder(type);
   const modDir = path.join(folder, name);
 
   if (!fs.existsSync(modDir)) {
@@ -534,7 +573,7 @@ export async function registerModuleChanges(typeArg?: string, nameArg?: string, 
   }
 
   const files = collectFiles(modDir);
-  const integrity = computeDirectoryHash(modDir, files);
+  const integrity = computeDirectoryHash(modDir);
 
   const manifestPath = path.join(modDir, "registry.json");
   let manifest: ModuleManifest;
@@ -667,8 +706,8 @@ async function main() {
         message: "🏛️  Mason Registry: What would you like to do?",
         options: [
           {
-            value: "diff",
-            label: "Inspect Diff & Status",
+            value: "status",
+            label: "Inspect Status & Diff",
             hint: "Summary of unregistered, uncommitted, and drifted modules",
           },
           {
@@ -696,7 +735,7 @@ async function main() {
     );
 
     switch (selectedAction) {
-      case "diff":
+      case "status":
         diffRegistry();
         break;
       case "register":
@@ -716,8 +755,8 @@ async function main() {
   }
 
   switch (action) {
-    case "diff":
     case "status":
+    case "diff":
       diffRegistry();
       break;
     case "register":
@@ -735,7 +774,7 @@ async function main() {
       break;
     default:
       console.error(
-        pc.red(`Unknown action: "${action}". Valid actions: diff, register, commit, register-changes, unregister.`)
+        pc.red(`Unknown action: "${action}". Valid actions: status, diff, register, commit, register-changes, unregister.`)
       );
       process.exit(1);
   }

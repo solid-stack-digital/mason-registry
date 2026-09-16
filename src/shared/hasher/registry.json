@@ -9,6 +9,7 @@
     "features": []
   },
   "files": [
+    "Hasher.test.ts",
     "Hasher.ts",
     "diProvider.ts",
     "infrastructure/ScryptHashEngine.ts",

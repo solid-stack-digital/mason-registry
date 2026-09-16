@@ -35,7 +35,7 @@ interface MasterIndex {
   features: IndexEntry[];
 }
 
-function collectFiles(dir: string, baseDir: string = dir): string[] {
+function collectAllModuleFiles(dir: string, baseDir: string = dir): string[] {
   const entries = fs.readdirSync(dir, { withFileTypes: true });
   const files: string[] = [];
 
@@ -44,13 +44,35 @@ function collectFiles(dir: string, baseDir: string = dir): string[] {
     const relPath = path.relative(baseDir, fullPath).replace(/\\/g, "/");
 
     if (entry.isDirectory()) {
-      // Ignore tests and hidden folders
+      if (entry.name.startsWith(".")) {
+        continue;
+      }
+      files.push(...collectAllModuleFiles(fullPath, baseDir));
+    } else if (entry.isFile()) {
+      if (entry.name === "registry.json" || entry.name.startsWith(".")) {
+        continue;
+      }
+      files.push(relPath);
+    }
+  }
+
+  return files.sort();
+}
+
+function collectSourceFiles(dir: string, baseDir: string = dir): string[] {
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  const files: string[] = [];
+
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+    const relPath = path.relative(baseDir, fullPath).replace(/\\/g, "/");
+
+    if (entry.isDirectory()) {
       if (entry.name === "__tests__" || entry.name.startsWith(".")) {
         continue;
       }
-      files.push(...collectFiles(fullPath, baseDir));
+      files.push(...collectSourceFiles(fullPath, baseDir));
     } else if (entry.isFile()) {
-      // Ignore registry.json, test files, hidden files
       if (
         entry.name === "registry.json" ||
         entry.name.endsWith(".test.ts") ||
@@ -68,7 +90,7 @@ function collectFiles(dir: string, baseDir: string = dir): string[] {
 
 function computeDirectoryHash(dirPath: string, files?: string[]): string {
   const hash = createHash("sha256");
-  const fileList = (files ?? collectFiles(dirPath)).sort();
+  const fileList = (files ?? collectSourceFiles(dirPath)).sort();
 
   for (const relativePath of fileList) {
     const absolutePath = path.join(dirPath, relativePath);
@@ -82,8 +104,23 @@ function computeDirectoryHash(dirPath: string, files?: string[]): string {
   return `sha256-${hash.digest("hex")}`;
 }
 
+function getTargetDir(type: "shared" | "feature"): string {
+  let config: any = null;
+  const configPath = path.join(rootDir, "mason.config.json");
+  if (fs.existsSync(configPath)) {
+    try {
+      config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+    } catch {}
+  }
+  const configured = type === "shared" ? config?.paths?.shared : config?.paths?.features;
+  if (configured) return path.resolve(rootDir, configured);
+  const inSrc = path.join(rootDir, "src", type === "shared" ? "shared" : "features");
+  if (fs.existsSync(inSrc)) return inSrc;
+  return path.join(rootDir, type === "shared" ? "shared" : "features");
+}
+
 function processDirectory(type: "shared" | "feature"): IndexEntry[] {
-  const targetDir = path.join(rootDir, type === "shared" ? "shared" : "features");
+  const targetDir = getTargetDir(type);
   if (!fs.existsSync(targetDir)) return [];
 
   const modules = fs.readdirSync(targetDir, { withFileTypes: true })
@@ -113,12 +150,12 @@ function processDirectory(type: "shared" | "feature"): IndexEntry[] {
       };
     }
 
-    // Auto-discover files
-    const files = collectFiles(modDir);
+    // Auto-discover all files (including test files)
+    const files = collectAllModuleFiles(modDir);
     manifest.files = files;
 
-    // Compute composite integrity hash
-    const integrity = computeDirectoryHash(modDir, files);
+    // Compute composite integrity hash on source files (excluding tests)
+    const integrity = computeDirectoryHash(modDir);
     manifest.integrity = integrity;
 
     // Ensure manifest name and type are set properly

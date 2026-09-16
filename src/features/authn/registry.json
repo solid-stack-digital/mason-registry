@@ -41,6 +41,7 @@
     "pxExpress/index.ts",
     "useCases/ChangePassword.ts",
     "useCases/GetCredentialById.ts",
+    "useCases/Login.test.ts",
     "useCases/Login.ts",
     "useCases/Logout.ts",
     "useCases/Refresh.ts",

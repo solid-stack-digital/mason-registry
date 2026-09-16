@@ -9,6 +9,7 @@
     "features": []
   },
   "files": [
+    "Uuid.test.ts",
     "Uuid.ts",
     "diProvider.ts",
     "domain/Id.ts",

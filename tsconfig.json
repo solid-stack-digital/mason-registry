@@ -4,12 +4,12 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "paths": {
-      "@/shared/*": ["./shared/*"],
-      "@/features/*": ["./features/*"]
+      "@/shared/*": ["./src/shared/*"],
+      "@/features/*": ["./src/features/*"]
     },
     "strict": false,
     "skipLibCheck": true,
     "esModuleInterop": true
   },
-  "include": ["shared/**/*", "features/**/*", "scripts/**/*"]
+  "include": ["src/**/*", "scripts/**/*"]
 }

@@ -13,20 +13,26 @@
     "reg:commit": "tsx scripts/manage.ts commit",
     "reg:register-changes": "tsx scripts/manage.ts register-changes",
     "reg:unregister": "tsx scripts/manage.ts unregister",
-    "reg:diff": "tsx scripts/manage.ts diff",
+    "reg:status": "tsx scripts/manage.ts status",
+    "reg:diff": "tsx scripts/manage.ts status",
+    "status": "tsx scripts/manage.ts status",
     "build": "tsx scripts/build.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@clack/prompts": "^1.8.1",
     "@solid-stack/agnos-express": "^1.0.2",
     "@solid-stack/di": "^1.0.4",
-    "@solid-stack/mason": "^1.0.14",
+    "@solid-stack/mason": "^1.0.18",
     "@types/express": "^5.0.6",
     "@types/node": "^22.13.5",
     "express": "^5.2.1",
     "picocolors": "^1.1.1",
     "tsx": "^4.19.3",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vitest": "^4.1.10",
+    "zod": "^4.6.5"
   }
 }
