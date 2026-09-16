@@ -2,7 +2,7 @@ import { MakeInjectable, type DepsType } from "@solid-stack/di";
 import { ICredentialRepo } from "../domain/ICredentialRepo.js";
 import { Hasher } from "@/shared/hasher/Hasher.js";
 import { Uuid } from "@/shared/uuid/Uuid.js";
-import { SendEmailOtp } from "@/features/otp/useCases/SendEmailOtp.js";
+import { IOtpGateway } from "../domain/IOtpGateway.js";
 import { Clock } from "@/shared/time/Clock.js";
 import { type Credential } from "../domain/Credential.js";
 
@@ -25,7 +25,7 @@ export class RegisterAccount {
     credRepo: ICredentialRepo,
     hasher: Hasher,
     uuid: Uuid,
-    sendEmailOtpUc: SendEmailOtp,
+    otpGateway: IOtpGateway,
     clock: Clock,
   };
 
@@ -69,9 +69,9 @@ export class RegisterAccount {
     await this.deps.credRepo.save(cred);
 
     // Dispatch verification OTP via email
-    await this.deps.sendEmailOtpUc.execute({
-      recipientid: cred.id,
-      recipientemail: cred.email,
+    await this.deps.otpGateway.sendVerificationOtp({
+      recipientId: cred.id,
+      email: cred.email,
       purpose: "EMAIL_VERIFICATION",
     });
 

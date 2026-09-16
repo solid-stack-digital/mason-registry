@@ -1,7 +1,7 @@
 import { MakeInjectable, type DepsType } from "@solid-stack/di";
 import { IOtpRepo } from "../domain/IOtpRepo.js";
 import { IOtpGenerator } from "../domain/IOtpGenerator.js";
-import { SendEmail } from "@/features/mailing/useCases/SendEmail.js";
+import { IOtpEmailGateway } from "../domain/IOtpEmailGateway.js";
 import { Uuid } from "@/shared/uuid/Uuid.js";
 import { Clock } from "@/shared/time/Clock.js";
 import { type Otp } from "../domain/Otp.js";
@@ -25,7 +25,7 @@ export class SendEmailOtp {
   public static deps = {
     otpRepo: IOtpRepo,
     otpGenerator: IOtpGenerator,
-    sendEmailUc: SendEmail,
+    emailGateway: IOtpEmailGateway,
     uuid: Uuid,
     clock: Clock,
   };
@@ -81,7 +81,7 @@ export class SendEmailOtp {
     };
 
     // Send email first
-    await this.deps.sendEmailUc.execute({
+    await this.deps.emailGateway.sendEmail({
       to: recipientEmail,
       subject: `Your verification code: ${otpCode}`,
       body: `Your One-Time Password is ${otpCode}. It will expire in 5 minutes.`,

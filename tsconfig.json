@@ -3,10 +3,9 @@
     "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "baseUrl": ".",
     "paths": {
-      "@/shared/*": ["shared/*"],
-      "@/features/*": ["features/*"]
+      "@/shared/*": ["./shared/*"],
+      "@/features/*": ["./features/*"]
     },
     "strict": false,
     "skipLibCheck": true,

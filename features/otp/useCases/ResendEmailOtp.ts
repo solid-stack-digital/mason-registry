@@ -1,6 +1,6 @@
 import { MakeInjectable, type DepsType } from "@solid-stack/di";
 import { IOtpRepo } from "../domain/IOtpRepo.js";
-import { SendEmail } from "@/features/mailing/useCases/SendEmail.js";
+import { IOtpEmailGateway } from "../domain/IOtpEmailGateway.js";
 import { Clock } from "@/shared/time/Clock.js";
 
 export type ResendEmailOtpInput = {
@@ -21,7 +21,7 @@ export type ResendEmailOtpOutput = {
 export class ResendEmailOtp {
   public static deps = {
     otpRepo: IOtpRepo,
-    sendEmailUc: SendEmail,
+    emailGateway: IOtpEmailGateway,
     clock: Clock,
   };
 
@@ -66,7 +66,7 @@ export class ResendEmailOtp {
       throw new Error("Please wait 30 seconds before requesting another OTP");
     }
 
-    await this.deps.sendEmailUc.execute({
+    await this.deps.emailGateway.sendEmail({
       to: existing.recipientEmail,
       subject: `Your verification code: ${existing.otpCode}`,
       body: `Your OTP is: ${existing.otpCode}. It will expire in 5 minutes.`,

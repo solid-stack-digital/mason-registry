@@ -1,6 +1,6 @@
 import { MakeInjectable, type DepsType } from "@solid-stack/di";
 import { ICredentialRepo } from "../domain/ICredentialRepo.js";
-import { ValidateOtp } from "@/features/otp/useCases/ValidateOtp.js";
+import { IOtpGateway } from "../domain/IOtpGateway.js";
 import { Clock } from "@/shared/time/Clock.js";
 
 export type VerifyEmailInput = {
@@ -16,7 +16,7 @@ export type VerifyEmailOutput = {
 export class VerifyEmail {
   public static deps = {
     credRepo: ICredentialRepo,
-    validateOtpUc: ValidateOtp,
+    otpGateway: IOtpGateway,
     clock: Clock,
   };
 
@@ -39,8 +39,8 @@ export class VerifyEmail {
     }
 
     // Validate OTP
-    const validationResult = await this.deps.validateOtpUc.execute({
-      recipientid: cred.id,
+    const validationResult = await this.deps.otpGateway.validateOtp({
+      recipientId: cred.id,
       code: props.code,
       purpose: "EMAIL_VERIFICATION",
     });

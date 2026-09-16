@@ -2,7 +2,7 @@ import { MakeInjectable, type DepsType } from "@solid-stack/di";
 import { ICredentialRepo } from "../domain/ICredentialRepo.js";
 import { IRefreshTokenRepo } from "../domain/IRefreshTokenRepo.js";
 import { Hasher } from "@/shared/hasher/Hasher.js";
-import { ValidateOtp } from "@/features/otp/useCases/ValidateOtp.js";
+import { IOtpGateway } from "../domain/IOtpGateway.js";
 import { Clock } from "@/shared/time/Clock.js";
 
 export type ResetPasswordInput = {
@@ -22,7 +22,7 @@ export class ResetPassword {
     credRepo: ICredentialRepo,
     refreshTokenRepo: IRefreshTokenRepo,
     hasher: Hasher,
-    validateOtpUc: ValidateOtp,
+    otpGateway: IOtpGateway,
     clock: Clock,
   };
 
@@ -46,8 +46,8 @@ export class ResetPassword {
 
     // Validate OTP if code was passed
     if (props.code) {
-      await this.deps.validateOtpUc.execute({
-        recipientid: cred.id,
+      await this.deps.otpGateway.validateOtp({
+        recipientId: cred.id,
         code: props.code,
         purpose: "PASSWORD_RESET",
       });
