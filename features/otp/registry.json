@@ -5,8 +5,26 @@
   "version": "1.0.0",
   "dependencies": {
     "npm": [],
-    "shared": ["time", "uuid"],
-    "features": ["mailing"]
+    "shared": [
+      "time",
+      "uuid"
+    ],
+    "features": [
+      "mailing"
+    ]
   },
-  "files": []
+  "files": [
+    "diProvider.ts",
+    "domain/IOtpGenerator.ts",
+    "domain/IOtpRepo.ts",
+    "domain/Otp.ts",
+    "infrastructure/CryptoOtpGenerator.ts",
+    "infrastructure/MemoryOtpRepo.ts",
+    "infrastructure/StaticOtpGenerator.ts",
+    "infrastructure/StubOtpGenerator.ts",
+    "infrastructure/StubOtpRepo.ts",
+    "useCases/ResendEmailOtp.ts",
+    "useCases/SendEmailOtp.ts",
+    "useCases/ValidateOtp.ts"
+  ]
 }

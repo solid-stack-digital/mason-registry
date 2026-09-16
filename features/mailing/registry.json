@@ -5,8 +5,16 @@
   "version": "1.0.0",
   "dependencies": {
     "npm": [],
-    "shared": ["time"],
+    "shared": [
+      "time"
+    ],
     "features": []
   },
-  "files": []
+  "files": [
+    "diProvider.ts",
+    "domain/IMailer.ts",
+    "infrastructure/MemoryMailer.ts",
+    "infrastructure/StubMailer.ts",
+    "useCases/SendEmail.ts"
+  ]
 }

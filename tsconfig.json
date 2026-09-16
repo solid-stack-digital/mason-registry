@@ -5,8 +5,8 @@
     "moduleResolution": "NodeNext",
     "baseUrl": ".",
     "paths": {
-      "@/shared/*": ["shared/*/src/*"],
-      "@/features/*": ["features/*/src/*"]
+      "@/shared/*": ["shared/*"],
+      "@/features/*": ["features/*"]
     },
     "strict": false,
     "skipLibCheck": true,

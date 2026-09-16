@@ -1,0 +1,41 @@
+{
+  "shared": [
+    {
+      "name": "hasher",
+      "description": "Cryptographic password hashing and verification abstraction using scrypt",
+      "version": "1.0.0"
+    },
+    {
+      "name": "jwt",
+      "description": "JSON Web Token (JWT) signing, verification, and expiration handling",
+      "version": "1.0.0"
+    },
+    {
+      "name": "time",
+      "description": "Clock and Time abstraction for deterministic date/time manipulation",
+      "version": "1.0.0"
+    },
+    {
+      "name": "uuid",
+      "description": "UUID v4 generation abstraction for clean architecture entities",
+      "version": "1.0.0"
+    }
+  ],
+  "features": [
+    {
+      "name": "authn",
+      "description": "User authentication, sessions, refresh token rotation, and password management",
+      "version": "1.0.0"
+    },
+    {
+      "name": "mailing",
+      "description": "Email sending, mailer interface, memory mailer, and template dispatcher",
+      "version": "1.0.0"
+    },
+    {
+      "name": "otp",
+      "description": "One-time password generation, validation, and email dispatching",
+      "version": "1.0.0"
+    }
+  ]
+}

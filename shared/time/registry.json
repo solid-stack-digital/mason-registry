@@ -8,5 +8,14 @@
     "shared": [],
     "features": []
   },
-  "files": []
+  "files": [
+    "Clock.ts",
+    "diProvider.ts",
+    "domain/Duration.ts",
+    "domain/Time.ts",
+    "domain/index.ts",
+    "infrastructure/StubTimeEngine.ts",
+    "infrastructure/SystemTimeEngine.ts",
+    "ports/ITimeEngine.ts"
+  ]
 }

@@ -8,5 +8,11 @@
     "shared": [],
     "features": []
   },
-  "files": []
+  "files": [
+    "Hasher.ts",
+    "diProvider.ts",
+    "infrastructure/ScryptHashEngine.ts",
+    "infrastructure/StubHashEngine.ts",
+    "ports/IHashEngine.ts"
+  ]
 }

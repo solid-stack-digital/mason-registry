@@ -8,5 +8,12 @@
     "shared": [],
     "features": []
   },
-  "files": []
+  "files": [
+    "Uuid.ts",
+    "diProvider.ts",
+    "domain/Id.ts",
+    "infrastructure/CryptoIdGenerator.ts",
+    "infrastructure/StubIdGenerator.ts",
+    "ports/IIdGenerator.ts"
+  ]
 }

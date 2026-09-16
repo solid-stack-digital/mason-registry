@@ -1,0 +1,48 @@
+{
+  "name": "authn",
+  "type": "feature",
+  "description": "User authentication, sessions, refresh token rotation, and password management",
+  "version": "1.0.0",
+  "dependencies": {
+    "npm": [
+      "@solid-stack/agnos-express",
+      "express"
+    ],
+    "shared": [
+      "hasher",
+      "jwt",
+      "time",
+      "uuid"
+    ],
+    "features": [
+      "otp"
+    ]
+  },
+  "files": [
+    "diProvider.ts",
+    "domain/Credential.ts",
+    "domain/ICredentialRepo.ts",
+    "domain/IRefreshTokenRepo.ts",
+    "domain/RefreshToken.ts",
+    "infrastructure/MemoryCredentialRepo.ts",
+    "infrastructure/MemoryRefreshTokenRepo.ts",
+    "infrastructure/StubCredentialRepo.ts",
+    "infrastructure/StubRefreshTokenRepo.ts",
+    "pxExpress/handlers/ChangePasswordHttp.ts",
+    "pxExpress/handlers/LoginHttp.ts",
+    "pxExpress/handlers/LogoutHttp.ts",
+    "pxExpress/handlers/RefreshHttp.ts",
+    "pxExpress/handlers/RegisterAccountHttp.ts",
+    "pxExpress/handlers/ResetPasswordHttp.ts",
+    "pxExpress/handlers/VerifyEmailHttp.ts",
+    "pxExpress/index.ts",
+    "useCases/ChangePassword.ts",
+    "useCases/GetCredentialById.ts",
+    "useCases/Login.ts",
+    "useCases/Logout.ts",
+    "useCases/Refresh.ts",
+    "useCases/RegisterAccount.ts",
+    "useCases/ResetPassword.ts",
+    "useCases/VerifyEmail.ts"
+  ]
+}

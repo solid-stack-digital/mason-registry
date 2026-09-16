@@ -5,8 +5,19 @@
   "version": "1.0.0",
   "dependencies": {
     "npm": [],
-    "shared": ["time"],
+    "shared": [
+      "time"
+    ],
     "features": []
   },
-  "files": []
+  "files": [
+    "Jwt.ts",
+    "diProvider.ts",
+    "errors/JwtError.ts",
+    "errors/TokenExpiredError.ts",
+    "errors/TokenIntegrityError.ts",
+    "infrastructure/HmacJwtEngine.ts",
+    "infrastructure/StubJwtEngine.ts",
+    "ports/IJwtEngine.ts"
+  ]
 }
