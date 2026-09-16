@@ -1,0 +1,7 @@
+{
+  "mode": "registry",
+  "paths": {
+    "features": "features",
+    "shared": "shared"
+  }
+}

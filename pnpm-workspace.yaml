@@ -1,2 +1,4 @@
 allowBuilds:
   esbuild: set this to true or false
+minimumReleaseAgeExclude:
+  - '@solid-stack/mason@1.0.12 || 1.0.13 || 1.0.14'
