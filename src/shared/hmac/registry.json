@@ -1,0 +1,12 @@
+{
+  "name": "hmac",
+  "type": "shared",
+  "description": "HMAC (Hash-based Message Authentication Code) cryptographic signing and verification abstraction",
+  "version": "1.0.0",
+  "dependencies": {
+    "npm": [],
+    "shared": [],
+    "features": []
+  },
+  "files": []
+}
