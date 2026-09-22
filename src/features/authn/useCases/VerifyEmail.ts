@@ -1,58 +1,67 @@
 import { type DepsType, MakeInjectable } from "@solid-stack/di";
 import { Clock } from "@/shared/time/Clock.js";
+import {
+	AccountAlreadyVerifiedError,
+	AccountNotFoundError,
+	InvalidTokenError,
+} from "../domain/errors/AuthnErrors.js";
 import { ICredentialRepo } from "../domain/ICredentialRepo.js";
-import { IOtpGateway } from "../domain/IOtpGateway.js";
+import { IEAVGateway } from "../domain/IEAVGateway.js";
 
 export type VerifyEmailInput = {
 	email: string;
-	code: string;
+	emailAccessToken: string;
+	purpose?: string | undefined;
 };
 
-export type VerifyEmailOutput = {
-	isVerified: boolean;
-};
+export type VerifyEmailOutput = boolean;
 
 @MakeInjectable
 export class VerifyEmail {
 	public static deps = {
 		credRepo: ICredentialRepo,
-		otpGateway: IOtpGateway,
+		eavGateway: IEAVGateway,
 		clock: Clock,
 	};
 
 	constructor(public deps: DepsType<typeof VerifyEmail.deps>) {}
 
 	async execute(props: VerifyEmailInput): Promise<VerifyEmailOutput> {
-		if (!props.email || !props.code) {
-			throw new Error("Email and OTP code are required for verification");
+		if (!props.email) {
+			throw new AccountNotFoundError("Email is required");
+		}
+
+		if (!props.emailAccessToken) {
+			throw new InvalidTokenError("emailAccessToken is required");
 		}
 
 		const email = props.email.trim().toLowerCase();
 		const cred = await this.deps.credRepo.findByEmail(email);
-
 		if (!cred) {
-			throw new Error(`Account with email ${email} not found`);
+			throw new AccountNotFoundError(`Account with email ${email} not found`);
 		}
 
 		if (cred.isVerified) {
-			return { isVerified: true };
+			throw new AccountAlreadyVerifiedError("Email is already verified");
 		}
 
-		// Validate OTP
-		const validationResult = await this.deps.otpGateway.validateOtp({
-			recipientId: cred.id,
-			code: props.code,
-			purpose: "EMAIL_VERIFICATION",
+		const purpose = props.purpose || "email_verification";
+		const consumed = await this.deps.eavGateway.consumeEmailAccessToken({
+			token: props.emailAccessToken,
+			purpose,
+			email: cred.email,
 		});
 
-		if (!validationResult.valid) {
-			throw new Error("Invalid or expired verification code");
+		if (!consumed) {
+			throw new InvalidTokenError(
+				"Failed to consume email access token: invalid or expired",
+			);
 		}
 
 		cred.isVerified = true;
 		cred.updatedAt = this.deps.clock.now();
 		await this.deps.credRepo.update(cred);
 
-		return { isVerified: true };
+		return true;
 	}
 }

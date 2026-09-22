@@ -3,21 +3,22 @@ import { Hasher } from "@/shared/hasher/Hasher.js";
 import { Clock } from "@/shared/time/Clock.js";
 import { Uuid } from "@/shared/uuid/Uuid.js";
 import type { Credential } from "../domain/Credential.js";
+import {
+	AccountAlreadyExistsError,
+	InvalidEmailError,
+	WeakPasswordError,
+} from "../domain/errors/AuthnErrors.js";
+import { events } from "../domain/events/index.js";
+import { IAuthnEventPublisher } from "../domain/IAuthnEventPublisher.js";
 import { ICredentialRepo } from "../domain/ICredentialRepo.js";
-import { IOtpGateway } from "../domain/IOtpGateway.js";
 
 export type RegisterAccountInput = {
 	email: string;
-	password?: string | undefined;
+	password: string;
 	id?: string | undefined;
 };
 
-export type RegisterAccountOutput = {
-	credentialId: string;
-	email: string;
-	isEmailVerified: boolean;
-	isVerified: boolean;
-};
+export type RegisterAccountOutput = string;
 
 @MakeInjectable
 export class RegisterAccount {
@@ -25,8 +26,8 @@ export class RegisterAccount {
 		credRepo: ICredentialRepo,
 		hasher: Hasher,
 		uuid: Uuid,
-		otpGateway: IOtpGateway,
 		clock: Clock,
+		eventPublisher: IAuthnEventPublisher,
 	};
 
 	constructor(public deps: DepsType<typeof RegisterAccount.deps>) {}
@@ -37,23 +38,22 @@ export class RegisterAccount {
 			typeof props.email !== "string" ||
 			!props.email.includes("@")
 		) {
-			throw new Error("A valid email is required");
+			throw new InvalidEmailError("A valid email is required");
+		}
+
+		if (!props.password || props.password.length < 8) {
+			throw new WeakPasswordError("Password must be at least 8 characters");
 		}
 
 		const email = props.email.trim().toLowerCase();
 		const existing = await this.deps.credRepo.findByEmail(email);
 		if (existing) {
-			throw new Error("An account with this email already exists");
+			throw new AccountAlreadyExistsError(
+				"An account with this email already exists",
+			);
 		}
 
-		let passwordHash = "";
-		if (props.password !== undefined) {
-			if (props.password.length < 8) {
-				throw new Error("Password must be at least 8 characters");
-			}
-			passwordHash = await this.deps.hasher.hash(props.password);
-		}
-
+		const passwordHash = await this.deps.hasher.hash(props.password);
 		const credId = props.id || this.deps.uuid.generate();
 		const now = this.deps.clock.now();
 
@@ -68,18 +68,13 @@ export class RegisterAccount {
 
 		await this.deps.credRepo.save(cred);
 
-		// Dispatch verification OTP via email
-		await this.deps.otpGateway.sendVerificationOtp({
-			recipientId: cred.id,
-			email: cred.email,
-			purpose: "EMAIL_VERIFICATION",
-		});
+		await this.deps.eventPublisher.publish(
+			new events.AccountRegisteredEvent({
+				credId: cred.id,
+				email: cred.email,
+			}),
+		);
 
-		return {
-			credentialId: cred.id,
-			email: cred.email,
-			isEmailVerified: cred.isVerified,
-			isVerified: cred.isVerified,
-		};
+		return cred.id;
 	}
 }

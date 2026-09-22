@@ -24,6 +24,6 @@ export default class LogoutHttp extends ExpressRoute {
 			credentialId,
 			allDevices,
 		});
-		res.status(200).json(result);
+		res.status(200).json({ success: result, ok: true });
 	};
 }
