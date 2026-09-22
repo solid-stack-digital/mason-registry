@@ -34,8 +34,8 @@
       "name": "authn",
       "description": "User authentication, sessions, refresh token rotation, and password management",
       "version": "1.0.0",
-      "integrity": "sha256-f4137fc29fff03ad7742daef4677855c2fbcdff30838d2d03180cd288fd2d098",
-      "commit": "e24422cdeab22d45cb89051d88b73b599489f05d"
+      "integrity": "sha256-3fc87e3fe84632a7184bde6f4e5572f887094bd7d54ebf99acc8a4c986e361c6",
+      "commit": "ded6165476912deffc14a72462af6a426a5e02d2"
     },
     {
       "name": "mailing",
@@ -48,8 +48,8 @@
       "name": "otp",
       "description": "One-time password generation, validation, and email dispatching",
       "version": "1.0.0",
-      "integrity": "sha256-1fa37e1a7161fc8731d167addf6705186fdfd08027090666b065ede5a682692b",
-      "commit": "2b6759f6cb7e1b3ab83a9c4a1234182457a02982"
+      "integrity": "sha256-4d34d201a880e48f940b40884fe5a9f3b22b2a866c1efcdf2754a0c8008d786c",
+      "commit": "013554d4b1ffbe32dfdb75ac77786867adefc209"
     }
   ]
 }
