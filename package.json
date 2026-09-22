@@ -21,7 +21,7 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "check:types": "tsc --noEmit",
-    "check:lint": "biome check src/ scripts/",
+    "check:lint": "biome check --error-on-warnings src/ scripts/",
     "check:lint:fix": "biome check --write src/ scripts/",
     "check:arch": "mason lint --complete",
     "check:all": "pnpm check:types && pnpm check:lint && pnpm check:arch",

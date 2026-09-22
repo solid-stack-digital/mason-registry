@@ -21,5 +21,6 @@
     "infrastructure/StubJwtEngine.ts",
     "ports/IJwtEngine.ts"
   ],
-  "integrity": "sha256-cabe57cac976d33ffbe53a4d89f888c679bdcb2b1fb7ae405f0365ec66bec50c"
+  "integrity": "sha256-cabe57cac976d33ffbe53a4d89f888c679bdcb2b1fb7ae405f0365ec66bec50c",
+  "commit": "e24422cdeab22d45cb89051d88b73b599489f05d"
 }

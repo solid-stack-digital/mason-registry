@@ -20,7 +20,19 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"preset": "recommended"
+			"preset": "recommended",
+			"correctness": {
+				"noUnusedFunctionParameters": "error",
+				"noUnusedImports": "error"
+			},
+			"suspicious": {
+				"noExplicitAny": "error",
+				"noGlobalIsNan": "error"
+			},
+			"style": {
+				"noNonNullAssertion": "error",
+				"useImportType": "error"
+			}
 		}
 	},
 	"javascript": {

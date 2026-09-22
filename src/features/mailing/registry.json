@@ -18,5 +18,6 @@
     "useCases/SendEmail.test.ts",
     "useCases/SendEmail.ts"
   ],
-  "integrity": "sha256-f38ace9979458e60ea5aa775557de611db5276163ae9cd69d3fccf3d05e4ad1b"
+  "integrity": "sha256-f38ace9979458e60ea5aa775557de611db5276163ae9cd69d3fccf3d05e4ad1b",
+  "commit": "2b6759f6cb7e1b3ab83a9c4a1234182457a02982"
 }

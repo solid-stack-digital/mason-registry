@@ -16,13 +16,14 @@ export interface ModuleManifest {
 	description: string;
 	version: string;
 	integrity?: string;
+	commit?: string;
 	dependencies: {
 		npm: string[];
 		shared: string[];
 		features: string[];
 	};
 	files: string[];
-	[key: string]: any;
+	[key: string]: unknown;
 }
 
 export interface IndexEntry {
@@ -30,7 +31,8 @@ export interface IndexEntry {
 	description: string;
 	version?: string;
 	integrity?: string;
-	[key: string]: any;
+	commit?: string;
+	[key: string]: unknown;
 }
 
 export interface MasterIndex {
@@ -46,8 +48,11 @@ export interface RegistryModuleStatus {
 	hasUncommittedGitChanges: boolean;
 	uncommittedFilesCount: number;
 	hasIntegrityDrift: boolean;
+	hasCommitDrift: boolean;
 	localIntegrity?: string | undefined;
 	registeredIntegrity?: string | undefined;
+	localCommit?: string | undefined;
+	registeredCommit?: string | undefined;
 }
 
 export function handleCancel<T>(value: T): Exclude<T, symbol> {
@@ -139,7 +144,7 @@ export function loadMasterIndex(): MasterIndex {
 		const initialIndex: MasterIndex = { shared: [], features: [] };
 		fs.writeFileSync(
 			indexPath,
-			JSON.stringify(initialIndex, null, 2) + "\n",
+			`${JSON.stringify(initialIndex, null, 2)}\n`,
 			"utf-8",
 		);
 		return initialIndex;
@@ -151,15 +156,22 @@ export function saveMasterIndex(index: MasterIndex): void {
 	const indexPath = path.join(rootDir, "index.json");
 	index.shared.sort((a, b) => a.name.localeCompare(b.name));
 	index.features.sort((a, b) => a.name.localeCompare(b.name));
-	fs.writeFileSync(indexPath, JSON.stringify(index, null, 2) + "\n", "utf-8");
+	fs.writeFileSync(indexPath, `${JSON.stringify(index, null, 2)}\n`, "utf-8");
+}
+
+interface MasonConfig {
+	paths?: {
+		shared?: string;
+		features?: string;
+	};
 }
 
 function getTargetFolder(type: "shared" | "feature"): string {
-	let config: any = null;
+	let config: MasonConfig | null = null;
 	const configPath = path.join(rootDir, "mason.config.json");
 	if (fs.existsSync(configPath)) {
 		try {
-			config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+			config = JSON.parse(fs.readFileSync(configPath, "utf-8")) as MasonConfig;
 		} catch {}
 	}
 	const configured =
@@ -232,11 +244,114 @@ export function checkGitStatusForDir(dirPath: string): {
 			return { hasChanges: false, filesCount: 0 };
 		}
 
-		const lines = output.split("\n").filter((l) => l.trim().length > 0);
-		return { hasChanges: true, filesCount: lines.length };
+		const lines = output
+			.split("\n")
+			.map((l) => l.trim())
+			.filter((l) => l.length > 0 && !l.endsWith("registry.json"));
+		return { hasChanges: lines.length > 0, filesCount: lines.length };
 	} catch {
 		return { hasChanges: false, filesCount: 0 };
 	}
+}
+
+export function getLatestCommitForDir(dirPath: string): string | undefined {
+	try {
+		const relPath = path.relative(rootDir, dirPath);
+		const regJsonPath = path.join(relPath, "registry.json").replace(/\\/g, "/");
+		const output = execSync(
+			`git log -n 1 --format="%H" -- "${relPath}" ":(exclude)${regJsonPath}"`,
+			{
+				cwd: rootDir,
+				stdio: ["ignore", "pipe", "ignore"],
+				encoding: "utf-8",
+			},
+		).trim();
+
+		return output || undefined;
+	} catch {
+		return undefined;
+	}
+}
+
+export function validateModuleLinting(
+	dirPath: string,
+	type: "shared" | "feature",
+): { ok: boolean; errors: string[] } {
+	const errors: string[] = [];
+	const relPath = path.relative(rootDir, dirPath);
+
+	// 1. Biome linting & format check on the module directory
+	try {
+		execSync(`pnpm exec biome check --error-on-warnings "${relPath}"`, {
+			cwd: rootDir,
+			stdio: ["ignore", "pipe", "pipe"],
+			encoding: "utf-8",
+		});
+	} catch (err: unknown) {
+		const execErr = err as {
+			stdout?: string;
+			stderr?: string;
+			message?: string;
+		};
+		const output = (
+			execErr.stdout ||
+			execErr.stderr ||
+			execErr.message ||
+			""
+		).trim();
+		errors.push(`Biome check failed for '${relPath}':\n${output}`);
+	}
+
+	// 2. TypeScript typecheck across project
+	try {
+		execSync("pnpm exec tsc --noEmit", {
+			cwd: rootDir,
+			stdio: ["ignore", "pipe", "pipe"],
+			encoding: "utf-8",
+		});
+	} catch (err: unknown) {
+		const execErr = err as {
+			stdout?: string;
+			stderr?: string;
+			message?: string;
+		};
+		const output = (
+			execErr.stdout ||
+			execErr.stderr ||
+			execErr.message ||
+			""
+		).trim();
+		errors.push(`TypeScript typecheck failed:\n${output}`);
+	}
+
+	// 3. Mason architectural dependency rules check (for features)
+	if (type === "feature") {
+		try {
+			execSync("pnpm exec mason lint --complete", {
+				cwd: rootDir,
+				stdio: ["ignore", "pipe", "pipe"],
+				encoding: "utf-8",
+			});
+		} catch (err: unknown) {
+			const execErr = err as {
+				stdout?: string;
+				stderr?: string;
+				message?: string;
+			};
+			const output = (
+				execErr.stdout ||
+				execErr.stderr ||
+				execErr.message ||
+				""
+			).trim();
+			errors.push(`Mason architecture lint failed:\n${output}`);
+		}
+	}
+
+	return {
+		ok: errors.length === 0,
+		errors,
+	};
 }
 
 export function getRegistryDiff(): RegistryModuleStatus[] {
@@ -278,7 +393,9 @@ export function getRegistryDiff(): RegistryModuleStatus[] {
 		let hasUncommittedGitChanges = false;
 		let uncommittedFilesCount = 0;
 		let hasIntegrityDrift = false;
+		let hasCommitDrift = false;
 		let localIntegrity: string | undefined;
+		let localCommit: string | undefined;
 
 		if (existsOnDisk && diskInfo) {
 			const git = checkGitStatusForDir(diskInfo.dir);
@@ -286,8 +403,17 @@ export function getRegistryDiff(): RegistryModuleStatus[] {
 			uncommittedFilesCount = git.filesCount;
 
 			localIntegrity = computeDirectoryHash(diskInfo.dir);
+			localCommit = getLatestCommitForDir(diskInfo.dir);
+
 			if (isRegistered && registeredEntry?.integrity) {
 				hasIntegrityDrift = localIntegrity !== registeredEntry.integrity;
+			}
+			if (isRegistered) {
+				if (registeredEntry?.commit) {
+					hasCommitDrift = localCommit !== registeredEntry.commit;
+				} else if (localCommit) {
+					hasCommitDrift = true;
+				}
 			}
 		}
 
@@ -299,8 +425,11 @@ export function getRegistryDiff(): RegistryModuleStatus[] {
 			hasUncommittedGitChanges,
 			uncommittedFilesCount,
 			hasIntegrityDrift,
+			hasCommitDrift,
 			localIntegrity,
 			registeredIntegrity: registeredEntry?.integrity,
+			localCommit,
+			registeredCommit: registeredEntry?.commit,
 		});
 	}
 
@@ -323,14 +452,15 @@ export function diffRegistry(): void {
 			d.existsOnDisk &&
 			d.isRegistered &&
 			!d.hasUncommittedGitChanges &&
-			d.hasIntegrityDrift,
+			(d.hasIntegrityDrift || d.hasCommitDrift),
 	);
 	const upToDate = diffs.filter(
 		(d) =>
 			d.existsOnDisk &&
 			d.isRegistered &&
 			!d.hasUncommittedGitChanges &&
-			!d.hasIntegrityDrift,
+			!d.hasIntegrityDrift &&
+			!d.hasCommitDrift,
 	);
 	const missing = diffs.filter((d) => !d.existsOnDisk && d.isRegistered);
 
@@ -363,9 +493,15 @@ export function diffRegistry(): void {
 			),
 		);
 		for (const mod of committedDrift) {
+			const commitDesc =
+				mod.localCommit && mod.registeredCommit
+					? `commit: ${mod.localCommit.slice(0, 7)} != registered: ${mod.registeredCommit.slice(0, 7)}`
+					: mod.localCommit
+						? `commit: ${mod.localCommit.slice(0, 7)} (unregistered commit)`
+						: "no commit history";
 			p.log.message(
 				`  ${pc.cyan("◆")} ${pc.bold(`${mod.type}/${mod.name}`)} ${pc.dim(
-					`local: ${mod.localIntegrity?.slice(0, 16)}... != registered: ${mod.registeredIntegrity?.slice(0, 16)}...`,
+					`(${commitDesc}, integrity: ${mod.localIntegrity?.slice(0, 16)}...)`,
 				)}`,
 			);
 		}
@@ -385,8 +521,11 @@ export function diffRegistry(): void {
 			pc.green(`\n✓ Up to Date & Registered (${upToDate.length}):`),
 		);
 		for (const mod of upToDate) {
+			const commitStr = mod.registeredCommit
+				? `commit: ${mod.registeredCommit.slice(0, 7)}, `
+				: "";
 			p.log.message(
-				`  ${pc.green("✔")} ${mod.type}/${mod.name} ${pc.dim(`(${mod.registeredIntegrity?.slice(0, 18)}...)`)}`,
+				`  ${pc.green("✔")} ${mod.type}/${mod.name} ${pc.dim(`(${commitStr}${mod.registeredIntegrity?.slice(0, 18)}...)`)}`,
 			);
 		}
 	}
@@ -443,8 +582,7 @@ export async function registerModule(
 				name = handleCancel(
 					await p.text({
 						message: `Enter ${type} name:`,
-						validate: (v) =>
-							v && v.trim() ? undefined : "Name cannot be empty",
+						validate: (v) => (v?.trim() ? undefined : "Name cannot be empty"),
 					}),
 				).trim();
 			} else {
@@ -454,7 +592,7 @@ export async function registerModule(
 			name = handleCancel(
 				await p.text({
 					message: `Enter ${type} name to register:`,
-					validate: (v) => (v && v.trim() ? undefined : "Name cannot be empty"),
+					validate: (v) => (v?.trim() ? undefined : "Name cannot be empty"),
 				}),
 			).trim();
 		}
@@ -472,6 +610,45 @@ export async function registerModule(
 		process.exit(1);
 	}
 
+	const gitStatus = checkGitStatusForDir(modDir);
+	if (gitStatus.hasChanges) {
+		p.log.error(
+			pc.red(
+				`Module '${type}/${name}' has ${gitStatus.filesCount} uncommitted change(s) in git. Please commit your changes first before registering so a valid commit hash can be recorded.`,
+			),
+		);
+		process.exit(1);
+	}
+
+	const commitHash = getLatestCommitForDir(modDir);
+	if (!commitHash) {
+		p.log.error(
+			pc.red(
+				`Module '${type}/${name}' has no git commit history. Please commit the module to git before registering.`,
+			),
+		);
+		process.exit(1);
+	}
+
+	const s = p.spinner();
+	s.start(
+		`Validating linting, types, and architecture for '${type}/${name}'...`,
+	);
+	const lintResult = validateModuleLinting(modDir, type);
+	if (!lintResult.ok) {
+		s.stop(pc.red(`Linting checks failed for '${type}/${name}'.`));
+		for (const err of lintResult.errors) {
+			p.log.error(pc.red(err));
+		}
+		p.log.error(
+			pc.red(
+				`Registration aborted: Module '${type}/${name}' must pass all linting, typecheck, and architectural checks before registration.`,
+			),
+		);
+		process.exit(1);
+	}
+	s.stop(`Linting checks passed for '${type}/${name}'.`);
+
 	const files = collectFiles(modDir);
 	const integrity = computeDirectoryHash(modDir);
 
@@ -479,7 +656,9 @@ export async function registerModule(
 	let manifest: ModuleManifest;
 
 	if (fs.existsSync(manifestPath)) {
-		manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
+		manifest = JSON.parse(
+			fs.readFileSync(manifestPath, "utf-8"),
+		) as ModuleManifest;
 	} else {
 		manifest = {
 			name,
@@ -499,37 +678,36 @@ export async function registerModule(
 	manifest.type = type;
 	manifest.files = files;
 	manifest.integrity = integrity;
+	manifest.commit = commitHash;
 
 	fs.writeFileSync(
 		manifestPath,
-		JSON.stringify(manifest, null, 2) + "\n",
+		`${JSON.stringify(manifest, null, 2)}\n`,
 		"utf-8",
 	);
 
 	const targetList = type === "shared" ? index.shared : index.features;
 	const existingIdx = targetList.findIndex((item) => item.name === name);
 
+	const entry: IndexEntry = {
+		name,
+		description: manifest.description,
+		version: manifest.version,
+		integrity,
+		commit: commitHash,
+	};
+
 	if (existingIdx >= 0) {
-		targetList[existingIdx] = {
-			name,
-			description: manifest.description,
-			version: manifest.version,
-			integrity,
-		};
+		targetList[existingIdx] = entry;
 	} else {
-		targetList.push({
-			name,
-			description: manifest.description,
-			version: manifest.version,
-			integrity,
-		});
+		targetList.push(entry);
 	}
 
 	saveMasterIndex(index);
 
 	p.log.success(
 		pc.green(
-			`✓ Module '${type}/${name}' registered in index.json (${files.length} files, ${integrity.slice(0, 18)}...)`,
+			`✓ Module '${type}/${name}' registered in index.json (${files.length} files, commit: ${commitHash.slice(0, 7)}, integrity: ${integrity.slice(0, 18)}...)`,
 		),
 	);
 }
@@ -603,7 +781,7 @@ export async function commitModule(
 				message: `Commit message for ${type}/${name}:`,
 				placeholder: `e.g. feat(${name}): update use cases and dependencies`,
 				validate: (v) =>
-					v && v.trim() ? undefined : "Commit message cannot be empty",
+					v?.trim() ? undefined : "Commit message cannot be empty",
 			}),
 		).trim();
 	}
@@ -625,9 +803,9 @@ export async function commitModule(
 		);
 		s.stop(`Changes for '${type}/${name}' committed to git.`);
 		p.log.success(pc.green(`✓ Committed '${type}/${name}': "${message}"`));
-	} catch (err: any) {
+	} catch (err: unknown) {
 		s.stop(pc.red("Git commit failed."));
-		p.log.error(pc.red(err.message || String(err)));
+		p.log.error(pc.red(err instanceof Error ? err.message : String(err)));
 		process.exit(1);
 	}
 }
@@ -661,12 +839,11 @@ export async function registerModuleChanges(
 
 		const opts = diskModules.map((m) => {
 			const d = diffs.find((item) => item.name === m.name);
+			const hasDrift = d?.hasIntegrityDrift || d?.hasCommitDrift;
 			return {
 				value: m.name,
 				label: m.name,
-				hint: d?.hasIntegrityDrift
-					? "drift detected (needs register)"
-					: "up to date",
+				hint: hasDrift ? "drift detected (needs register)" : "up to date",
 			};
 		});
 
@@ -690,6 +867,45 @@ export async function registerModuleChanges(
 		process.exit(1);
 	}
 
+	const gitStatus = checkGitStatusForDir(modDir);
+	if (gitStatus.hasChanges) {
+		p.log.error(
+			pc.red(
+				`Module '${type}/${name}' has ${gitStatus.filesCount} uncommitted change(s) in git. Please commit your changes first before registering so a valid commit hash can be recorded.`,
+			),
+		);
+		process.exit(1);
+	}
+
+	const commitHash = getLatestCommitForDir(modDir);
+	if (!commitHash) {
+		p.log.error(
+			pc.red(
+				`Module '${type}/${name}' has no git commit history. Please commit the module to git before registering.`,
+			),
+		);
+		process.exit(1);
+	}
+
+	const s = p.spinner();
+	s.start(
+		`Validating linting, types, and architecture for '${type}/${name}'...`,
+	);
+	const lintResult = validateModuleLinting(modDir, type);
+	if (!lintResult.ok) {
+		s.stop(pc.red(`Linting checks failed for '${type}/${name}'.`));
+		for (const err of lintResult.errors) {
+			p.log.error(pc.red(err));
+		}
+		p.log.error(
+			pc.red(
+				`Registration aborted: Module '${type}/${name}' must pass all linting, typecheck, and architectural checks before registration.`,
+			),
+		);
+		process.exit(1);
+	}
+	s.stop(`Linting checks passed for '${type}/${name}'.`);
+
 	const files = collectFiles(modDir);
 	const integrity = computeDirectoryHash(modDir);
 
@@ -697,7 +913,9 @@ export async function registerModuleChanges(
 	let manifest: ModuleManifest;
 
 	if (fs.existsSync(manifestPath)) {
-		manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
+		manifest = JSON.parse(
+			fs.readFileSync(manifestPath, "utf-8"),
+		) as ModuleManifest;
 	} else {
 		manifest = {
 			name,
@@ -711,40 +929,39 @@ export async function registerModuleChanges(
 
 	manifest.files = files;
 	manifest.integrity = integrity;
+	manifest.commit = commitHash;
 	if (versionArg) {
 		manifest.version = versionArg;
 	}
 
 	fs.writeFileSync(
 		manifestPath,
-		JSON.stringify(manifest, null, 2) + "\n",
+		`${JSON.stringify(manifest, null, 2)}\n`,
 		"utf-8",
 	);
 
 	const targetList = type === "shared" ? index.shared : index.features;
 	const existingIdx = targetList.findIndex((item) => item.name === name);
 
+	const entry: IndexEntry = {
+		name,
+		description: manifest.description,
+		version: manifest.version,
+		integrity,
+		commit: commitHash,
+	};
+
 	if (existingIdx >= 0) {
-		targetList[existingIdx] = {
-			name,
-			description: manifest.description,
-			version: manifest.version,
-			integrity,
-		};
+		targetList[existingIdx] = entry;
 	} else {
-		targetList.push({
-			name,
-			description: manifest.description,
-			version: manifest.version,
-			integrity,
-		});
+		targetList.push(entry);
 	}
 
 	saveMasterIndex(index);
 
 	p.log.success(
 		pc.green(
-			`✓ Registered changes for '${type}/${name}' (new integrity: ${integrity.slice(0, 18)}...)`,
+			`✓ Registered changes for '${type}/${name}' (commit: ${commitHash.slice(0, 7)}, integrity: ${integrity.slice(0, 18)}...)`,
 		),
 	);
 }
@@ -813,14 +1030,16 @@ async function main() {
 	const positionalArgs: string[] = [];
 
 	for (let i = 1; i < args.length; i++) {
-		if (args[i] === "-m" || args[i] === "--message") {
+		const arg = args[i];
+		if (!arg) continue;
+		if (arg === "-m" || arg === "--message") {
 			message = args[i + 1];
 			i++;
-		} else if (args[i] === "-v" || args[i] === "--version") {
+		} else if (arg === "-v" || arg === "--version") {
 			version = args[i + 1];
 			i++;
-		} else if (!args[i].startsWith("-")) {
-			positionalArgs.push(args[i]);
+		} else if (!arg.startsWith("-")) {
+			positionalArgs.push(arg);
 		}
 	}
 

@@ -7,7 +7,9 @@
       "@/shared/*": ["./src/shared/*"],
       "@/features/*": ["./src/features/*"]
     },
-    "strict": false,
+    "strict": true,
+    "verbatimModuleSyntax": true,
+    "noUncheckedIndexedAccess": true,
     "skipLibCheck": true,
     "esModuleInterop": true
   },
