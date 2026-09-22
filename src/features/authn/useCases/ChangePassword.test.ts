@@ -85,7 +85,7 @@ describe("ChangePassword UseCase", () => {
 		// Password hash updated
 		const cred = await credRepo.findById("cred-1");
 		expect(
-			await hasher.compare(cred?.passwordHash || "", "newPassword456"),
+			await hasher.verify("newPassword456", cred?.passwordHash || ""),
 		).toBe(true);
 
 		// Current session is preserved

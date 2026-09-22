@@ -56,9 +56,9 @@ export class Login {
 			);
 		}
 
-		const isMatch = await this.deps.hasher.compare(
-			cred.passwordHash,
+		const isMatch = await this.deps.hasher.verify(
 			props.password,
+			cred.passwordHash,
 		);
 		if (!isMatch) {
 			throw new InvalidCredentialsError("Invalid email or password");

@@ -71,9 +71,9 @@ export class ChangePassword {
 			throw new PasswordMismatchError("Current password is required");
 		}
 
-		const isMatch = await this.deps.hasher.compare(
-			cred.passwordHash,
+		const isMatch = await this.deps.hasher.verify(
 			currentPwd,
+			cred.passwordHash,
 		);
 		if (!isMatch) {
 			throw new PasswordMismatchError("Incorrect current password");

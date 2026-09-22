@@ -91,7 +91,7 @@ describe("ResetPassword UseCase", () => {
 		// Password updated
 		const cred = await credRepo.findById("cred-1");
 		expect(
-			await hasher.compare(cred?.passwordHash || "", "freshPassword123"),
+			await hasher.verify("freshPassword123", cred?.passwordHash || ""),
 		).toBe(true);
 
 		// All sessions on all devices deleted
