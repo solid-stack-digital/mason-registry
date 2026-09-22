@@ -1,0 +1,18 @@
+{
+  "name": "emailAccessVerification",
+  "type": "feature",
+  "description": "Email access verification with OTP validation and JWT issuance",
+  "version": "1.0.0",
+  "dependencies": {
+    "npm": [],
+    "shared": [
+      "jwt",
+      "time",
+      "uuid"
+    ],
+    "features": [
+      "otp"
+    ]
+  },
+  "files": []
+}
