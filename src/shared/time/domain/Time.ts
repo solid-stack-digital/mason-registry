@@ -61,10 +61,6 @@ export class Time {
 		return new Time(this.millis + duration.millis);
 	}
 
-	afterDuration(duration: Duration): Time {
-		return this.plus(duration);
-	}
-
 	minus(duration: Duration): Time {
 		return new Time(this.millis - duration.millis);
 	}
