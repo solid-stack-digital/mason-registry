@@ -8,5 +8,15 @@
     "shared": [],
     "features": []
   },
-  "files": []
+  "files": [
+    "Hmac.test.ts",
+    "Hmac.ts",
+    "diProvider.ts",
+    "infrastructure/DefaultHmacEngine.ts",
+    "infrastructure/StubHmacEngine.ts",
+    "infrastructure/__tests__/HmacEngine.test.ts",
+    "ports/IHmacEngine.ts"
+  ],
+  "integrity": "sha256-033640b3ef85f398e51f225cfb57517146d1581adb522f0c4212815266080f02",
+  "commit": "2fa235ac28bdd6f3e88fde0879d47cc68e214a1d"
 }

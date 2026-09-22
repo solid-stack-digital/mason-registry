@@ -8,6 +8,13 @@
       "commit": "9f6e685068ce5590ff91f77f8ef0cc9cad24db03"
     },
     {
+      "name": "hmac",
+      "description": "HMAC (Hash-based Message Authentication Code) cryptographic signing and verification abstraction",
+      "version": "1.0.0",
+      "integrity": "sha256-033640b3ef85f398e51f225cfb57517146d1581adb522f0c4212815266080f02",
+      "commit": "2fa235ac28bdd6f3e88fde0879d47cc68e214a1d"
+    },
+    {
       "name": "jwt",
       "description": "JSON Web Token (JWT) signing, verification, and expiration handling",
       "version": "1.0.0",
