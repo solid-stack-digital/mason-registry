@@ -1,6 +1,6 @@
 import { type DepsType, MakeInjectable } from "@solid-stack/di";
-import { Clock } from "@/shared/time/Clock.js";
 import type { Duration } from "@/shared/time/domain/index.js";
+import { Clock } from "../time/Clock.js";
 import { IJwtEngine } from "./ports/IJwtEngine.js";
 
 @MakeInjectable
