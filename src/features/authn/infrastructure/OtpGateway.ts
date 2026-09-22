@@ -1,5 +1,5 @@
 import { type DepsType, MakeInjectable } from "@solid-stack/di";
-import { SendEmailOtp } from "@/features/otp/useCases/SendEmailOtp.js";
+import { SendOtp } from "@/features/otp/useCases/SendOtp.js";
 import { ValidateOtp } from "@/features/otp/useCases/ValidateOtp.js";
 import type {
 	IOtpGateway,
@@ -14,7 +14,7 @@ import type {
 @MakeInjectable
 export class OtpGateway implements IOtpGateway {
 	public static deps = {
-		sendEmailOtp: SendEmailOtp,
+		sendOtp: SendOtp,
 		validateOtp: ValidateOtp,
 	};
 
@@ -23,20 +23,22 @@ export class OtpGateway implements IOtpGateway {
 	async sendVerificationOtp(
 		payload: SendOtpVerificationPayload,
 	): Promise<void> {
-		await this.deps.sendEmailOtp.execute({
-			recipientid: payload.recipientId,
-			recipientemail: payload.email,
+		await this.deps.sendOtp.execute({
+			recipientId: payload.recipientId,
+			recipientEmail: payload.email,
 			purpose: payload.purpose,
+			mode: "email",
 		});
 	}
 
 	async validateOtp(
 		payload: ValidateOtpVerificationPayload,
 	): Promise<{ valid: boolean }> {
-		return this.deps.validateOtp.execute({
+		const valid = await this.deps.validateOtp.execute({
 			recipientid: payload.recipientId,
 			code: payload.code,
 			purpose: payload.purpose,
 		});
+		return { valid: Boolean(valid) };
 	}
 }
