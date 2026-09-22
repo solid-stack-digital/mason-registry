@@ -2,13 +2,21 @@ import { type DepsType, MakeInjectable } from "@solid-stack/di";
 import { Jwt } from "@/shared/jwt/Jwt.js";
 import { Clock } from "@/shared/time/Clock.js";
 import { Uuid } from "@/shared/uuid/Uuid.js";
+import { DEFAULT_AUTHN_CONFIG, toDuration } from "../domain/AuthnConfig.js";
+import {
+	AccountNotFoundError,
+	DeviceMismatchError,
+	RefreshTokenExpiredError,
+	RefreshTokenNotFoundError,
+} from "../domain/errors/AuthnErrors.js";
 import { ICredentialRepo } from "../domain/ICredentialRepo.js";
 import { IRefreshTokenRepo } from "../domain/IRefreshTokenRepo.js";
 import type { RefreshToken } from "../domain/RefreshToken.js";
+import { AuthnConfigToken } from "../tokens.js";
 
 export type RefreshInput = {
 	refreshToken: string;
-	clientDeviceId?: string | undefined;
+	clientDeviceId: string;
 };
 
 export type RefreshOutput = {
@@ -24,62 +32,52 @@ export class Refresh {
 		jwt: Jwt,
 		uuid: Uuid,
 		clock: Clock,
+		authnConfig: AuthnConfigToken,
 	};
 
 	constructor(public deps: DepsType<typeof Refresh.deps>) {}
 
 	async execute(props: RefreshInput): Promise<RefreshOutput> {
 		if (!props.refreshToken || typeof props.refreshToken !== "string") {
-			throw new Error("Refresh token is required");
+			throw new RefreshTokenNotFoundError("Refresh token is required");
 		}
 
 		const storedToken = await this.deps.refreshTokenRepo.findByToken(
 			props.refreshToken,
 		);
 		if (!storedToken) {
-			throw new Error("Invalid or unrecognized refresh token");
-		}
-
-		// Reuse detection: If token was already revoked, revoke family / all tokens
-		if (storedToken.isRevoked) {
-			if (storedToken.familyId) {
-				await this.deps.refreshTokenRepo.revokeFamily(storedToken.familyId);
-			}
-			await this.deps.refreshTokenRepo.revokeAllByCredentialId(
-				storedToken.credentialId,
-			);
-			throw new Error(
-				"Revoked refresh token presented (possible replay attack)",
+			throw new RefreshTokenNotFoundError(
+				"Invalid or unrecognized refresh token",
 			);
 		}
 
 		const now = this.deps.clock.now();
 		const expTime = storedToken.expiresAt;
 		if (now.isAfter(expTime) || now.isEqual(expTime)) {
-			throw new Error("Refresh token has expired");
+			throw new RefreshTokenExpiredError("Refresh token has expired");
 		}
 
-		if (
-			props.clientDeviceId &&
-			storedToken.clientDeviceId !== props.clientDeviceId.trim()
-		) {
-			throw new Error(
+		const clientDeviceId = props.clientDeviceId?.trim();
+		if (storedToken.clientDeviceId !== clientDeviceId) {
+			throw new DeviceMismatchError(
 				"Client device ID does not match the token's bound device",
 			);
 		}
 
 		const cred = await this.deps.credRepo.findById(storedToken.credentialId);
 		if (!cred) {
-			throw new Error("Associated credential not found");
+			throw new AccountNotFoundError("Associated credential not found");
 		}
 
-		// Invalidate current refresh token
-		await this.deps.refreshTokenRepo.revokeByToken(storedToken.token);
+		// Delete the session for refresh token
+		await this.deps.refreshTokenRepo.deleteByToken(storedToken.token);
 
-		// Create new token pair
+		// Generate new access and refresh token
+		const config = this.deps.authnConfig ?? DEFAULT_AUTHN_CONFIG;
+		const accessTtl = toDuration(config.accessTokenTtl);
+		const refreshTtl = toDuration(config.refreshTokenTtl);
+
 		const newTokenId = this.deps.uuid.generate();
-		const accessTtl = this.deps.clock.duration("15m");
-		const refreshTtl = this.deps.clock.duration(7 * 24 * 60 * 60 * 1000);
 		const newRefreshExpiresAt = now.plus(refreshTtl);
 
 		const [accessToken, refreshToken] = await Promise.all([
@@ -94,9 +92,9 @@ export class Refresh {
 			this.deps.jwt.sign(
 				{
 					credentialId: cred.id,
-					clientDeviceId: storedToken.clientDeviceId,
+					clientDeviceId,
+					jti: newTokenId,
 					tokenId: newTokenId,
-					familyId: storedToken.familyId,
 					type: "refresh",
 				},
 				{ ttl: refreshTtl },
@@ -105,9 +103,9 @@ export class Refresh {
 
 		const newRefreshTokenRecord: RefreshToken = {
 			id: newTokenId,
+			jti: newTokenId,
 			credentialId: cred.id,
-			familyId: storedToken.familyId,
-			clientDeviceId: storedToken.clientDeviceId,
+			clientDeviceId,
 			token: refreshToken,
 			isRevoked: false,
 			expiresAt: newRefreshExpiresAt,

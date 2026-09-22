@@ -1,14 +1,12 @@
 import { type DepsType, MakeInjectable } from "@solid-stack/di";
-import type { SanitizedCredential } from "../domain/Credential.js";
+import type { Credential } from "../domain/Credential.js";
 import { ICredentialRepo } from "../domain/ICredentialRepo.js";
 
 export type GetCredentialByIdInput = {
 	id: string;
 };
 
-export type GetCredentialByIdOutput = {
-	credential: SanitizedCredential;
-};
+export type GetCredentialByIdOutput = Credential | null;
 
 @MakeInjectable
 export class GetCredentialById {
@@ -22,22 +20,14 @@ export class GetCredentialById {
 		props: GetCredentialByIdInput,
 	): Promise<GetCredentialByIdOutput> {
 		if (!props.id || typeof props.id !== "string") {
-			throw new Error("Credential ID is required");
+			return null;
 		}
 
 		const cred = await this.deps.credRepo.findById(props.id);
 		if (!cred) {
-			throw new Error(`Credential not found with id: ${props.id}`);
+			return null;
 		}
 
-		return {
-			credential: {
-				id: cred.id,
-				email: cred.email,
-				isVerified: cred.isVerified,
-				createdAt: cred.createdAt,
-				updatedAt: cred.updatedAt,
-			},
-		};
+		return cred;
 	}
 }

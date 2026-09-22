@@ -2,6 +2,7 @@ import type { Time } from "@/shared/time/domain/Time.js";
 
 export interface RefreshToken {
 	id: string;
+	jti?: string | undefined;
 	credentialId: string;
 	clientDeviceId: string;
 	token: string;

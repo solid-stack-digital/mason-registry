@@ -90,6 +90,13 @@ export class StubRefreshTokenRepo implements IRefreshTokenRepo {
 		return this.cloneToken(found);
 	}
 
+	async findByJti(jti: string): Promise<RefreshToken | null> {
+		if (this.errorToThrow) throw this.errorToThrow;
+		const found = this.tokens.find((t) => t.jti === jti || t.id === jti);
+		if (!found) return null;
+		return this.cloneToken(found);
+	}
+
 	async findActiveByCredentialAndDevice(
 		credentialId: string,
 		clientDeviceId: string,
@@ -107,6 +114,61 @@ export class StubRefreshTokenRepo implements IRefreshTokenRepo {
 		const latest = matches[0];
 		if (!latest) return null;
 		return this.cloneToken(latest);
+	}
+
+	async deleteByToken(token: string): Promise<void> {
+		if (this.errorToThrow) throw this.errorToThrow;
+		this.tokens = this.tokens.filter((t) => t.token !== token);
+	}
+
+	async deleteById(id: string): Promise<void> {
+		if (this.errorToThrow) throw this.errorToThrow;
+		this.tokens = this.tokens.filter((t) => t.id !== id);
+	}
+
+	async deleteByDeviceAndJti(
+		clientDeviceId: string,
+		jti: string,
+	): Promise<void> {
+		if (this.errorToThrow) throw this.errorToThrow;
+		this.tokens = this.tokens.filter(
+			(t) =>
+				!(
+					t.clientDeviceId === clientDeviceId &&
+					(t.jti === jti || t.id === jti)
+				),
+		);
+	}
+
+	async deleteByCredentialAndDevice(
+		credentialId: string,
+		clientDeviceId: string,
+	): Promise<void> {
+		if (this.errorToThrow) throw this.errorToThrow;
+		this.tokens = this.tokens.filter(
+			(t) =>
+				!(
+					t.credentialId === credentialId && t.clientDeviceId === clientDeviceId
+				),
+		);
+	}
+
+	async deleteAllByCredentialId(credentialId: string): Promise<void> {
+		if (this.errorToThrow) throw this.errorToThrow;
+		this.tokens = this.tokens.filter((t) => t.credentialId !== credentialId);
+	}
+
+	async deleteAllByCredentialExceptDevice(
+		credentialId: string,
+		clientDeviceId: string,
+	): Promise<void> {
+		if (this.errorToThrow) throw this.errorToThrow;
+		this.tokens = this.tokens.filter(
+			(t) =>
+				!(
+					t.credentialId === credentialId && t.clientDeviceId !== clientDeviceId
+				),
+		);
 	}
 
 	async revokeAllByCredentialId(credentialId: string): Promise<void> {
@@ -140,10 +202,5 @@ export class StubRefreshTokenRepo implements IRefreshTokenRepo {
 				t.updatedAt = now;
 			}
 		}
-	}
-
-	async deleteByToken(token: string): Promise<void> {
-		if (this.errorToThrow) throw this.errorToThrow;
-		this.tokens = this.tokens.filter((t) => t.token !== token);
 	}
 }

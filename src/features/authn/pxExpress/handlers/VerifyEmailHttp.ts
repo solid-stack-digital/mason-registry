@@ -16,11 +16,12 @@ export default class VerifyEmailHttp extends ExpressRoute {
 	public method = "post" as const;
 	public path = "/verify-email";
 	public handler = async (req: Request, res: Response) => {
-		const { email, code } = req.body || {};
+		const { email, emailAccessToken, code, purpose } = req.body || {};
 		const result = await this.deps.verifyEmailUc.execute({
 			email,
-			code,
+			emailAccessToken: emailAccessToken || code,
+			purpose,
 		});
-		res.status(200).json(result);
+		res.status(200).json({ success: result, isVerified: true });
 	};
 }

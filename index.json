@@ -34,8 +34,15 @@
       "name": "authn",
       "description": "User authentication, sessions, refresh token rotation, and password management",
       "version": "1.0.0",
-      "integrity": "sha256-3fc87e3fe84632a7184bde6f4e5572f887094bd7d54ebf99acc8a4c986e361c6",
-      "commit": "ded6165476912deffc14a72462af6a426a5e02d2"
+      "integrity": "sha256-4b8d27f2c19f62a77a9f9227bc2ffb09cf75148e22bea6f6d4e28bf7715e4b8f",
+      "commit": "c3df69cd8bdcdf1c6678b91b20954c242b16bc0c"
+    },
+    {
+      "name": "emailAccessVerification",
+      "description": "Email access verification with OTP validation and JWT issuance",
+      "version": "1.0.0",
+      "integrity": "sha256-04153b3504bc86dd93bfe96ed6cd2c1c483f6e7dbcf07536ac444f6d496c134a",
+      "commit": "f0d9e54484db77c2d7ab3a99e8f6e4b0853cc3c8"
     },
     {
       "name": "mailing",

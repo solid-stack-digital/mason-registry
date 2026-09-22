@@ -7,6 +7,7 @@ import { Clock } from "@/shared/time/Clock.js";
 import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
 import { StubIdGenerator } from "@/shared/uuid/infrastructure/StubIdGenerator.js";
 import { Uuid } from "@/shared/uuid/Uuid.js";
+import { DEFAULT_AUTHN_CONFIG } from "../domain/AuthnConfig.js";
 import type { Credential } from "../domain/Credential.js";
 import { MemoryCredentialRepo } from "../infrastructure/MemoryCredentialRepo.js";
 import { MemoryRefreshTokenRepo } from "../infrastructure/MemoryRefreshTokenRepo.js";
@@ -44,6 +45,7 @@ describe("Login UseCase", () => {
 			jwt,
 			uuid,
 			clock,
+			authnConfig: DEFAULT_AUTHN_CONFIG,
 		});
 	});
 
@@ -74,11 +76,69 @@ describe("Login UseCase", () => {
 		const savedRefresh = await refreshTokenRepo.findById("stub-id-1");
 		expect(savedRefresh).toBeDefined();
 		expect(savedRefresh?.credentialId).toBe("cred-1");
+		expect(savedRefresh?.clientDeviceId).toBe("device-123");
+	});
+
+	it("invalidates and deletes all previous refresh tokens for device and credential", async () => {
+		const hashedPassword = await hasher.hash("secretPassword");
+		const testCred: Credential = {
+			id: "cred-1",
+			email: "test@example.com",
+			passwordHash: hashedPassword,
+			isVerified: true,
+			createdAt: clock.now(),
+			updatedAt: clock.now(),
+		};
+		await credRepo.save(testCred);
+
+		// Pre-populate old token for same device and credential
+		await refreshTokenRepo.save({
+			id: "old-refresh-1",
+			jti: "old-refresh-1",
+			credentialId: "cred-1",
+			clientDeviceId: "device-123",
+			token: "old-token-123",
+			isRevoked: false,
+			expiresAt: clock.now().plus(clock.duration("1d")),
+			createdAt: clock.now(),
+			updatedAt: clock.now(),
+		});
+
+		// Pre-populate token for DIFFERENT device
+		await refreshTokenRepo.save({
+			id: "other-device-token",
+			jti: "other-device-token",
+			credentialId: "cred-1",
+			clientDeviceId: "other-device",
+			token: "other-token-456",
+			isRevoked: false,
+			expiresAt: clock.now().plus(clock.duration("1d")),
+			createdAt: clock.now(),
+			updatedAt: clock.now(),
+		});
+
+		await login.execute({
+			email: "test@example.com",
+			password: "secretPassword",
+			clientDeviceId: "device-123",
+		});
+
+		// Old token on device-123 should be deleted
+		const oldSession = await refreshTokenRepo.findById("old-refresh-1");
+		expect(oldSession).toBeNull();
+
+		// Session on other device should remain intact
+		const otherSession = await refreshTokenRepo.findById("other-device-token");
+		expect(otherSession).not.toBeNull();
 	});
 
 	it("throws error for non-existent user", async () => {
 		await expect(
-			login.execute({ email: "unknown@example.com", password: "pwd" }),
+			login.execute({
+				email: "unknown@example.com",
+				password: "pwd",
+				clientDeviceId: "device-123",
+			}),
 		).rejects.toThrow("Invalid email or password");
 	});
 
@@ -94,7 +154,11 @@ describe("Login UseCase", () => {
 		});
 
 		await expect(
-			login.execute({ email: "user@example.com", password: "wrongPassword" }),
+			login.execute({
+				email: "user@example.com",
+				password: "wrongPassword",
+				clientDeviceId: "device-123",
+			}),
 		).rejects.toThrow("Invalid email or password");
 	});
 
@@ -110,7 +174,11 @@ describe("Login UseCase", () => {
 		});
 
 		await expect(
-			login.execute({ email: "unverified@example.com", password: "password" }),
+			login.execute({
+				email: "unverified@example.com",
+				password: "password",
+				clientDeviceId: "device-123",
+			}),
 		).rejects.toThrow("Email has not been verified");
 	});
 });

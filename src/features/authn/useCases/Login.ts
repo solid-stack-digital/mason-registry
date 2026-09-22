@@ -3,14 +3,20 @@ import { Hasher } from "@/shared/hasher/Hasher.js";
 import { Jwt } from "@/shared/jwt/Jwt.js";
 import { Clock } from "@/shared/time/Clock.js";
 import { Uuid } from "@/shared/uuid/Uuid.js";
+import { DEFAULT_AUTHN_CONFIG, toDuration } from "../domain/AuthnConfig.js";
+import {
+	AccountNotVerifiedError,
+	InvalidCredentialsError,
+} from "../domain/errors/AuthnErrors.js";
 import { ICredentialRepo } from "../domain/ICredentialRepo.js";
 import { IRefreshTokenRepo } from "../domain/IRefreshTokenRepo.js";
 import type { RefreshToken } from "../domain/RefreshToken.js";
+import { AuthnConfigToken } from "../tokens.js";
 
 export type LoginInput = {
+	clientDeviceId: string;
 	email: string;
-	password?: string | undefined;
-	clientDeviceId?: string | undefined;
+	password: string;
 };
 
 export type LoginOutput = {
@@ -28,44 +34,50 @@ export class Login {
 		jwt: Jwt,
 		uuid: Uuid,
 		clock: Clock,
+		authnConfig: AuthnConfigToken,
 	};
 
 	constructor(public deps: DepsType<typeof Login.deps>) {}
 
 	async execute(props: LoginInput): Promise<LoginOutput> {
 		if (!props.email || typeof props.email !== "string") {
-			throw new Error("Email is required");
+			throw new InvalidCredentialsError("Invalid email or password");
 		}
 
 		const email = props.email.trim().toLowerCase();
 		const cred = await this.deps.credRepo.findByEmail(email);
-
 		if (!cred) {
-			throw new Error("Invalid email or password");
-		}
-
-		if (props.password) {
-			const isValid = await this.deps.hasher.compare(
-				cred.passwordHash,
-				props.password,
-			);
-			if (!isValid) {
-				throw new Error("Invalid email or password");
-			}
+			throw new InvalidCredentialsError("Invalid email or password");
 		}
 
 		if (!cred.isVerified) {
-			throw new Error(
+			throw new AccountNotVerifiedError(
 				"Email has not been verified. Please verify your email before logging in",
 			);
 		}
 
-		const clientDeviceId = props.clientDeviceId?.trim() || "default-device";
-		const refreshTokenId = this.deps.uuid.generate();
-		const familyId = this.deps.uuid.generate();
+		const isMatch = await this.deps.hasher.compare(
+			cred.passwordHash,
+			props.password,
+		);
+		if (!isMatch) {
+			throw new InvalidCredentialsError("Invalid email or password");
+		}
 
-		const accessTtl = this.deps.clock.duration("15m");
-		const refreshTtl = this.deps.clock.duration(7 * 24 * 60 * 60 * 1000); // 7 days
+		const clientDeviceId = props.clientDeviceId?.trim() || "default-device";
+
+		// Invalidate and delete all refresh token with deviceId, credential id
+		await this.deps.refreshTokenRepo.deleteByCredentialAndDevice(
+			cred.id,
+			clientDeviceId,
+		);
+
+		// Resolve TTL from config
+		const config = this.deps.authnConfig ?? DEFAULT_AUTHN_CONFIG;
+		const accessTtl = toDuration(config.accessTokenTtl);
+		const refreshTtl = toDuration(config.refreshTokenTtl);
+
+		const refreshTokenId = this.deps.uuid.generate();
 
 		const [accessToken, refreshToken] = await Promise.all([
 			this.deps.jwt.sign(
@@ -79,8 +91,9 @@ export class Login {
 			this.deps.jwt.sign(
 				{
 					credentialId: cred.id,
+					clientDeviceId,
+					jti: refreshTokenId,
 					tokenId: refreshTokenId,
-					familyId,
 					type: "refresh",
 				},
 				{ ttl: refreshTtl },
@@ -92,8 +105,8 @@ export class Login {
 
 		const refreshTokenRecord: RefreshToken = {
 			id: refreshTokenId,
+			jti: refreshTokenId,
 			credentialId: cred.id,
-			familyId,
 			clientDeviceId,
 			token: refreshToken,
 			isRevoked: false,

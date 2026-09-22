@@ -22,6 +22,8 @@ export default class RegisterAccountHttp extends ExpressRoute {
 			password,
 			id,
 		});
-		res.status(201).json(result);
+		res
+			.status(201)
+			.json(typeof result === "string" ? { credentialId: result } : result);
 	};
 }

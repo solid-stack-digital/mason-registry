@@ -16,13 +16,14 @@ export default class ResetPasswordHttp extends ExpressRoute {
 	public method = "post" as const;
 	public path = "/reset-password";
 	public handler = async (req: Request, res: Response) => {
-		const { email, code, newPassword, password } = req.body || {};
+		const { email, emailAccessToken, code, newPassword, password, purpose } =
+			req.body || {};
 		const result = await this.deps.resetPasswordUc.execute({
 			email,
-			code,
-			newPassword,
-			password,
+			emailAccessToken: emailAccessToken || code,
+			newPassword: newPassword || password,
+			purpose,
 		});
-		res.status(200).json(result);
+		res.status(200).json({ success: result, ok: true });
 	};
 }
