@@ -34,8 +34,8 @@
       "name": "authn",
       "description": "User authentication, sessions, refresh token rotation, and password management",
       "version": "1.0.0",
-      "integrity": "sha256-3fc87e3fe84632a7184bde6f4e5572f887094bd7d54ebf99acc8a4c986e361c6",
-      "commit": "ded6165476912deffc14a72462af6a426a5e02d2"
+      "integrity": "sha256-4b8d27f2c19f62a77a9f9227bc2ffb09cf75148e22bea6f6d4e28bf7715e4b8f",
+      "commit": "c3df69cd8bdcdf1c6678b91b20954c242b16bc0c"
     },
     {
       "name": "emailAccessVerification",
