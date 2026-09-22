@@ -19,8 +19,9 @@
     "errors/TokenIntegrityError.ts",
     "infrastructure/HmacJwtEngine.ts",
     "infrastructure/StubJwtEngine.ts",
+    "infrastructure/__tests__/JwtEngine.test.ts",
     "ports/IJwtEngine.ts"
   ],
-  "integrity": "sha256-cabe57cac976d33ffbe53a4d89f888c679bdcb2b1fb7ae405f0365ec66bec50c",
-  "commit": "e24422cdeab22d45cb89051d88b73b599489f05d"
+  "integrity": "sha256-8284e6e876b12590bf6c4f9042874cd1abd318d61857c4fee4daae7898803b0d",
+  "commit": "6ab8a5e56c06b941222a2dd3e5f5335527c5d313"
 }

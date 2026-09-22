@@ -14,11 +14,14 @@
     "diProvider.ts",
     "domain/Duration.ts",
     "domain/Time.ts",
+    "domain/__tests__/Duration.test.ts",
+    "domain/__tests__/Time.test.ts",
     "domain/index.ts",
     "infrastructure/StubTimeEngine.ts",
     "infrastructure/SystemTimeEngine.ts",
+    "infrastructure/__tests__/TimeEngine.test.ts",
     "ports/ITimeEngine.ts"
   ],
-  "integrity": "sha256-965faaf72e740528f369b7dab8b4b05ce668aaf190ae908150d2d302411f0575",
-  "commit": "e24422cdeab22d45cb89051d88b73b599489f05d"
+  "integrity": "sha256-eb1ca681ffd425b95c6135ca3a85dbd20c049f5d78c86667626b9bee2cf55256",
+  "commit": "1582dcf0e8ad2f6dcb60e4f661cd48295ca3f8d7"
 }

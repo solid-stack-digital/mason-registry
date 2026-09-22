@@ -5,28 +5,28 @@
       "description": "Cryptographic password hashing and verification abstraction using scrypt",
       "version": "1.0.0",
       "integrity": "sha256-efeca880410bb359194ece28e8957d63fe388f9d5fe84a33e7836215d8942b8e",
-      "commit": "2b6759f6cb7e1b3ab83a9c4a1234182457a02982"
+      "commit": "9f6e685068ce5590ff91f77f8ef0cc9cad24db03"
     },
     {
       "name": "jwt",
       "description": "JSON Web Token (JWT) signing, verification, and expiration handling",
       "version": "1.0.0",
-      "integrity": "sha256-cabe57cac976d33ffbe53a4d89f888c679bdcb2b1fb7ae405f0365ec66bec50c",
-      "commit": "e24422cdeab22d45cb89051d88b73b599489f05d"
+      "integrity": "sha256-8284e6e876b12590bf6c4f9042874cd1abd318d61857c4fee4daae7898803b0d",
+      "commit": "6ab8a5e56c06b941222a2dd3e5f5335527c5d313"
     },
     {
       "name": "time",
       "description": "Clock and Time abstraction for deterministic date/time manipulation",
       "version": "1.0.0",
-      "integrity": "sha256-965faaf72e740528f369b7dab8b4b05ce668aaf190ae908150d2d302411f0575",
-      "commit": "e24422cdeab22d45cb89051d88b73b599489f05d"
+      "integrity": "sha256-eb1ca681ffd425b95c6135ca3a85dbd20c049f5d78c86667626b9bee2cf55256",
+      "commit": "1582dcf0e8ad2f6dcb60e4f661cd48295ca3f8d7"
     },
     {
       "name": "uuid",
       "description": "UUID v4 generation abstraction for clean architecture entities",
       "version": "1.0.0",
       "integrity": "sha256-c534774f89727e4ebc7f5cab449355ae49db7bf73506eda46859ce57095018c5",
-      "commit": "2b6759f6cb7e1b3ab83a9c4a1234182457a02982"
+      "commit": "b56d9d389d8e4fcf695852f7d5b0d17ce9ecc0ca"
     }
   ],
   "features": [

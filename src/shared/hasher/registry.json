@@ -14,8 +14,9 @@
     "diProvider.ts",
     "infrastructure/ScryptHashEngine.ts",
     "infrastructure/StubHashEngine.ts",
+    "infrastructure/__tests__/HashEngine.test.ts",
     "ports/IHashEngine.ts"
   ],
   "integrity": "sha256-efeca880410bb359194ece28e8957d63fe388f9d5fe84a33e7836215d8942b8e",
-  "commit": "2b6759f6cb7e1b3ab83a9c4a1234182457a02982"
+  "commit": "9f6e685068ce5590ff91f77f8ef0cc9cad24db03"
 }
