@@ -17,5 +17,5 @@
     "infrastructure/StubIdGenerator.ts",
     "ports/IIdGenerator.ts"
   ],
-  "integrity": "sha256-b7246d917438ff818a59e682ff33227eed3bed9d68861f209000d5f6d0e8af7f"
+  "integrity": "sha256-c534774f89727e4ebc7f5cab449355ae49db7bf73506eda46859ce57095018c5"
 }

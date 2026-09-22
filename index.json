@@ -4,25 +4,25 @@
       "name": "hasher",
       "description": "Cryptographic password hashing and verification abstraction using scrypt",
       "version": "1.0.0",
-      "integrity": "sha256-09ebf144dd06e48a944ffae7522dc867fee954437aab39bac005650c7c1a6f19"
+      "integrity": "sha256-efeca880410bb359194ece28e8957d63fe388f9d5fe84a33e7836215d8942b8e"
     },
     {
       "name": "jwt",
       "description": "JSON Web Token (JWT) signing, verification, and expiration handling",
       "version": "1.0.0",
-      "integrity": "sha256-389381d1828c873ce4bef4d4f97b340733c2bd744d3e1d7fa001e80cd2c4033b"
+      "integrity": "sha256-518505718c70750e24654223c67b515951dde36d9b933cd1350aad297507b8dc"
     },
     {
       "name": "time",
       "description": "Clock and Time abstraction for deterministic date/time manipulation",
       "version": "1.0.0",
-      "integrity": "sha256-3c7e3b365f087997f5a13aee22f177db966b5ccc4f9af01985544f1609ca832f"
+      "integrity": "sha256-d9f08bc743b2aaa6c3893d98aefa338b944595e80397b3ede5ea9427c0f26969"
     },
     {
       "name": "uuid",
       "description": "UUID v4 generation abstraction for clean architecture entities",
       "version": "1.0.0",
-      "integrity": "sha256-b7246d917438ff818a59e682ff33227eed3bed9d68861f209000d5f6d0e8af7f"
+      "integrity": "sha256-c534774f89727e4ebc7f5cab449355ae49db7bf73506eda46859ce57095018c5"
     }
   ],
   "features": [
@@ -30,19 +30,19 @@
       "name": "authn",
       "description": "User authentication, sessions, refresh token rotation, and password management",
       "version": "1.0.0",
-      "integrity": "sha256-8abef73c2a0737d409995ad4f08a8085928c1d6c79aeddabec1c647023e5466d"
+      "integrity": "sha256-cf17e4c4516c3e248ff58baf535b5c396bb6161f56611da6498298779236b626"
     },
     {
       "name": "mailing",
       "description": "Email sending, mailer interface, memory mailer, and template dispatcher",
       "version": "1.0.0",
-      "integrity": "sha256-d97ced35396b6d9be019ecc68a5b2c8bdf0da740ea9d3df5724b5f7ff474a8b3"
+      "integrity": "sha256-f38ace9979458e60ea5aa775557de611db5276163ae9cd69d3fccf3d05e4ad1b"
     },
     {
       "name": "otp",
       "description": "One-time password generation, validation, and email dispatching",
       "version": "1.0.0",
-      "integrity": "sha256-2149a267818b3aae345b39e538a4dac011aea89f7026e6df1248ffd4938bf641"
+      "integrity": "sha256-1fa37e1a7161fc8731d167addf6705186fdfd08027090666b065ede5a682692b"
     }
   ]
 }

@@ -1,9 +1,9 @@
-import { MakeInjectable, type DepsType } from "@solid-stack/di";
-import {
-  IOtpEmailGateway,
-  type SendOtpEmailPayload,
-} from "../domain/IOtpEmailGateway.js";
+import { type DepsType, MakeInjectable } from "@solid-stack/di";
 import { SendEmail } from "@/features/mailing/useCases/SendEmail.js";
+import type {
+	IOtpEmailGateway,
+	SendOtpEmailPayload,
+} from "../domain/IOtpEmailGateway.js";
 
 /**
  * Infrastructure adapter implementing IOtpEmailGateway.
@@ -11,17 +11,17 @@ import { SendEmail } from "@/features/mailing/useCases/SendEmail.js";
  */
 @MakeInjectable
 export class OtpEmailGateway implements IOtpEmailGateway {
-  public static deps = {
-    sendEmail: SendEmail,
-  };
+	public static deps = {
+		sendEmail: SendEmail,
+	};
 
-  constructor(public deps: DepsType<typeof OtpEmailGateway.deps>) {}
+	constructor(public deps: DepsType<typeof OtpEmailGateway.deps>) {}
 
-  async sendEmail(payload: SendOtpEmailPayload): Promise<void> {
-    await this.deps.sendEmail.execute({
-      to: payload.to,
-      subject: payload.subject,
-      body: payload.body,
-    });
-  }
+	async sendEmail(payload: SendOtpEmailPayload): Promise<void> {
+		await this.deps.sendEmail.execute({
+			to: payload.to,
+			subject: payload.subject,
+			body: payload.body,
+		});
+	}
 }

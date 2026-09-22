@@ -1,13 +1,13 @@
 export interface SendOtpVerificationPayload {
-  recipientId: string;
-  email: string;
-  purpose: string;
+	recipientId: string;
+	email: string;
+	purpose: string;
 }
 
 export interface ValidateOtpVerificationPayload {
-  recipientId: string;
-  code: string;
-  purpose: string;
+	recipientId: string;
+	code: string;
+	purpose: string;
 }
 
 /**
@@ -16,6 +16,10 @@ export interface ValidateOtpVerificationPayload {
  * local contract of what it requires from the OTP feature.
  */
 export abstract class IOtpGateway {
-  abstract sendVerificationOtp(payload: SendOtpVerificationPayload): Promise<void>;
-  abstract validateOtp(payload: ValidateOtpVerificationPayload): Promise<{ valid: boolean }>;
+	abstract sendVerificationOtp(
+		payload: SendOtpVerificationPayload,
+	): Promise<void>;
+	abstract validateOtp(
+		payload: ValidateOtpVerificationPayload,
+	): Promise<{ valid: boolean }>;
 }

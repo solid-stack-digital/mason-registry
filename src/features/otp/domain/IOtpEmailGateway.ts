@@ -1,7 +1,7 @@
 export interface SendOtpEmailPayload {
-  to: string;
-  subject: string;
-  body: string;
+	to: string;
+	subject: string;
+	body: string;
 }
 
 /**
@@ -10,5 +10,5 @@ export interface SendOtpEmailPayload {
  * local contract of what it requires from the mailing feature.
  */
 export abstract class IOtpEmailGateway {
-  abstract sendEmail(payload: SendOtpEmailPayload): Promise<void>;
+	abstract sendEmail(payload: SendOtpEmailPayload): Promise<void>;
 }

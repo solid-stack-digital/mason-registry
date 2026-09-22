@@ -16,5 +16,5 @@
     "infrastructure/StubHashEngine.ts",
     "ports/IHashEngine.ts"
   ],
-  "integrity": "sha256-09ebf144dd06e48a944ffae7522dc867fee954437aab39bac005650c7c1a6f19"
+  "integrity": "sha256-efeca880410bb359194ece28e8957d63fe388f9d5fe84a33e7836215d8942b8e"
 }

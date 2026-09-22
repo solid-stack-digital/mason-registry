@@ -1,11 +1,11 @@
-import { MakeInjectable, type DepsType } from "@solid-stack/di";
-import {
-  IOtpGateway,
-  type SendOtpVerificationPayload,
-  type ValidateOtpVerificationPayload,
-} from "../domain/IOtpGateway.js";
+import { type DepsType, MakeInjectable } from "@solid-stack/di";
 import { SendEmailOtp } from "@/features/otp/useCases/SendEmailOtp.js";
 import { ValidateOtp } from "@/features/otp/useCases/ValidateOtp.js";
+import type {
+	IOtpGateway,
+	SendOtpVerificationPayload,
+	ValidateOtpVerificationPayload,
+} from "../domain/IOtpGateway.js";
 
 /**
  * Infrastructure adapter implementing IOtpGateway.
@@ -13,26 +13,30 @@ import { ValidateOtp } from "@/features/otp/useCases/ValidateOtp.js";
  */
 @MakeInjectable
 export class OtpGateway implements IOtpGateway {
-  public static deps = {
-    sendEmailOtp: SendEmailOtp,
-    validateOtp: ValidateOtp,
-  };
+	public static deps = {
+		sendEmailOtp: SendEmailOtp,
+		validateOtp: ValidateOtp,
+	};
 
-  constructor(public deps: DepsType<typeof OtpGateway.deps>) {}
+	constructor(public deps: DepsType<typeof OtpGateway.deps>) {}
 
-  async sendVerificationOtp(payload: SendOtpVerificationPayload): Promise<void> {
-    await this.deps.sendEmailOtp.execute({
-      recipientid: payload.recipientId,
-      recipientemail: payload.email,
-      purpose: payload.purpose,
-    });
-  }
+	async sendVerificationOtp(
+		payload: SendOtpVerificationPayload,
+	): Promise<void> {
+		await this.deps.sendEmailOtp.execute({
+			recipientid: payload.recipientId,
+			recipientemail: payload.email,
+			purpose: payload.purpose,
+		});
+	}
 
-  async validateOtp(payload: ValidateOtpVerificationPayload): Promise<{ valid: boolean }> {
-    return this.deps.validateOtp.execute({
-      recipientid: payload.recipientId,
-      code: payload.code,
-      purpose: payload.purpose,
-    });
-  }
+	async validateOtp(
+		payload: ValidateOtpVerificationPayload,
+	): Promise<{ valid: boolean }> {
+		return this.deps.validateOtp.execute({
+			recipientid: payload.recipientId,
+			code: payload.code,
+			purpose: payload.purpose,
+		});
+	}
 }

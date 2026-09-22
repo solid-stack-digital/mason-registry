@@ -30,5 +30,5 @@
     "useCases/SendEmailOtp.ts",
     "useCases/ValidateOtp.ts"
   ],
-  "integrity": "sha256-2149a267818b3aae345b39e538a4dac011aea89f7026e6df1248ffd4938bf641"
+  "integrity": "sha256-1fa37e1a7161fc8731d167addf6705186fdfd08027090666b065ede5a682692b"
 }
