@@ -8,6 +8,7 @@ export interface Otp {
 	otpCode: string;
 	attempts: number;
 	isUsed: boolean;
+	isInvalidated: boolean;
 	expiresAt: Time;
 	createdAt: Time;
 	updatedAt: Time;
