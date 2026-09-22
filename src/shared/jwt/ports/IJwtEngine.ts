@@ -5,5 +5,5 @@ import type { Duration } from "@/shared/time/domain/Duration.js";
  */
 export abstract class IJwtEngine {
 	abstract sign(payload: unknown, ttl: Duration): Promise<string>;
-	abstract verify<T = any>(token: string): Promise<T>;
+	abstract verify<T = unknown>(token: string): Promise<T>;
 }

@@ -62,7 +62,7 @@ export class HmacJwtEngine implements IJwtEngine {
 		return `${encodedHeader}.${encodedPayload}.${encodedSignature}`;
 	}
 
-	async verify<T = any>(
+	async verify<T = unknown>(
 		token: string,
 		options?: { ignoreExpiration?: boolean },
 	): Promise<T> {
@@ -92,14 +92,17 @@ export class HmacJwtEngine implements IJwtEngine {
 			throw new TokenIntegrityError("Invalid token signature");
 		}
 
-		let payload: any;
+		let payload: Record<string, unknown>;
 		try {
-			payload = JSON.parse(base64UrlDecode(payloadB64));
+			payload = JSON.parse(base64UrlDecode(payloadB64)) as Record<
+				string,
+				unknown
+			>;
 		} catch {
 			throw new TokenIntegrityError("Malformed token payload");
 		}
 
-		if (!options?.ignoreExpiration && payload.exp !== undefined) {
+		if (!options?.ignoreExpiration && typeof payload.exp === "number") {
 			const nowSec = Math.floor(this.deps.clock.now().millis / 1000);
 			const isoTimeExp = new Date(payload.exp * 1000);
 			if (nowSec >= payload.exp) {

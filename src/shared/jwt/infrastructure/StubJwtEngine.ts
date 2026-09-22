@@ -13,7 +13,7 @@ import type { IJwtEngine } from "../ports/IJwtEngine.js";
 export class StubJwtEngine implements IJwtEngine {
 	public static deps = {};
 	private nextToken = "mock-jwt-token";
-	private nextPayload: any = { userId: "mock-user-id" };
+	private nextPayload: unknown = { userId: "mock-user-id" };
 	private errorToThrow: Error | null = null;
 
 	constructor(public deps: DepsType<typeof StubJwtEngine.deps>) {}
@@ -22,7 +22,7 @@ export class StubJwtEngine implements IJwtEngine {
 		this.nextToken = token;
 	}
 
-	setNextPayload(payload: any): void {
+	setNextPayload(payload: unknown): void {
 		this.nextPayload = payload;
 	}
 
@@ -37,7 +37,7 @@ export class StubJwtEngine implements IJwtEngine {
 		return this.nextToken;
 	}
 
-	async verify<T = any>(token: string, _options?: any): Promise<T> {
+	async verify<T = unknown>(token: string, _options?: unknown): Promise<T> {
 		if (this.errorToThrow) {
 			throw this.errorToThrow;
 		}
@@ -69,7 +69,7 @@ export class StubJwt implements Jwt {
 		this.stubJwtEngine.setNextToken(token);
 	}
 
-	setNextPayload(payload: any): void {
+	setNextPayload(payload: unknown): void {
 		this.stubJwtEngine.setNextPayload(payload);
 	}
 
@@ -81,7 +81,7 @@ export class StubJwt implements Jwt {
 		return this.stubJwtEngine.sign(payload, options.ttl);
 	}
 
-	async verify<T = any>(token: string): Promise<T> {
+	async verify<T = unknown>(token: string): Promise<T> {
 		return this.stubJwtEngine.verify<T>(token);
 	}
 }

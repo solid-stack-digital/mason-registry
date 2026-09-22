@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { Clock } from "./Clock.js";
-import { Duration } from "./domain/Duration.js";
-import { Time } from "./domain/Time.js";
 import { StubTimeEngine } from "./infrastructure/StubTimeEngine.js";
 
 describe("Clock", () => {

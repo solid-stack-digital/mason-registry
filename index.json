@@ -10,13 +10,13 @@
       "name": "jwt",
       "description": "JSON Web Token (JWT) signing, verification, and expiration handling",
       "version": "1.0.0",
-      "integrity": "sha256-518505718c70750e24654223c67b515951dde36d9b933cd1350aad297507b8dc"
+      "integrity": "sha256-cabe57cac976d33ffbe53a4d89f888c679bdcb2b1fb7ae405f0365ec66bec50c"
     },
     {
       "name": "time",
       "description": "Clock and Time abstraction for deterministic date/time manipulation",
       "version": "1.0.0",
-      "integrity": "sha256-d9f08bc743b2aaa6c3893d98aefa338b944595e80397b3ede5ea9427c0f26969"
+      "integrity": "sha256-965faaf72e740528f369b7dab8b4b05ce668aaf190ae908150d2d302411f0575"
     },
     {
       "name": "uuid",
@@ -30,7 +30,7 @@
       "name": "authn",
       "description": "User authentication, sessions, refresh token rotation, and password management",
       "version": "1.0.0",
-      "integrity": "sha256-cf17e4c4516c3e248ff58baf535b5c396bb6161f56611da6498298779236b626"
+      "integrity": "sha256-f4137fc29fff03ad7742daef4677855c2fbcdff30838d2d03180cd288fd2d098"
     },
     {
       "name": "mailing",

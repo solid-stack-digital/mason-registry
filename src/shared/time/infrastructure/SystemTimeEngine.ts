@@ -16,7 +16,7 @@ export class SystemTimeEngine implements ITimeEngine {
 	}
 
 	millisToIso(millis: number): string {
-		if (typeof millis !== "number" || isNaN(millis)) {
+		if (typeof millis !== "number" || Number.isNaN(millis)) {
 			throw new Error(`Invalid millis: ${millis}`);
 		}
 		return new Date(millis).toISOString();
@@ -27,7 +27,7 @@ export class SystemTimeEngine implements ITimeEngine {
 			throw new Error(`Invalid ISO date string: ${isoString}`);
 		}
 		const millis = Date.parse(isoString);
-		if (isNaN(millis)) {
+		if (Number.isNaN(millis)) {
 			throw new Error(`Invalid ISO date string: ${isoString}`);
 		}
 		return millis;
@@ -38,7 +38,7 @@ export class SystemTimeEngine implements ITimeEngine {
 		month: number;
 		day: number;
 	} {
-		if (typeof millis !== "number" || isNaN(millis)) {
+		if (typeof millis !== "number" || Number.isNaN(millis)) {
 			throw new Error(`Invalid millis: ${millis}`);
 		}
 		const date = new Date(millis);
@@ -54,9 +54,9 @@ export class SystemTimeEngine implements ITimeEngine {
 			typeof year !== "number" ||
 			typeof month !== "number" ||
 			typeof day !== "number" ||
-			isNaN(year) ||
-			isNaN(month) ||
-			isNaN(day)
+			Number.isNaN(year) ||
+			Number.isNaN(month) ||
+			Number.isNaN(day)
 		) {
 			throw new Error(`Invalid civil date: ${year}-${month}-${day}`);
 		}

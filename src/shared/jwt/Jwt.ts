@@ -15,7 +15,7 @@ export class Jwt {
 		return this.deps.jwtEngine.sign(payload, options.ttl);
 	}
 
-	async verify<T = any>(token: string): Promise<T> {
+	async verify<T = unknown>(token: string): Promise<T> {
 		return this.deps.jwtEngine.verify<T>(token);
 	}
 }

@@ -46,9 +46,12 @@ export class Clock {
 				throw new Error(`Invalid duration string: ${duration}`);
 			}
 
-			// Use "!" to satisfy TypeScript's strict null checks for regex groups
-			const value = parseFloat(match[1]!);
-			const unit = match[2]!.toLowerCase();
+			const rawValue = match[1];
+			const unit = match[2]?.toLowerCase();
+			if (!rawValue || !unit) {
+				throw new Error(`Invalid duration string: ${duration}`);
+			}
+			const value = parseFloat(rawValue);
 			let millis: number;
 
 			switch (unit) {

@@ -49,5 +49,5 @@
     "useCases/ResetPassword.ts",
     "useCases/VerifyEmail.ts"
   ],
-  "integrity": "sha256-cf17e4c4516c3e248ff58baf535b5c396bb6161f56611da6498298779236b626"
+  "integrity": "sha256-f4137fc29fff03ad7742daef4677855c2fbcdff30838d2d03180cd288fd2d098"
 }

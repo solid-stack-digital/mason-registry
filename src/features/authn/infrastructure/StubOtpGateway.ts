@@ -24,7 +24,7 @@ export class StubOtpGateway implements IOtpGateway {
 	}
 
 	async validateOtp(
-		payload: ValidateOtpVerificationPayload,
+		_payload: ValidateOtpVerificationPayload,
 	): Promise<{ valid: boolean }> {
 		if (this.shouldFailValidation) {
 			throw new Error("Invalid or expired verification code");
