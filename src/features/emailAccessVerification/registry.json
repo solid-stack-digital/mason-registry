@@ -14,5 +14,37 @@
       "otp"
     ]
   },
-  "files": []
+  "files": [
+    "EmailAccessVerificationIntegration.test.ts",
+    "diProvider.ts",
+    "domain/EmailAccess.ts",
+    "domain/EmailAccessConfig.test.ts",
+    "domain/EmailAccessConfig.ts",
+    "domain/IEmailAccessRepository.ts",
+    "domain/IOtpGateway.ts",
+    "domain/errors/EmailAccessErrors.test.ts",
+    "domain/errors/EmailAccessErrors.ts",
+    "infrastructure/MemoryEmailAccessRepository.test.ts",
+    "infrastructure/MemoryEmailAccessRepository.ts",
+    "infrastructure/OtpGateway.test.ts",
+    "infrastructure/OtpGateway.ts",
+    "infrastructure/StubEmailAccessRepository.test.ts",
+    "infrastructure/StubEmailAccessRepository.ts",
+    "infrastructure/StubOtpGateway.test.ts",
+    "infrastructure/StubOtpGateway.ts",
+    "services/DecodeAndValidateToken.test.ts",
+    "services/DecodeAndValidateToken.ts",
+    "tokens.test.ts",
+    "tokens.ts",
+    "useCases/ConsumeEmailAccessToken.test.ts",
+    "useCases/ConsumeEmailAccessToken.ts",
+    "useCases/DecodeEmailAccessToken.test.ts",
+    "useCases/DecodeEmailAccessToken.ts",
+    "useCases/RequestEmailAccessVerification.test.ts",
+    "useCases/RequestEmailAccessVerification.ts",
+    "useCases/ValidateEmailAccess.test.ts",
+    "useCases/ValidateEmailAccess.ts"
+  ],
+  "integrity": "sha256-04153b3504bc86dd93bfe96ed6cd2c1c483f6e7dbcf07536ac444f6d496c134a",
+  "commit": "f0d9e54484db77c2d7ab3a99e8f6e4b0853cc3c8"
 }

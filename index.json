@@ -38,6 +38,13 @@
       "commit": "ded6165476912deffc14a72462af6a426a5e02d2"
     },
     {
+      "name": "emailAccessVerification",
+      "description": "Email access verification with OTP validation and JWT issuance",
+      "version": "1.0.0",
+      "integrity": "sha256-04153b3504bc86dd93bfe96ed6cd2c1c483f6e7dbcf07536ac444f6d496c134a",
+      "commit": "f0d9e54484db77c2d7ab3a99e8f6e4b0853cc3c8"
+    },
+    {
       "name": "mailing",
       "description": "Email sending, mailer interface, memory mailer, and template dispatcher",
       "version": "1.0.0",
