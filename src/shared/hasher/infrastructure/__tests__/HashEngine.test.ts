@@ -5,17 +5,17 @@ import { StubHashEngine, StubHasher } from "../StubHashEngine.js";
 
 describe("Hasher Infrastructure & Hasher Service", () => {
 	describe("ScryptHashEngine", () => {
-		it("hashes and compares passwords correctly", async () => {
+		it("hashes and verifies passwords correctly", async () => {
 			const engine = new ScryptHashEngine({});
 			const hash = await engine.hash("my-secret-password");
 
 			expect(hash).toBeDefined();
 			expect(hash.startsWith("scrypt$")).toBe(true);
 
-			const isValid = await engine.compare(hash, "my-secret-password");
+			const isValid = await engine.verify("my-secret-password", hash);
 			expect(isValid).toBe(true);
 
-			const isInvalid = await engine.compare(hash, "wrong-password");
+			const isInvalid = await engine.verify("wrong-password", hash);
 			expect(isInvalid).toBe(false);
 		});
 
@@ -25,8 +25,8 @@ describe("Hasher Infrastructure & Hasher Service", () => {
 			const hash2 = await engine.hash("same-password");
 
 			expect(hash1).not.toBe(hash2);
-			expect(await engine.compare(hash1, "same-password")).toBe(true);
-			expect(await engine.compare(hash2, "same-password")).toBe(true);
+			expect(await engine.verify("same-password", hash1)).toBe(true);
+			expect(await engine.verify("same-password", hash2)).toBe(true);
 		});
 
 		it("verifies plaintext against hash via verify()", async () => {
@@ -48,30 +48,27 @@ describe("Hasher Infrastructure & Hasher Service", () => {
 			);
 		});
 
-		it("handles malformed hashes gracefully in compare()", async () => {
+		it("handles malformed hashes gracefully in verify()", async () => {
 			const engine = new ScryptHashEngine({});
 
-			expect(await engine.compare("invalid-hash", "password")).toBe(false);
-			expect(await engine.compare("scrypt$only-salt", "password")).toBe(false);
-			expect(await engine.compare("bcrypt$salt$hash", "password")).toBe(false);
-			expect(await engine.compare(null as unknown as string, "password")).toBe(
+			expect(await engine.verify("password", "invalid-hash")).toBe(false);
+			expect(await engine.verify("password", "scrypt$only-salt")).toBe(false);
+			expect(await engine.verify("password", "bcrypt$salt$hash")).toBe(false);
+			expect(await engine.verify("password", null as unknown as string)).toBe(
 				false,
 			);
-			expect(await engine.compare("scrypt$salt$badhex", "password")).toBe(
-				false,
-			);
+			expect(await engine.verify("password", "scrypt$salt$badhex")).toBe(false);
 		});
 	});
 
 	describe("StubHashEngine", () => {
-		it("provides predictable hashing and comparison", async () => {
+		it("provides predictable hashing and verification", async () => {
 			const stub = new StubHashEngine({});
 			const hash = await stub.hash("test-password");
 
 			expect(hash).toBe("mock-hash$test-password");
-			expect(await stub.compare(hash, "test-password")).toBe(true);
-			expect(await stub.compare(hash, "other")).toBe(false);
 			expect(await stub.verify("test-password", hash)).toBe(true);
+			expect(await stub.verify("other", hash)).toBe(false);
 		});
 
 		it("allows custom prefix", async () => {
@@ -80,7 +77,7 @@ describe("Hasher Infrastructure & Hasher Service", () => {
 			const hash = await stub.hash("test");
 
 			expect(hash).toBe("custom$test");
-			expect(await stub.compare("custom$test", "test")).toBe(true);
+			expect(await stub.verify("test", "custom$test")).toBe(true);
 		});
 
 		it("allows setting synthetic errors", async () => {
@@ -90,7 +87,7 @@ describe("Hasher Infrastructure & Hasher Service", () => {
 			await expect(stub.hash("pass")).rejects.toThrow(
 				"Database connection lost",
 			);
-			await expect(stub.compare("mock$pass", "pass")).rejects.toThrow(
+			await expect(stub.verify("pass", "mock$pass")).rejects.toThrow(
 				"Database connection lost",
 			);
 		});
@@ -102,7 +99,6 @@ describe("Hasher Infrastructure & Hasher Service", () => {
 			const hash = await stubHasher.hash("hello");
 
 			expect(hash).toBe("mock-hash$hello");
-			expect(await stubHasher.compare(hash, "hello")).toBe(true);
 			expect(await stubHasher.verify("hello", hash)).toBe(true);
 		});
 
@@ -115,16 +111,15 @@ describe("Hasher Infrastructure & Hasher Service", () => {
 	});
 
 	describe("Hasher Service", () => {
-		it("delegates hash, compare, verify to injected hashEngine", async () => {
+		it("delegates hash and verify to injected hashEngine", async () => {
 			const stubEngine = new StubHashEngine({});
 			const hasher = new Hasher({ hashEngine: stubEngine });
 
 			const hash = await hasher.hash("plain");
 			expect(hash).toBe("mock-hash$plain");
 
-			expect(await hasher.compare(hash, "plain")).toBe(true);
-			expect(await hasher.compare(hash, "other")).toBe(false);
 			expect(await hasher.verify("plain", hash)).toBe(true);
+			expect(await hasher.verify("other", hash)).toBe(false);
 		});
 	});
 });

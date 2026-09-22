@@ -5,21 +5,18 @@ import { StubHashEngine } from "./infrastructure/StubHashEngine.js";
 
 describe("Hasher", () => {
 	describe("with StubHashEngine", () => {
-		it("hashes and compares plain text correctly", async () => {
+		it("hashes and verifies plain text correctly", async () => {
 			const stub = new StubHashEngine({});
 			const hasher = new Hasher({ hashEngine: stub });
 
 			const hashed = await hasher.hash("my-secret-password");
 			expect(hashed).toBe("mock-hash$my-secret-password");
 
-			const isValid = await hasher.compare(hashed, "my-secret-password");
+			const isValid = await hasher.verify("my-secret-password", hashed);
 			expect(isValid).toBe(true);
 
-			const isInvalid = await hasher.compare(hashed, "wrong-password");
+			const isInvalid = await hasher.verify("wrong-password", hashed);
 			expect(isInvalid).toBe(false);
-
-			const verifyResult = await hasher.verify("my-secret-password", hashed);
-			expect(verifyResult).toBe(true);
 		});
 	});
 
@@ -31,10 +28,10 @@ describe("Hasher", () => {
 			const hashed = await hasher.hash("secure-pass-123");
 			expect(hashed.startsWith("scrypt$")).toBe(true);
 
-			const isValid = await hasher.compare(hashed, "secure-pass-123");
+			const isValid = await hasher.verify("secure-pass-123", hashed);
 			expect(isValid).toBe(true);
 
-			const isInvalid = await hasher.compare(hashed, "other-pass");
+			const isInvalid = await hasher.verify("other-pass", hashed);
 			expect(isInvalid).toBe(false);
 		});
 

@@ -10,10 +10,6 @@ export class Hasher {
 		return this.deps.hashEngine.hash(plain);
 	}
 
-	async compare(hashed: string, plain: string): Promise<boolean> {
-		return this.deps.hashEngine.compare(hashed, plain);
-	}
-
 	async verify(plain: string, hashed: string): Promise<boolean> {
 		return this.deps.hashEngine.verify(plain, hashed);
 	}

@@ -29,7 +29,7 @@ export class ScryptHashEngine implements IHashEngine {
 		return `scrypt$${salt}$${derivedKey.toString("hex")}`;
 	}
 
-	async compare(hashed: string, plain: string): Promise<boolean> {
+	async verify(plain: string, hashed: string): Promise<boolean> {
 		try {
 			if (typeof hashed !== "string" || typeof plain !== "string") {
 				return false;
@@ -65,9 +65,5 @@ export class ScryptHashEngine implements IHashEngine {
 		} catch {
 			return false;
 		}
-	}
-
-	async verify(plain: string, hashed: string): Promise<boolean> {
-		return this.compare(hashed, plain);
 	}
 }

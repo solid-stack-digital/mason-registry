@@ -29,15 +29,11 @@ export class StubHashEngine implements IHashEngine {
 		return `${this.prefix}${plain}`;
 	}
 
-	async compare(hashed: string, plain: string): Promise<boolean> {
+	async verify(plain: string, hashed: string): Promise<boolean> {
 		if (this.errorToThrow) {
 			throw this.errorToThrow;
 		}
 		return hashed === `${this.prefix}${plain}`;
-	}
-
-	async verify(plain: string, hashed: string): Promise<boolean> {
-		return this.compare(hashed, plain);
 	}
 }
 
@@ -67,10 +63,6 @@ export class StubHasher implements Hasher {
 
 	async hash(plain: string): Promise<string> {
 		return this.internalHasher.hash(plain);
-	}
-
-	async compare(hashed: string, plain: string): Promise<boolean> {
-		return this.internalHasher.compare(hashed, plain);
 	}
 
 	async verify(plain: string, hashed: string): Promise<boolean> {
