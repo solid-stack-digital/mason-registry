@@ -74,6 +74,6 @@
     "useCases/VerifyEmail.test.ts",
     "useCases/VerifyEmail.ts"
   ],
-  "integrity": "sha256-4b8d27f2c19f62a77a9f9227bc2ffb09cf75148e22bea6f6d4e28bf7715e4b8f",
-  "commit": "c3df69cd8bdcdf1c6678b91b20954c242b16bc0c"
+  "integrity": "sha256-586e96d9dc3bf2732e6dbe493dae6ad3d135cab08de693ed7dc01201c969a9b3",
+  "commit": "6bcf285d6896bc413086c013a107266714aa1f15"
 }

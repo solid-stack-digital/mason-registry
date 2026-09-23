@@ -3,9 +3,9 @@
     {
       "name": "hasher",
       "description": "Cryptographic password hashing and verification abstraction using scrypt",
-      "version": "1.0.0",
-      "integrity": "sha256-efeca880410bb359194ece28e8957d63fe388f9d5fe84a33e7836215d8942b8e",
-      "commit": "9f6e685068ce5590ff91f77f8ef0cc9cad24db03"
+      "version": "2.0.0",
+      "integrity": "sha256-40feb53e10bb98f8729e8c6e370bb62f466137d1626b20d6f37b9558d05eadb2",
+      "commit": "5ad8179db6c952ef72a01fd27c29fac5c3f07156"
     },
     {
       "name": "hmac",
@@ -41,8 +41,8 @@
       "name": "authn",
       "description": "User authentication, sessions, refresh token rotation, and password management",
       "version": "1.0.0",
-      "integrity": "sha256-4b8d27f2c19f62a77a9f9227bc2ffb09cf75148e22bea6f6d4e28bf7715e4b8f",
-      "commit": "c3df69cd8bdcdf1c6678b91b20954c242b16bc0c"
+      "integrity": "sha256-586e96d9dc3bf2732e6dbe493dae6ad3d135cab08de693ed7dc01201c969a9b3",
+      "commit": "6bcf285d6896bc413086c013a107266714aa1f15"
     },
     {
       "name": "emailAccessVerification",

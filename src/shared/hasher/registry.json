@@ -2,7 +2,7 @@
   "name": "hasher",
   "type": "shared",
   "description": "Cryptographic password hashing and verification abstraction using scrypt",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "dependencies": {
     "npm": [],
     "shared": [],
@@ -17,6 +17,6 @@
     "infrastructure/__tests__/HashEngine.test.ts",
     "ports/IHashEngine.ts"
   ],
-  "integrity": "sha256-efeca880410bb359194ece28e8957d63fe388f9d5fe84a33e7836215d8942b8e",
-  "commit": "9f6e685068ce5590ff91f77f8ef0cc9cad24db03"
+  "integrity": "sha256-40feb53e10bb98f8729e8c6e370bb62f466137d1626b20d6f37b9558d05eadb2",
+  "commit": "5ad8179db6c952ef72a01fd27c29fac5c3f07156"
 }
