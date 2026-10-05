@@ -4,36 +4,36 @@
       "name": "hasher",
       "description": "Cryptographic password hashing and verification abstraction using scrypt",
       "version": "2.0.0",
-      "integrity": "sha256-40feb53e10bb98f8729e8c6e370bb62f466137d1626b20d6f37b9558d05eadb2",
-      "commit": "5ad8179db6c952ef72a01fd27c29fac5c3f07156"
+      "integrity": "sha256-20d1ff8a9bb492796c6e9d426a0101f63ac25bdc276445dd6e1223f55f01b520",
+      "commit": "5db89381a28a6e95af3605c14f2f4e0c15d182b0"
     },
     {
       "name": "hmac",
       "description": "HMAC (Hash-based Message Authentication Code) cryptographic signing and verification abstraction",
       "version": "1.0.0",
-      "integrity": "sha256-033640b3ef85f398e51f225cfb57517146d1581adb522f0c4212815266080f02",
-      "commit": "2fa235ac28bdd6f3e88fde0879d47cc68e214a1d"
+      "integrity": "sha256-7a9b3bfeb9e330a3b35737bb876ddbef8f0b9b4855ccaa0ea2f70ba928b35327",
+      "commit": "c0e6ae944117f8022125245d2a87c5bc55156f65"
     },
     {
       "name": "jwt",
       "description": "JSON Web Token (JWT) signing, verification, and expiration handling",
       "version": "1.0.0",
-      "integrity": "sha256-8284e6e876b12590bf6c4f9042874cd1abd318d61857c4fee4daae7898803b0d",
-      "commit": "6ab8a5e56c06b941222a2dd3e5f5335527c5d313"
+      "integrity": "sha256-c36e17161ca947297278ee7adfd4ad0be1447dbaf1ba546e82c208d3853c3327",
+      "commit": "067c8a9e6df8b69e5e190a42f36df5514f75a657"
     },
     {
       "name": "time",
       "description": "Clock and Time abstraction for deterministic date/time manipulation",
       "version": "1.0.0",
-      "integrity": "sha256-eb1ca681ffd425b95c6135ca3a85dbd20c049f5d78c86667626b9bee2cf55256",
-      "commit": "1582dcf0e8ad2f6dcb60e4f661cd48295ca3f8d7"
+      "integrity": "sha256-88b8cb1d2373185907cafd79f34013f401383204e2120ef281d9ae2e316a8e3c",
+      "commit": "067c8a9e6df8b69e5e190a42f36df5514f75a657"
     },
     {
       "name": "uuid",
       "description": "UUID v4 generation abstraction for clean architecture entities",
       "version": "1.0.0",
-      "integrity": "sha256-c534774f89727e4ebc7f5cab449355ae49db7bf73506eda46859ce57095018c5",
-      "commit": "b56d9d389d8e4fcf695852f7d5b0d17ce9ecc0ca"
+      "integrity": "sha256-8a13847fe64b4386a5db663010b4d9d5764325d086233c6700dbae59193b1606",
+      "commit": "8e46d077cea5c41775bb5e835773bcf989effa49"
     }
   ],
   "features": [
@@ -41,29 +41,29 @@
       "name": "authn",
       "description": "User authentication, sessions, refresh token rotation, and password management",
       "version": "1.0.0",
-      "integrity": "sha256-586e96d9dc3bf2732e6dbe493dae6ad3d135cab08de693ed7dc01201c969a9b3",
-      "commit": "6bcf285d6896bc413086c013a107266714aa1f15"
+      "integrity": "sha256-d991b69bdfd45b84f38f7c2a9706bb2f72674d6dfc8500705a5e73045767a272",
+      "commit": "6d8a71b7f961d23e236350cd93a03bcaddad05ef"
     },
     {
       "name": "emailAccessVerification",
       "description": "Email access verification with OTP validation and JWT issuance",
       "version": "1.0.0",
-      "integrity": "sha256-04153b3504bc86dd93bfe96ed6cd2c1c483f6e7dbcf07536ac444f6d496c134a",
-      "commit": "f0d9e54484db77c2d7ab3a99e8f6e4b0853cc3c8"
+      "integrity": "sha256-6c12bd2d20a6ff4d937fab9c7cc7e2ac9a537af24f3fbde34d46f5bd3a361542",
+      "commit": "75a2e74e59b2caa45eeb4244843c50492ebb80ca"
     },
     {
       "name": "mailing",
       "description": "Email sending, mailer interface, memory mailer, and template dispatcher",
       "version": "1.0.0",
-      "integrity": "sha256-f38ace9979458e60ea5aa775557de611db5276163ae9cd69d3fccf3d05e4ad1b",
-      "commit": "2b6759f6cb7e1b3ab83a9c4a1234182457a02982"
+      "integrity": "sha256-379f878b13f761644cb3be666e336cbb4d065e0e2a95061ef12b7071e9349848",
+      "commit": "48bc3f036ceba2d3f90ac2e7a239d0fc388cf37d"
     },
     {
       "name": "otp",
       "description": "One-time password generation, validation, and email dispatching",
       "version": "1.0.0",
-      "integrity": "sha256-4d34d201a880e48f940b40884fe5a9f3b22b2a866c1efcdf2754a0c8008d786c",
-      "commit": "013554d4b1ffbe32dfdb75ac77786867adefc209"
+      "integrity": "sha256-4fae3666bd8f1db392942726794dc5736eee3a8f0e4b61c5ad03e6e998923507",
+      "commit": "8e46d077cea5c41775bb5e835773bcf989effa49"
     }
   ]
 }

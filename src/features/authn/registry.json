@@ -30,12 +30,13 @@
     "domain/IRefreshTokenRepo.ts",
     "domain/ISessionRepo.ts",
     "domain/RefreshToken.ts",
-    "domain/errors/AuthnErrors.test.ts",
-    "domain/errors/AuthnErrors.ts",
     "domain/events/AccountRegisteredEvent.ts",
     "domain/events/PasswordChangedEvent.ts",
     "domain/events/events.test.ts",
     "domain/events/index.ts",
+    "errors/AuthnError.ts",
+    "errors/AuthnErrors.test.ts",
+    "errors/AuthnErrors.ts",
     "infrastructure/EAVGateway.test.ts",
     "infrastructure/EAVGateway.ts",
     "infrastructure/MemoryCredentialRepo.ts",
@@ -74,6 +75,6 @@
     "useCases/VerifyEmail.test.ts",
     "useCases/VerifyEmail.ts"
   ],
-  "integrity": "sha256-586e96d9dc3bf2732e6dbe493dae6ad3d135cab08de693ed7dc01201c969a9b3",
-  "commit": "6bcf285d6896bc413086c013a107266714aa1f15"
+  "integrity": "sha256-d991b69bdfd45b84f38f7c2a9706bb2f72674d6dfc8500705a5e73045767a272",
+  "commit": "6d8a71b7f961d23e236350cd93a03bcaddad05ef"
 }

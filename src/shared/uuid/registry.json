@@ -13,11 +13,12 @@
     "Uuid.ts",
     "diProvider.ts",
     "domain/Id.ts",
+    "errors/UuidError.ts",
     "infrastructure/CryptoIdGenerator.ts",
     "infrastructure/StubIdGenerator.ts",
     "infrastructure/__tests__/IdGenerator.test.ts",
     "ports/IIdGenerator.ts"
   ],
-  "integrity": "sha256-c534774f89727e4ebc7f5cab449355ae49db7bf73506eda46859ce57095018c5",
-  "commit": "b56d9d389d8e4fcf695852f7d5b0d17ce9ecc0ca"
+  "integrity": "sha256-8a13847fe64b4386a5db663010b4d9d5764325d086233c6700dbae59193b1606",
+  "commit": "8e46d077cea5c41775bb5e835773bcf989effa49"
 }

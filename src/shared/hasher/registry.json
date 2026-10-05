@@ -12,11 +12,12 @@
     "Hasher.test.ts",
     "Hasher.ts",
     "diProvider.ts",
+    "errors/HasherError.ts",
     "infrastructure/ScryptHashEngine.ts",
     "infrastructure/StubHashEngine.ts",
     "infrastructure/__tests__/HashEngine.test.ts",
     "ports/IHashEngine.ts"
   ],
-  "integrity": "sha256-40feb53e10bb98f8729e8c6e370bb62f466137d1626b20d6f37b9558d05eadb2",
-  "commit": "5ad8179db6c952ef72a01fd27c29fac5c3f07156"
+  "integrity": "sha256-20d1ff8a9bb492796c6e9d426a0101f63ac25bdc276445dd6e1223f55f01b520",
+  "commit": "5db89381a28a6e95af3605c14f2f4e0c15d182b0"
 }

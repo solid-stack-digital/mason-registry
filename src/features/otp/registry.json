@@ -22,8 +22,9 @@
     "domain/Otp.ts",
     "domain/OtpConfig.test.ts",
     "domain/OtpConfig.ts",
-    "domain/errors/OtpErrors.test.ts",
-    "domain/errors/OtpErrors.ts",
+    "errors/OtpError.ts",
+    "errors/OtpErrors.test.ts",
+    "errors/OtpErrors.ts",
     "infrastructure/CryptoOtpGenerator.test.ts",
     "infrastructure/CryptoOtpGenerator.ts",
     "infrastructure/MemoryOtpRepo.test.ts",
@@ -45,6 +46,6 @@
     "useCases/ValidateOtp.test.ts",
     "useCases/ValidateOtp.ts"
   ],
-  "integrity": "sha256-4d34d201a880e48f940b40884fe5a9f3b22b2a866c1efcdf2754a0c8008d786c",
-  "commit": "013554d4b1ffbe32dfdb75ac77786867adefc209"
+  "integrity": "sha256-4fae3666bd8f1db392942726794dc5736eee3a8f0e4b61c5ad03e6e998923507",
+  "commit": "8e46d077cea5c41775bb5e835773bcf989effa49"
 }

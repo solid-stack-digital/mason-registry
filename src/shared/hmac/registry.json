@@ -12,11 +12,12 @@
     "Hmac.test.ts",
     "Hmac.ts",
     "diProvider.ts",
+    "errors/HmacError.ts",
     "infrastructure/DefaultHmacEngine.ts",
     "infrastructure/StubHmacEngine.ts",
     "infrastructure/__tests__/HmacEngine.test.ts",
     "ports/IHmacEngine.ts"
   ],
-  "integrity": "sha256-033640b3ef85f398e51f225cfb57517146d1581adb522f0c4212815266080f02",
-  "commit": "2fa235ac28bdd6f3e88fde0879d47cc68e214a1d"
+  "integrity": "sha256-7a9b3bfeb9e330a3b35737bb876ddbef8f0b9b4855ccaa0ea2f70ba928b35327",
+  "commit": "c0e6ae944117f8022125245d2a87c5bc55156f65"
 }
