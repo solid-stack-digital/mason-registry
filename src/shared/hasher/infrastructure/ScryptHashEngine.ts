@@ -1,6 +1,7 @@
 import { randomBytes, scrypt, timingSafeEqual } from "node:crypto";
 import { promisify } from "node:util";
 import { type DepsType, MakeInjectable } from "@solid-stack/di";
+import { HasherError } from "../errors/HasherError.js";
 import type { IHashEngine } from "../ports/IHashEngine.js";
 
 const scryptAsync = promisify(scrypt);
@@ -17,7 +18,7 @@ export class ScryptHashEngine implements IHashEngine {
 
 	async hash(plain: string): Promise<string> {
 		if (typeof plain !== "string" || plain.length === 0) {
-			throw new Error("Password must be a non-empty string");
+			throw new HasherError("Password must be a non-empty string");
 		}
 
 		const salt = randomBytes(16).toString("hex");
