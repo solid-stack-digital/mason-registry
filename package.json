@@ -17,7 +17,7 @@
     "reg:diff": "tsx scripts/manage.ts status",
     "status": "tsx scripts/manage.ts status",
     "build": "tsx scripts/build.ts",
-    "test": "vitest run",
+    "test": "pnpm check:all && vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "check:types": "tsc --noEmit",
