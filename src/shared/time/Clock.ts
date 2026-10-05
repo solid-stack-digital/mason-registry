@@ -1,6 +1,7 @@
 import { type DepsType, MakeInjectable } from "@solid-stack/di";
 import { Duration } from "./domain/Duration.js";
 import { Time } from "./domain/Time.js";
+import { TimeError } from "./errors/TimeError.js";
 import { ITimeEngine } from "./ports/ITimeEngine.js";
 
 @MakeInjectable
@@ -43,13 +44,13 @@ export class Clock {
 			const match = duration.match(regex);
 
 			if (!match) {
-				throw new Error(`Invalid duration string: ${duration}`);
+				throw new TimeError(`Invalid duration string: ${duration}`);
 			}
 
 			const rawValue = match[1];
 			const unit = match[2]?.toLowerCase();
 			if (!rawValue || !unit) {
-				throw new Error(`Invalid duration string: ${duration}`);
+				throw new TimeError(`Invalid duration string: ${duration}`);
 			}
 			const value = parseFloat(rawValue);
 			let millis: number;
@@ -74,14 +75,14 @@ export class Clock {
 					millis = value * 7 * 24 * 60 * 60 * 1000;
 					break;
 				default:
-					throw new Error(`Unknown duration unit: ${unit}`);
+					throw new TimeError(`Unknown duration unit: ${unit}`);
 			}
 			return new Duration(millis);
 		} else if (typeof duration === "number") {
 			// If it's a number, treat it as milliseconds
 			return new Duration(duration);
 		} else {
-			throw new Error(`Invalid duration type: ${typeof duration}`);
+			throw new TimeError(`Invalid duration type: ${typeof duration}`);
 		}
 	}
 }

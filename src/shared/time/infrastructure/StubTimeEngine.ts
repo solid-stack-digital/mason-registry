@@ -2,6 +2,7 @@ import { type DepsType, MakeInjectable } from "@solid-stack/di";
 import { Clock } from "../Clock.js";
 import type { Duration } from "../domain/Duration.js";
 import { Time } from "../domain/Time.js";
+import { TimeError } from "../errors/TimeError.js";
 import type { ITimeEngine } from "../ports/ITimeEngine.js";
 
 /**
@@ -42,18 +43,18 @@ export class StubTimeEngine implements ITimeEngine {
 
 	millisToIso(millis: number): string {
 		if (typeof millis !== "number" || Number.isNaN(millis)) {
-			throw new Error(`Invalid millis: ${millis}`);
+			throw new TimeError(`Invalid millis: ${millis}`);
 		}
 		return new Date(millis).toISOString();
 	}
 
 	isoToMillis(isoString: string): number {
 		if (typeof isoString !== "string" || !isoString.trim()) {
-			throw new Error(`Invalid ISO date string: ${isoString}`);
+			throw new TimeError(`Invalid ISO date string: ${isoString}`);
 		}
 		const millis = Date.parse(isoString);
 		if (Number.isNaN(millis)) {
-			throw new Error(`Invalid ISO date string: ${isoString}`);
+			throw new TimeError(`Invalid ISO date string: ${isoString}`);
 		}
 		return millis;
 	}
@@ -64,7 +65,7 @@ export class StubTimeEngine implements ITimeEngine {
 		day: number;
 	} {
 		if (typeof millis !== "number" || Number.isNaN(millis)) {
-			throw new Error(`Invalid millis: ${millis}`);
+			throw new TimeError(`Invalid millis: ${millis}`);
 		}
 		const date = new Date(millis);
 		return {
@@ -83,7 +84,7 @@ export class StubTimeEngine implements ITimeEngine {
 			Number.isNaN(month) ||
 			Number.isNaN(day)
 		) {
-			throw new Error(`Invalid civil date: ${year}-${month}-${day}`);
+			throw new TimeError(`Invalid civil date: ${year}-${month}-${day}`);
 		}
 		const date = new Date(0);
 		date.setUTCFullYear(year, month - 1, day);
@@ -94,7 +95,7 @@ export class StubTimeEngine implements ITimeEngine {
 			date.getUTCMonth() + 1 !== month ||
 			date.getUTCDate() !== day
 		) {
-			throw new Error(`Invalid civil date: ${year}-${month}-${day}`);
+			throw new TimeError(`Invalid civil date: ${year}-${month}-${day}`);
 		}
 
 		return date.getTime();

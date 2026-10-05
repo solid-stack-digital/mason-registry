@@ -2,6 +2,7 @@ import { createHmac } from "node:crypto";
 import { type DepsType, MakeInjectable } from "@solid-stack/di";
 import { Clock } from "@/shared/time/Clock.js";
 import { Duration } from "@/shared/time/domain/Duration.js";
+import { JwtError } from "../errors/JwtError.js";
 import { TokenExpiredError } from "../errors/TokenExpiredError.js";
 import { TokenIntegrityError } from "../errors/TokenIntegrityError.js";
 import type { IJwtEngine } from "../ports/IJwtEngine.js";
@@ -39,7 +40,7 @@ export class HmacJwtEngine implements IJwtEngine {
 
 	async sign(payload: unknown, ttl: Duration): Promise<string> {
 		if (!ttl || !(ttl instanceof Duration)) {
-			throw new Error("TTL must be an instance of Duration");
+			throw new JwtError("TTL must be an instance of Duration");
 		}
 
 		const header = { alg: "HS256", typ: "JWT" };
