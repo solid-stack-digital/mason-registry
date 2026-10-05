@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { HmacError } from "./errors/HmacError.js";
 import { Hmac } from "./Hmac.js";
 import { DefaultHmacEngine } from "./infrastructure/DefaultHmacEngine.js";
 import { StubHmac, StubHmacEngine } from "./infrastructure/StubHmacEngine.js";
@@ -47,7 +48,7 @@ describe("Hmac", () => {
 
 		it("supports error injection in stub", () => {
 			const stub = new StubHmac({});
-			stub.setError(new Error("Stub failure"));
+			stub.setError(new HmacError("Stub failure"));
 
 			expect(() => stub.sign("data", "secret")).toThrow("Stub failure");
 			expect(() => stub.verify("data", "secret", "sig")).toThrow(

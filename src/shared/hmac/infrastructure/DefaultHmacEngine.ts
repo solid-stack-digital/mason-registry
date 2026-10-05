@@ -1,5 +1,6 @@
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { type DepsType, MakeInjectable } from "@solid-stack/di";
+import { HmacError } from "../errors/HmacError.js";
 import type {
 	HmacEncoding,
 	HmacInput,
@@ -22,14 +23,14 @@ export class DefaultHmacEngine implements IHmacEngine {
 			if (envSecret && envSecret.length > 0) {
 				return envSecret;
 			}
-			throw new Error("HMAC secret cannot be empty");
+			throw new HmacError("HMAC secret cannot be empty");
 		}
 		if (!secret) {
 			const envSecret = process.env.HMAC_SECRET;
 			if (envSecret && envSecret.length > 0) {
 				return envSecret;
 			}
-			throw new Error("HMAC secret cannot be empty");
+			throw new HmacError("HMAC secret cannot be empty");
 		}
 		return secret;
 	}
@@ -37,7 +38,7 @@ export class DefaultHmacEngine implements IHmacEngine {
 	sign(data: HmacInput, secret: HmacInput, options?: HmacOptions): string {
 		const key = this.resolveSecret(secret);
 		if (data === undefined || data === null) {
-			throw new Error("HMAC data cannot be null or undefined");
+			throw new HmacError("HMAC data cannot be null or undefined");
 		}
 
 		const algorithm = options?.algorithm ?? "sha256";
@@ -77,7 +78,7 @@ export class DefaultHmacEngine implements IHmacEngine {
 
 	generateSecret(bytes: number = 32, encoding: HmacEncoding = "hex"): string {
 		if (bytes <= 0) {
-			throw new Error("Byte length must be greater than 0");
+			throw new HmacError("Byte length must be greater than 0");
 		}
 		const buf = randomBytes(bytes);
 		return buf.toString(encoding);
