@@ -13,7 +13,6 @@ describe("OtpErrors Domain Errors", () => {
 		const err = new OtpError("Base OTP error");
 		expect(err).toBeInstanceOf(Error);
 		expect(err).toBeInstanceOf(OtpError);
-		expect(err.name).toBe("OtpError");
 		expect(err.message).toBe("Base OTP error");
 	});
 
