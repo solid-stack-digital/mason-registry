@@ -1,5 +1,6 @@
 import { type DepsType, MakeInjectable } from "@solid-stack/di";
 import { IMailer } from "../domain/IMailer.js";
+import { MailingError } from "../errors/MailingError.js";
 
 export type SendEmailInput = {
 	to: string;
@@ -28,13 +29,13 @@ export class SendEmail {
 			typeof props.to !== "string" ||
 			!EMAIL_REGEX.test(props.to.trim())
 		) {
-			throw new Error(`Invalid email address format: ${props.to}`);
+			throw new MailingError(`Invalid email address format: ${props.to}`);
 		}
 		if (typeof props.subject !== "string") {
-			throw new Error("Subject must be a string");
+			throw new MailingError("Subject must be a string");
 		}
 		if (typeof props.body !== "string") {
-			throw new Error("Body must be a string");
+			throw new MailingError("Body must be a string");
 		}
 
 		const result = await this.deps.mailer.send({
