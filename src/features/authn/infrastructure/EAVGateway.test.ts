@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { ConsumeEmailAccessToken } from "@/features/emailAccessVerification/useCases/ConsumeEmailAccessToken.js";
+import { AuthnError } from "../errors/AuthnError.js";
 import { EAVGateway } from "./EAVGateway.js";
 import { StubEAVGateway } from "./StubEAVGateway.js";
 
@@ -35,7 +36,7 @@ describe("EAVGateway", () => {
 			}),
 		).toBe(true);
 
-		stub.setErrorToThrow(new Error("Custom gateway error"));
+		stub.setErrorToThrow(new AuthnError("Custom gateway error"));
 		await expect(
 			stub.consumeEmailAccessToken({ token: "t", purpose: "p", email: "e" }),
 		).rejects.toThrow("Custom gateway error");

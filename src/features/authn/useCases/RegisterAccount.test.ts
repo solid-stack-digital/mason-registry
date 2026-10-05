@@ -5,12 +5,12 @@ import { Clock } from "@/shared/time/Clock.js";
 import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
 import { StubIdGenerator } from "@/shared/uuid/infrastructure/StubIdGenerator.js";
 import { Uuid } from "@/shared/uuid/Uuid.js";
+import { AccountRegisteredEvent } from "../domain/events/index.js";
 import {
 	AccountAlreadyExistsError,
 	InvalidEmailError,
 	WeakPasswordError,
-} from "../domain/errors/AuthnErrors.js";
-import { AccountRegisteredEvent } from "../domain/events/index.js";
+} from "../errors/AuthnErrors.js";
 import { MemoryCredentialRepo } from "../infrastructure/MemoryCredentialRepo.js";
 import { MemoryEventPublisher } from "../infrastructure/MemoryEventPublisher.js";
 import { RegisterAccount } from "./RegisterAccount.js";

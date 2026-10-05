@@ -1,17 +1,17 @@
 import { type DepsType, MakeInjectable } from "@solid-stack/di";
 import { Hasher } from "@/shared/hasher/Hasher.js";
 import { Clock } from "@/shared/time/Clock.js";
+import { events } from "../domain/events/index.js";
+import { IAuthnEventPublisher } from "../domain/IAuthnEventPublisher.js";
+import { ICredentialRepo } from "../domain/ICredentialRepo.js";
+import { IRefreshTokenRepo } from "../domain/IRefreshTokenRepo.js";
 import {
 	AccountNotFoundError,
 	DeviceMismatchError,
 	PasswordMismatchError,
 	RefreshTokenNotFoundError,
 	WeakPasswordError,
-} from "../domain/errors/AuthnErrors.js";
-import { events } from "../domain/events/index.js";
-import { IAuthnEventPublisher } from "../domain/IAuthnEventPublisher.js";
-import { ICredentialRepo } from "../domain/ICredentialRepo.js";
-import { IRefreshTokenRepo } from "../domain/IRefreshTokenRepo.js";
+} from "../errors/AuthnErrors.js";
 
 export type ChangePasswordInput = {
 	refreshtoken?: string | undefined;

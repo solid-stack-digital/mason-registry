@@ -1,16 +1,16 @@
 import { type DepsType, MakeInjectable } from "@solid-stack/di";
 import { Hasher } from "@/shared/hasher/Hasher.js";
 import { Clock } from "@/shared/time/Clock.js";
-import {
-	AccountNotFoundError,
-	InvalidTokenError,
-	WeakPasswordError,
-} from "../domain/errors/AuthnErrors.js";
 import { events } from "../domain/events/index.js";
 import { IAuthnEventPublisher } from "../domain/IAuthnEventPublisher.js";
 import { ICredentialRepo } from "../domain/ICredentialRepo.js";
 import { IEAVGateway } from "../domain/IEAVGateway.js";
 import { IRefreshTokenRepo } from "../domain/IRefreshTokenRepo.js";
+import {
+	AccountNotFoundError,
+	InvalidTokenError,
+	WeakPasswordError,
+} from "../errors/AuthnErrors.js";
 
 export type ResetPasswordInput = {
 	email: string;

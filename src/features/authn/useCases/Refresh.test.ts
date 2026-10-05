@@ -10,7 +10,7 @@ import {
 	DeviceMismatchError,
 	RefreshTokenExpiredError,
 	RefreshTokenNotFoundError,
-} from "../domain/errors/AuthnErrors.js";
+} from "../errors/AuthnErrors.js";
 import { MemoryCredentialRepo } from "../infrastructure/MemoryCredentialRepo.js";
 import { MemoryRefreshTokenRepo } from "../infrastructure/MemoryRefreshTokenRepo.js";
 import { Refresh } from "./Refresh.js";

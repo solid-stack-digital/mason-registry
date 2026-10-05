@@ -1,9 +1,9 @@
 import { type DepsType, MakeInjectable } from "@solid-stack/di";
+import { IRefreshTokenRepo } from "../domain/IRefreshTokenRepo.js";
 import {
 	DeviceMismatchError,
 	RefreshTokenNotFoundError,
-} from "../domain/errors/AuthnErrors.js";
-import { IRefreshTokenRepo } from "../domain/IRefreshTokenRepo.js";
+} from "../errors/AuthnErrors.js";
 
 export type LogoutInput = {
 	refreshToken: string;

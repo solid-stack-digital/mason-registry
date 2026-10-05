@@ -4,7 +4,7 @@ import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
 import {
 	AccountAlreadyVerifiedError,
 	AccountNotFoundError,
-} from "../domain/errors/AuthnErrors.js";
+} from "../errors/AuthnErrors.js";
 import { MemoryCredentialRepo } from "../infrastructure/MemoryCredentialRepo.js";
 import { StubEAVGateway } from "../infrastructure/StubEAVGateway.js";
 import { VerifyEmail } from "./VerifyEmail.js";

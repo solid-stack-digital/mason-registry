@@ -3,6 +3,7 @@ import type {
 	ConsumeEmailAccessTokenPayload,
 	IEAVGateway,
 } from "../domain/IEAVGateway.js";
+import { AuthnError } from "../errors/AuthnError.js";
 
 @MakeInjectable
 export class StubEAVGateway implements IEAVGateway {
@@ -29,7 +30,7 @@ export class StubEAVGateway implements IEAVGateway {
 			throw this.errorToThrow;
 		}
 		if (!this.shouldSucceed) {
-			throw new Error("Invalid or rejected email access token");
+			throw new AuthnError("Invalid or rejected email access token");
 		}
 		return true;
 	}

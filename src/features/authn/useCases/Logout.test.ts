@@ -4,7 +4,7 @@ import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
 import {
 	DeviceMismatchError,
 	RefreshTokenNotFoundError,
-} from "../domain/errors/AuthnErrors.js";
+} from "../errors/AuthnErrors.js";
 import { MemoryRefreshTokenRepo } from "../infrastructure/MemoryRefreshTokenRepo.js";
 import { Logout } from "./Logout.js";
 

@@ -1,12 +1,12 @@
 import { type DepsType, MakeInjectable } from "@solid-stack/di";
 import { Clock } from "@/shared/time/Clock.js";
+import { ICredentialRepo } from "../domain/ICredentialRepo.js";
+import { IEAVGateway } from "../domain/IEAVGateway.js";
 import {
 	AccountAlreadyVerifiedError,
 	AccountNotFoundError,
 	InvalidTokenError,
-} from "../domain/errors/AuthnErrors.js";
-import { ICredentialRepo } from "../domain/ICredentialRepo.js";
-import { IEAVGateway } from "../domain/IEAVGateway.js";
+} from "../errors/AuthnErrors.js";
 
 export type VerifyEmailInput = {
 	email: string;

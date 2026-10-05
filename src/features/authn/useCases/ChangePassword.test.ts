@@ -3,11 +3,11 @@ import { Hasher } from "@/shared/hasher/Hasher.js";
 import { StubHashEngine } from "@/shared/hasher/infrastructure/StubHashEngine.js";
 import { Clock } from "@/shared/time/Clock.js";
 import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
+import { PasswordChangedEvent } from "../domain/events/index.js";
 import {
 	PasswordMismatchError,
 	WeakPasswordError,
-} from "../domain/errors/AuthnErrors.js";
-import { PasswordChangedEvent } from "../domain/events/index.js";
+} from "../errors/AuthnErrors.js";
 import { MemoryCredentialRepo } from "../infrastructure/MemoryCredentialRepo.js";
 import { MemoryEventPublisher } from "../infrastructure/MemoryEventPublisher.js";
 import { MemoryRefreshTokenRepo } from "../infrastructure/MemoryRefreshTokenRepo.js";

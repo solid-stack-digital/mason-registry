@@ -3,14 +3,14 @@ import { Hasher } from "@/shared/hasher/Hasher.js";
 import { Clock } from "@/shared/time/Clock.js";
 import { Uuid } from "@/shared/uuid/Uuid.js";
 import type { Credential } from "../domain/Credential.js";
+import { events } from "../domain/events/index.js";
+import { IAuthnEventPublisher } from "../domain/IAuthnEventPublisher.js";
+import { ICredentialRepo } from "../domain/ICredentialRepo.js";
 import {
 	AccountAlreadyExistsError,
 	InvalidEmailError,
 	WeakPasswordError,
-} from "../domain/errors/AuthnErrors.js";
-import { events } from "../domain/events/index.js";
-import { IAuthnEventPublisher } from "../domain/IAuthnEventPublisher.js";
-import { ICredentialRepo } from "../domain/ICredentialRepo.js";
+} from "../errors/AuthnErrors.js";
 
 export type RegisterAccountInput = {
 	email: string;

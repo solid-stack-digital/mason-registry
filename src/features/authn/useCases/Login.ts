@@ -4,13 +4,13 @@ import { Jwt } from "@/shared/jwt/Jwt.js";
 import { Clock } from "@/shared/time/Clock.js";
 import { Uuid } from "@/shared/uuid/Uuid.js";
 import { DEFAULT_AUTHN_CONFIG, toDuration } from "../domain/AuthnConfig.js";
-import {
-	AccountNotVerifiedError,
-	InvalidCredentialsError,
-} from "../domain/errors/AuthnErrors.js";
 import { ICredentialRepo } from "../domain/ICredentialRepo.js";
 import { IRefreshTokenRepo } from "../domain/IRefreshTokenRepo.js";
 import type { RefreshToken } from "../domain/RefreshToken.js";
+import {
+	AccountNotVerifiedError,
+	InvalidCredentialsError,
+} from "../errors/AuthnErrors.js";
 import { AuthnConfigToken } from "../tokens.js";
 
 export type LoginInput = {
