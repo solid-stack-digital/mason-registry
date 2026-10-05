@@ -1,6 +1,7 @@
 import { type DepsType, MakeInjectable, ValueToken } from "@solid-stack/di";
 import { Clock } from "@/shared/time/Clock.js";
 import type { IMailer, SentMail } from "../domain/IMailer.js";
+import { MailingError } from "../errors/MailingError.js";
 
 export class InitialSendStatus extends ValueToken<boolean> {}
 
@@ -38,7 +39,7 @@ export class StubMailer implements IMailer {
 			throw this.errorToThrow;
 		}
 		if (this.simulateFailure) {
-			throw new Error("External mailing service unavailable (500)");
+			throw new MailingError("External mailing service unavailable (500)");
 		}
 		const now = this.deps.clock.now();
 		this.sentMails.push({
