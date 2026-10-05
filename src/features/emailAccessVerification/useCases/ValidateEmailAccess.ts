@@ -9,8 +9,8 @@ import {
 } from "../domain/EmailAccessConfig.js";
 import { IEmailAccessRepository } from "../domain/IEmailAccessRepository.js";
 import { IOtpGateway } from "../domain/IOtpGateway.js";
-import { EmailAccessConfigToken } from "../tokens.js";
 import { EmailAccessVerificationError } from "../errors/EmailAccessVerificationError.js";
+import { EmailAccessConfigToken } from "../tokens.js";
 
 export interface ValidateEmailAccessInput {
 	email: string;
