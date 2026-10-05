@@ -5,10 +5,10 @@ import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
 import { ITimeEngine } from "@/shared/time/ports/ITimeEngine.js";
 import { StubIdGenerator } from "@/shared/uuid/infrastructure/StubIdGenerator.js";
 import { IIdGenerator } from "@/shared/uuid/ports/IIdGenerator.js";
-import { OtpCooldownError } from "../domain/errors/OtpErrors.js";
 import { IOtpEmailGateway } from "../domain/IOtpEmailGateway.js";
 import { IOtpGenerator } from "../domain/IOtpGenerator.js";
 import { IOtpRepo } from "../domain/IOtpRepo.js";
+import { OtpCooldownError } from "../errors/OtpErrors.js";
 import { StubOtpEmailGateway } from "../infrastructure/StubOtpEmailGateway.js";
 import {
 	NextOtp,

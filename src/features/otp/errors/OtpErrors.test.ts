@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { OtpError } from "./OtpError.js";
 import {
 	OtpCooldownError,
-	OtpError,
 	OtpExpiredError,
 	OtpInvalidCodeError,
 	OtpMaxAttemptsExceededError,

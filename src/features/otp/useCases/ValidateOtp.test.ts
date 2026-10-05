@@ -4,14 +4,14 @@ import { Duration } from "@/shared/time/domain/Duration.js";
 import { Time } from "@/shared/time/domain/Time.js";
 import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
 import { ITimeEngine } from "@/shared/time/ports/ITimeEngine.js";
+import { IOtpRepo } from "../domain/IOtpRepo.js";
+import type { Otp } from "../domain/Otp.js";
 import {
 	OtpExpiredError,
 	OtpInvalidCodeError,
 	OtpMaxAttemptsExceededError,
 	OtpNotFoundError,
-} from "../domain/errors/OtpErrors.js";
-import { IOtpRepo } from "../domain/IOtpRepo.js";
-import type { Otp } from "../domain/Otp.js";
+} from "../errors/OtpErrors.js";
 import { InitialOtps, StubOtpRepo } from "../infrastructure/StubOtpRepo.js";
 import { OtpConfigToken } from "../tokens.js";
 import { ValidateOtp, type ValidateOtpInput } from "./ValidateOtp.js";

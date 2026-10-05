@@ -8,14 +8,14 @@ import { ITimeEngine } from "@/shared/time/ports/ITimeEngine.js";
 import { CryptoIdGenerator } from "@/shared/uuid/infrastructure/CryptoIdGenerator.js";
 import { IIdGenerator } from "@/shared/uuid/ports/IIdGenerator.js";
 import { OtpProvider } from "./diProvider.js";
+import { IOtpEmailGateway } from "./domain/IOtpEmailGateway.js";
+import { IOtpGenerator } from "./domain/IOtpGenerator.js";
+import { IOtpRepo } from "./domain/IOtpRepo.js";
 import {
 	OtpExpiredError,
 	OtpInvalidCodeError,
 	OtpMaxAttemptsExceededError,
-} from "./domain/errors/OtpErrors.js";
-import { IOtpEmailGateway } from "./domain/IOtpEmailGateway.js";
-import { IOtpGenerator } from "./domain/IOtpGenerator.js";
-import { IOtpRepo } from "./domain/IOtpRepo.js";
+} from "./errors/OtpErrors.js";
 import { CryptoOtpGenerator } from "./infrastructure/CryptoOtpGenerator.js";
 import { MemoryOtpRepo } from "./infrastructure/MemoryOtpRepo.js";
 import { OtpEmailGateway } from "./infrastructure/OtpEmailGateway.js";

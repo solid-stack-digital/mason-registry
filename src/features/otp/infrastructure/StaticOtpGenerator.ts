@@ -1,5 +1,6 @@
 import { type DepsType, MakeInjectable, ValueToken } from "@solid-stack/di";
 import type { IOtpGenerator } from "../domain/IOtpGenerator.js";
+import { OtpError } from "../errors/OtpError.js";
 
 export type StaticOtp = string;
 export class StaticOtpToken extends ValueToken<StaticOtp> {}
@@ -18,12 +19,12 @@ export class StaticOtpGenerator implements IOtpGenerator {
 			!Number.isInteger(length) ||
 			length <= 0
 		) {
-			throw new Error(
+			throw new OtpError(
 				`Invalid OTP length: ${length}. Must be a positive integer.`,
 			);
 		}
 		if (length > 32) {
-			throw new Error(`OTP length exceeds maximum allowed limit of 32.`);
+			throw new OtpError(`OTP length exceeds maximum allowed limit of 32.`);
 		}
 
 		const code = this.deps.staticOtp || "123456";

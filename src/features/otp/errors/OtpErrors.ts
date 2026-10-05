@@ -1,9 +1,4 @@
-export class OtpError extends Error {
-	constructor(message: string) {
-		super(message);
-		this.name = "OtpError";
-	}
-}
+import { OtpError } from "./OtpError.js";
 
 export class OtpExpiredError extends OtpError {
 	constructor(message = "Code expired, please request a new one") {

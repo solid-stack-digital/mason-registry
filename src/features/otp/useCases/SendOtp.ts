@@ -2,12 +2,13 @@ import { type DepsType, MakeInjectable } from "@solid-stack/di";
 import { Clock } from "@/shared/time/Clock.js";
 import { Duration } from "@/shared/time/domain/Duration.js";
 import { Uuid } from "@/shared/uuid/Uuid.js";
-import { OtpCooldownError } from "../domain/errors/OtpErrors.js";
 import { IOtpEmailGateway } from "../domain/IOtpEmailGateway.js";
 import { IOtpGenerator } from "../domain/IOtpGenerator.js";
 import { IOtpRepo } from "../domain/IOtpRepo.js";
 import type { Otp } from "../domain/Otp.js";
 import { DEFAULT_OTP_CONFIG, toMillis } from "../domain/OtpConfig.js";
+import { OtpError } from "../errors/OtpError.js";
+import { OtpCooldownError } from "../errors/OtpErrors.js";
 import { OtpConfigToken } from "../tokens.js";
 
 export type SendOtpMode = "email";
@@ -49,13 +50,13 @@ export class SendOtp {
 		const mode = props.mode || "email";
 
 		if (!recipientId) {
-			throw new Error("recipientId is required");
+			throw new OtpError("recipientId is required");
 		}
 		if (mode === "email" && !recipientEmail) {
-			throw new Error("recipientEmail is required for email mode");
+			throw new OtpError("recipientEmail is required for email mode");
 		}
 		if (mode !== "email") {
-			throw new Error(`Unsupported OTP mode: ${mode}`);
+			throw new OtpError(`Unsupported OTP mode: ${mode}`);
 		}
 
 		const config = this.deps.otpConfig || DEFAULT_OTP_CONFIG;

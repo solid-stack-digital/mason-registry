@@ -1,6 +1,7 @@
 import { randomInt } from "node:crypto";
 import { type DepsType, MakeInjectable } from "@solid-stack/di";
 import type { IOtpGenerator } from "../domain/IOtpGenerator.js";
+import { OtpError } from "../errors/OtpError.js";
 
 @MakeInjectable
 export class CryptoOtpGenerator implements IOtpGenerator {
@@ -14,12 +15,12 @@ export class CryptoOtpGenerator implements IOtpGenerator {
 			!Number.isInteger(length) ||
 			length <= 0
 		) {
-			throw new Error(
+			throw new OtpError(
 				`Invalid OTP length: ${length}. Must be a positive integer.`,
 			);
 		}
 		if (length > 32) {
-			throw new Error(`OTP length exceeds maximum allowed limit of 32.`);
+			throw new OtpError(`OTP length exceeds maximum allowed limit of 32.`);
 		}
 
 		let result = "";

@@ -1,13 +1,14 @@
 import { type DepsType, MakeInjectable } from "@solid-stack/di";
 import { Clock } from "@/shared/time/Clock.js";
+import { IOtpRepo } from "../domain/IOtpRepo.js";
+import { DEFAULT_OTP_CONFIG, toMillis } from "../domain/OtpConfig.js";
+import { OtpError } from "../errors/OtpError.js";
 import {
 	OtpExpiredError,
 	OtpInvalidCodeError,
 	OtpMaxAttemptsExceededError,
 	OtpNotFoundError,
-} from "../domain/errors/OtpErrors.js";
-import { IOtpRepo } from "../domain/IOtpRepo.js";
-import { DEFAULT_OTP_CONFIG, toMillis } from "../domain/OtpConfig.js";
+} from "../errors/OtpErrors.js";
 import { OtpConfigToken } from "../tokens.js";
 
 export interface ValidateOtpInput {
@@ -38,7 +39,7 @@ export class ValidateOtp {
 		const otpCode = props.otp || props.code || props.otpCode;
 
 		if (!recipientId || !otpCode) {
-			throw new Error("recipientId and otp code are required");
+			throw new OtpError("recipientId and otp code are required");
 		}
 
 		const config = this.deps.otpConfig || DEFAULT_OTP_CONFIG;
