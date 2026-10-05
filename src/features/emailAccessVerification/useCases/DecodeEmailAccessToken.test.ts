@@ -5,12 +5,12 @@ import { IJwtEngine } from "@/shared/jwt/ports/IJwtEngine.js";
 import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
 import { ITimeEngine } from "@/shared/time/ports/ITimeEngine.js";
 import type { DecodedEmailAccessPayload } from "../domain/EmailAccess.js";
+import { IEmailAccessRepository } from "../domain/IEmailAccessRepository.js";
 import {
 	EmailAccessPurposeMismatchError,
 	EmailAccessTokenExpiredError,
 	EmailAccessTokenNotFoundError,
-} from "../domain/errors/EmailAccessErrors.js";
-import { IEmailAccessRepository } from "../domain/IEmailAccessRepository.js";
+} from "../errors/EmailAccessErrors.js";
 import {
 	InitialEmailAccesses,
 	StubEmailAccessRepository,

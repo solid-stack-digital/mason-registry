@@ -469,9 +469,20 @@ export function diffRegistry(): void {
 			pc.yellow(`\n📦 Unregistered Modules (${unregistered.length}):`),
 		);
 		for (const mod of unregistered) {
-			p.log.message(
+			const lines = [
 				`  ${pc.red("●")} ${pc.bold(`${mod.type}/${mod.name}`)} ${pc.dim("(not registered in index.json)")}`,
-			);
+			];
+			if (mod.hasUncommittedGitChanges) {
+				lines.push(
+					`    ${pc.dim("→ Run:")} ${pc.cyan(`pnpm reg:commit ${mod.type} ${mod.name} -m "feat(${mod.name}): initial commit"`)}`,
+					`    ${pc.dim("→ Then:")} ${pc.cyan(`pnpm reg:register ${mod.type} ${mod.name}`)}`,
+				);
+			} else {
+				lines.push(
+					`    ${pc.dim("→ Run:")} ${pc.cyan(`pnpm reg:register ${mod.type} ${mod.name}`)}`,
+				);
+			}
+			p.log.message(lines.join("\n"));
 		}
 	}
 
@@ -480,9 +491,20 @@ export function diffRegistry(): void {
 			pc.yellow(`\n💾 Uncommitted Changes in Git (${uncommitted.length}):`),
 		);
 		for (const mod of uncommitted) {
-			p.log.message(
+			const lines = [
 				`  ${pc.yellow("▲")} ${pc.bold(`${mod.type}/${mod.name}`)} ${pc.dim(`(${mod.uncommittedFilesCount} modified/untracked files)`)}`,
-			);
+				`    ${pc.dim("→ Run:")} ${pc.cyan(`pnpm reg:commit ${mod.type} ${mod.name} -m "feat(${mod.name}): update"`)}`,
+			];
+			if (mod.isRegistered) {
+				lines.push(
+					`    ${pc.dim("→ Then:")} ${pc.cyan(`pnpm reg:register-changes ${mod.type} ${mod.name}`)}`,
+				);
+			} else {
+				lines.push(
+					`    ${pc.dim("→ Then:")} ${pc.cyan(`pnpm reg:register ${mod.type} ${mod.name}`)}`,
+				);
+			}
+			p.log.message(lines.join("\n"));
 		}
 	}
 
@@ -499,20 +521,24 @@ export function diffRegistry(): void {
 					: mod.localCommit
 						? `commit: ${mod.localCommit.slice(0, 7)} (unregistered commit)`
 						: "no commit history";
-			p.log.message(
+			const lines = [
 				`  ${pc.cyan("◆")} ${pc.bold(`${mod.type}/${mod.name}`)} ${pc.dim(
 					`(${commitDesc}, integrity: ${mod.localIntegrity?.slice(0, 16)}...)`,
 				)}`,
-			);
+				`    ${pc.dim("→ Run:")} ${pc.cyan(`pnpm reg:register-changes ${mod.type} ${mod.name}`)}`,
+			];
+			p.log.message(lines.join("\n"));
 		}
 	}
 
 	if (missing.length > 0) {
 		p.log.message(pc.red(`\n⚠️ Missing on Disk (${missing.length}):`));
 		for (const mod of missing) {
-			p.log.message(
+			const lines = [
 				`  ${pc.red("✕")} ${pc.bold(`${mod.type}/${mod.name}`)} ${pc.dim("(in index.json, but folder missing)")}`,
-			);
+				`    ${pc.dim("→ Run:")} ${pc.cyan(`pnpm reg:unregister ${mod.type} ${mod.name}`)}`,
+			];
+			p.log.message(lines.join("\n"));
 		}
 	}
 

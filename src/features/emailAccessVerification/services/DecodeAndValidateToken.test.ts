@@ -8,6 +8,7 @@ import { Time } from "@/shared/time/domain/Time.js";
 import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
 import { ITimeEngine } from "@/shared/time/ports/ITimeEngine.js";
 import type { EmailAccess } from "../domain/EmailAccess.js";
+import { IEmailAccessRepository } from "../domain/IEmailAccessRepository.js";
 import {
 	EmailAccessPurposeMismatchError,
 	EmailAccessTokenAlreadyUsedError,
@@ -15,8 +16,7 @@ import {
 	EmailAccessTokenInvalidatedError,
 	EmailAccessTokenInvalidError,
 	EmailAccessTokenNotFoundError,
-} from "../domain/errors/EmailAccessErrors.js";
-import { IEmailAccessRepository } from "../domain/IEmailAccessRepository.js";
+} from "../errors/EmailAccessErrors.js";
 import {
 	InitialEmailAccesses,
 	StubEmailAccessRepository,

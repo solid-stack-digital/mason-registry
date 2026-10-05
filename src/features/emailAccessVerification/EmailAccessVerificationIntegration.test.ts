@@ -11,14 +11,14 @@ import { ITimeEngine } from "@/shared/time/ports/ITimeEngine.js";
 import { CryptoIdGenerator } from "@/shared/uuid/infrastructure/CryptoIdGenerator.js";
 import { IIdGenerator } from "@/shared/uuid/ports/IIdGenerator.js";
 import { EmailAccessVerificationProvider } from "./diProvider.js";
+import { IEmailAccessRepository } from "./domain/IEmailAccessRepository.js";
+import { IOtpGateway } from "./domain/IOtpGateway.js";
 import {
 	EmailAccessEmailMismatchError,
 	EmailAccessPurposeMismatchError,
 	EmailAccessTokenAlreadyUsedError,
 	EmailAccessTokenExpiredError,
-} from "./domain/errors/EmailAccessErrors.js";
-import { IEmailAccessRepository } from "./domain/IEmailAccessRepository.js";
-import { IOtpGateway } from "./domain/IOtpGateway.js";
+} from "./errors/EmailAccessErrors.js";
 import { MemoryEmailAccessRepository } from "./infrastructure/MemoryEmailAccessRepository.js";
 import { OtpGateway } from "./infrastructure/OtpGateway.js";
 import { EmailAccessConfigToken } from "./tokens.js";

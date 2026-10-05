@@ -9,12 +9,12 @@ import type {
 	DecodedEmailAccessPayload,
 	EmailAccess,
 } from "../domain/EmailAccess.js";
+import { IEmailAccessRepository } from "../domain/IEmailAccessRepository.js";
 import {
 	EmailAccessEmailMismatchError,
 	EmailAccessTokenAlreadyUsedError,
 	EmailAccessTokenExpiredError,
-} from "../domain/errors/EmailAccessErrors.js";
-import { IEmailAccessRepository } from "../domain/IEmailAccessRepository.js";
+} from "../errors/EmailAccessErrors.js";
 import {
 	InitialEmailAccesses,
 	StubEmailAccessRepository,

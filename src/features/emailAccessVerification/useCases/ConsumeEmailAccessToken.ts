@@ -1,7 +1,7 @@
 import { type DepsType, MakeInjectable } from "@solid-stack/di";
 import { Clock } from "@/shared/time/Clock.js";
-import { EmailAccessEmailMismatchError } from "../domain/errors/EmailAccessErrors.js";
 import { IEmailAccessRepository } from "../domain/IEmailAccessRepository.js";
+import { EmailAccessEmailMismatchError } from "../errors/EmailAccessErrors.js";
 import { DecodeAndValidateToken } from "../services/DecodeAndValidateToken.js";
 
 export interface ConsumeEmailAccessTokenInput {

@@ -341,18 +341,30 @@ pnpm tsx scripts/manage.ts diff
 
 📦 Unregistered Modules (1):
   ● feature/notifications (not registered in index.json)
+    → Run: pnpm reg:commit feature notifications -m "feat(notifications): initial commit"
+    → Then: pnpm reg:register feature notifications
 
 💾 Uncommitted Changes in Git (1):
-  ▲ feature/authn (3 modified/untracked files)
+  ▲ feature/emailAccessVerification (9 modified/untracked files)
+    → Run: pnpm reg:commit feature emailAccessVerification -m "feat(emailAccessVerification): update"
+    → Then: pnpm reg:register-changes feature emailAccessVerification
 
 🚀 Committed But Unregistered Changes (1):
-  ◆ shared/time (commit: 88fee31 != registered: 7a4b12c, integrity: sha256-4277fafe5be4...)
+  ◆ feature/authn (commit: 6d8a71b != registered: 6bcf285, integrity: sha256-d991b69bd...)
+    → Run: pnpm reg:register-changes feature authn
 
-✓ Up to Date & Registered (3):
-  ✔ feature/mailing (commit: 88fee31, sha256-89d12a34...)
-  ✔ feature/otp (commit: 88fee31, sha256-55cbfa18...)
-  ✔ shared/uuid (commit: 88fee31, sha256-11ac45de...)
+✓ Up to Date & Registered (7):
+  ✔ feature/mailing (commit: 2b6759f, sha256-f38ace99794...)
+  ✔ feature/otp (commit: 013554d, sha256-4d34d201a88...)
+  ✔ shared/hasher (commit: 5ad8179, sha256-40feb53e10b...)
+  ✔ shared/hmac (commit: 2fa235a, sha256-033640b3ef8...)
+  ✔ shared/jwt (commit: 6ab8a5e, sha256-8284e6e876b...)
+  ✔ shared/time (commit: 1582dcf, sha256-eb1ca681ffd...)
+  ✔ shared/uuid (commit: b56d9d3, sha256-c534774f897...)
 ```
+
+> [!TIP]
+> The status command automatically analyzes the lifecycle state of each module and outputs the exact command required to advance it to the next stage (`→ Run:` and `→ Then:`), allowing you to easily copy and paste the required workflow actions.
 
 ---
 

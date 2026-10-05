@@ -3,6 +3,7 @@ import { TokenExpiredError } from "@/shared/jwt/errors/TokenExpiredError.js";
 import { Jwt } from "@/shared/jwt/Jwt.js";
 import { Clock } from "@/shared/time/Clock.js";
 import type { DecodedEmailAccessPayload } from "../domain/EmailAccess.js";
+import { IEmailAccessRepository } from "../domain/IEmailAccessRepository.js";
 import {
 	EmailAccessPurposeMismatchError,
 	EmailAccessTokenAlreadyUsedError,
@@ -10,8 +11,7 @@ import {
 	EmailAccessTokenInvalidatedError,
 	EmailAccessTokenInvalidError,
 	EmailAccessTokenNotFoundError,
-} from "../domain/errors/EmailAccessErrors.js";
-import { IEmailAccessRepository } from "../domain/IEmailAccessRepository.js";
+} from "../errors/EmailAccessErrors.js";
 
 export interface DecodeAndValidateTokenInput {
 	token: string;
