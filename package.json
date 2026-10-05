@@ -32,7 +32,7 @@
     "@clack/prompts": "^1.8.1",
     "@solid-stack/agnos-express": "^1.0.2",
     "@solid-stack/di": "^1.0.4",
-    "@solid-stack/mason": "^1.0.34",
+    "@solid-stack/mason": "1.0.37",
     "@types/express": "^5.0.6",
     "@types/node": "^22.13.5",
     "express": "^5.2.1",
