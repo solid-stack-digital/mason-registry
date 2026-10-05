@@ -1,4 +1,6 @@
-export class EmailAccessTokenExpiredError extends Error {
+import { EmailAccessVerificationError } from "./EmailAccessVerificationError.js";
+
+export class EmailAccessTokenExpiredError extends EmailAccessVerificationError {
 	constructor(message: string = "Email access token has expired") {
 		super(message);
 		this.name = "EmailAccessTokenExpiredError";
@@ -6,7 +8,7 @@ export class EmailAccessTokenExpiredError extends Error {
 	}
 }
 
-export class EmailAccessPurposeMismatchError extends Error {
+export class EmailAccessPurposeMismatchError extends EmailAccessVerificationError {
 	constructor(message: string = "Email access token purpose mismatch") {
 		super(message);
 		this.name = "EmailAccessPurposeMismatchError";
@@ -14,7 +16,7 @@ export class EmailAccessPurposeMismatchError extends Error {
 	}
 }
 
-export class EmailAccessEmailMismatchError extends Error {
+export class EmailAccessEmailMismatchError extends EmailAccessVerificationError {
 	constructor(message: string = "Email does not match token email") {
 		super(message);
 		this.name = "EmailAccessEmailMismatchError";
@@ -22,7 +24,7 @@ export class EmailAccessEmailMismatchError extends Error {
 	}
 }
 
-export class EmailAccessTokenNotFoundError extends Error {
+export class EmailAccessTokenNotFoundError extends EmailAccessVerificationError {
 	constructor(message: string = "Email access token not found") {
 		super(message);
 		this.name = "EmailAccessTokenNotFoundError";
@@ -30,7 +32,7 @@ export class EmailAccessTokenNotFoundError extends Error {
 	}
 }
 
-export class EmailAccessTokenAlreadyUsedError extends Error {
+export class EmailAccessTokenAlreadyUsedError extends EmailAccessVerificationError {
 	constructor(message: string = "Email access token has already been used") {
 		super(message);
 		this.name = "EmailAccessTokenAlreadyUsedError";
@@ -38,7 +40,7 @@ export class EmailAccessTokenAlreadyUsedError extends Error {
 	}
 }
 
-export class EmailAccessTokenInvalidatedError extends Error {
+export class EmailAccessTokenInvalidatedError extends EmailAccessVerificationError {
 	constructor(message: string = "Email access token has been invalidated") {
 		super(message);
 		this.name = "EmailAccessTokenInvalidatedError";
@@ -46,7 +48,7 @@ export class EmailAccessTokenInvalidatedError extends Error {
 	}
 }
 
-export class EmailAccessTokenInvalidError extends Error {
+export class EmailAccessTokenInvalidError extends EmailAccessVerificationError {
 	constructor(message: string = "Invalid email access token") {
 		super(message);
 		this.name = "EmailAccessTokenInvalidError";

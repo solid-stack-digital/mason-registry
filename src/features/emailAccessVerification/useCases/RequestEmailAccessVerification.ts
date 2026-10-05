@@ -1,6 +1,7 @@
 import { type DepsType, MakeInjectable } from "@solid-stack/di";
 import { IEmailAccessRepository } from "../domain/IEmailAccessRepository.js";
 import { IOtpGateway } from "../domain/IOtpGateway.js";
+import { EmailAccessVerificationError } from "../errors/EmailAccessVerificationError.js";
 
 export interface RequestEmailAccessVerificationInput {
 	email: string;
@@ -31,14 +32,14 @@ export class RequestEmailAccessVerification {
 			typeof props.email !== "string" ||
 			props.email.trim() === ""
 		) {
-			throw new Error("Email is required");
+			throw new EmailAccessVerificationError("Email is required");
 		}
 		if (
 			!props.purpose ||
 			typeof props.purpose !== "string" ||
 			props.purpose.trim() === ""
 		) {
-			throw new Error("Purpose is required");
+			throw new EmailAccessVerificationError("Purpose is required");
 		}
 
 		const email = props.email.trim().toLowerCase();

@@ -10,6 +10,7 @@ import {
 import { IEmailAccessRepository } from "../domain/IEmailAccessRepository.js";
 import { IOtpGateway } from "../domain/IOtpGateway.js";
 import { EmailAccessConfigToken } from "../tokens.js";
+import { EmailAccessVerificationError } from "../errors/EmailAccessVerificationError.js";
 
 export interface ValidateEmailAccessInput {
 	email: string;
@@ -42,21 +43,21 @@ export class ValidateEmailAccess {
 			typeof props.email !== "string" ||
 			props.email.trim() === ""
 		) {
-			throw new Error("Email is required");
+			throw new EmailAccessVerificationError("Email is required");
 		}
 		if (
 			!props.purpose ||
 			typeof props.purpose !== "string" ||
 			props.purpose.trim() === ""
 		) {
-			throw new Error("Purpose is required");
+			throw new EmailAccessVerificationError("Purpose is required");
 		}
 		if (
 			!props.code ||
 			typeof props.code !== "string" ||
 			props.code.trim() === ""
 		) {
-			throw new Error("Code is required");
+			throw new EmailAccessVerificationError("Code is required");
 		}
 
 		const email = props.email.trim().toLowerCase();
@@ -71,7 +72,7 @@ export class ValidateEmailAccess {
 			otp: code,
 		});
 		if (!isValid) {
-			throw new Error("Invalid OTP code");
+			throw new EmailAccessVerificationError("Invalid OTP code");
 		}
 
 		// 2. Generate access jwt (email, purpose) with ttl = configs.jwtTtl
