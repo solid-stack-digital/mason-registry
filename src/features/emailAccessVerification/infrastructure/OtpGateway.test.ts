@@ -6,12 +6,12 @@ import { MemoryMailer } from "@/features/mailing/infrastructure/MemoryMailer.js"
 import { OtpProvider } from "@/features/otp/diProvider.js";
 import { JwtEngine } from "@/shared/jwt/infrastructure/JwtEngine.js";
 import { IJwtEngine } from "@/shared/jwt/ports/IJwtEngine.js";
-import { Duration } from "@/shared/time/domain/Duration.js";
 import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
 import { ITimeEngine } from "@/shared/time/ports/ITimeEngine.js";
 import { CryptoIdGenerator } from "@/shared/uuid/infrastructure/CryptoIdGenerator.js";
 import { IIdGenerator } from "@/shared/uuid/ports/IIdGenerator.js";
 import { getEmailAccessVerificationTestContainer } from "../__tests__/utils/getEmailAccessVerificationTestContainer.js";
+import { EmailAccessConfigToken } from "../configs/EmailAccessConfigToken.js";
 import { EmailAccessVerificationProvider } from "../diProvider.js";
 import {
 	EmailAccessEmailMismatchError,
@@ -19,7 +19,6 @@ import {
 	EmailAccessTokenAlreadyUsedError,
 	EmailAccessTokenExpiredError,
 } from "../errors/EmailAccessErrors.js";
-import { EmailAccessConfigToken } from "../tokens.js";
 import { ConsumeEmailAccessToken } from "../useCases/ConsumeEmailAccessToken.js";
 import { DecodeEmailAccessToken } from "../useCases/DecodeEmailAccessToken.js";
 import { RequestEmailAccessVerification } from "../useCases/RequestEmailAccessVerification.js";
@@ -75,7 +74,7 @@ describe("OtpGateway integration with OTP", () => {
 
 		// Provide explicit config for tests
 		c.provideValue(EmailAccessConfigToken, {
-			jwtTtl: Duration.fromMinutes(15),
+			jwtTtl: 15 * 60 * 1000,
 		});
 
 		return c;

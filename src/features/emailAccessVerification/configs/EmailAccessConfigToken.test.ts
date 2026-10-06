@@ -1,6 +1,6 @@
 import { ValueToken } from "@solid-stack/di";
 import { describe, expect, it } from "vitest";
-import { EmailAccessConfigToken } from "./tokens.js";
+import { EmailAccessConfigToken } from "./EmailAccessConfigToken.js";
 
 describe("EmailAccessTokens", () => {
 	it("EmailAccessConfigToken should be defined as a ValueToken subclass", () => {

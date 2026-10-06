@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { AuthnConfigToken } from "./tokens.js";
+import { AuthnConfigToken } from "./AuthnConfigToken.js";
 
 describe("authn tokens", () => {
 	it("exports AuthnConfigToken", () => {

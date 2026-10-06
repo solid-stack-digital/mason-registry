@@ -1,10 +1,10 @@
 import type { Container } from "@solid-stack/di";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { Duration } from "@/shared/time/domain/Duration.js";
 import { Time } from "@/shared/time/domain/Time.js";
 import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
 import { ITimeEngine } from "@/shared/time/ports/ITimeEngine.js";
 import { getOtpTestContainer } from "../__tests__/utils/getOtpTestContainer.js";
+import { OtpConfigToken } from "../configs/OtpConfigToken.js";
 import { IOtpRepo } from "../domain/IOtpRepo.js";
 import type { Otp } from "../domain/Otp.js";
 import {
@@ -14,7 +14,6 @@ import {
 	OtpNotFoundError,
 } from "../errors/OtpErrors.js";
 import { InitialOtps, StubOtpRepo } from "../infrastructure/StubOtpRepo.js";
-import { OtpConfigToken } from "../tokens.js";
 import { ValidateOtp, type ValidateOtpInput } from "./ValidateOtp.js";
 
 describe("ValidateOtp UseCase", () => {
@@ -31,8 +30,8 @@ describe("ValidateOtp UseCase", () => {
 		stubTime = container.resolve(StubTimeEngine);
 
 		container.provideValue(OtpConfigToken, {
-			retryInterval: Duration.fromSeconds(30),
-			otpTtl: Duration.fromMinutes(5),
+			retryInterval: 30 * 1000,
+			otpTtl: 5 * 60 * 1000,
 			maxAttempts: 3,
 		});
 

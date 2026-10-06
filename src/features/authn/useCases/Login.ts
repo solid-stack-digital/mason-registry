@@ -3,7 +3,7 @@ import { Hasher } from "@/shared/hasher/Hasher.js";
 import { Jwt } from "@/shared/jwt/Jwt.js";
 import { Clock } from "@/shared/time/Clock.js";
 import { Uuid } from "@/shared/uuid/Uuid.js";
-import { DEFAULT_AUTHN_CONFIG, toDuration } from "../domain/AuthnConfig.js";
+import { AuthnConfigToken } from "../configs/AuthnConfigToken.js";
 import { ICredentialRepo } from "../domain/ICredentialRepo.js";
 import { IRefreshTokenRepo } from "../domain/IRefreshTokenRepo.js";
 import type { RefreshToken } from "../domain/RefreshToken.js";
@@ -11,7 +11,6 @@ import {
 	AccountNotVerifiedError,
 	InvalidCredentialsError,
 } from "../errors/AuthnErrors.js";
-import { AuthnConfigToken } from "../tokens.js";
 
 export type LoginInput = {
 	clientDeviceId: string;
@@ -73,9 +72,9 @@ export class Login {
 		);
 
 		// Resolve TTL from config
-		const config = this.deps.authnConfig ?? DEFAULT_AUTHN_CONFIG;
-		const accessTtl = toDuration(config.accessTokenTtl);
-		const refreshTtl = toDuration(config.refreshTokenTtl);
+		const config = this.deps.authnConfig;
+		const accessTtl = this.deps.clock.durationMillis(config.accessTokenTtl);
+		const refreshTtl = this.deps.clock.durationMillis(config.refreshTokenTtl);
 
 		const refreshTokenId = this.deps.uuid.generate();
 

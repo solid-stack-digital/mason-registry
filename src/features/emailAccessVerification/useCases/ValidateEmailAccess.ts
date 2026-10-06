@@ -2,15 +2,11 @@ import { type DepsType, MakeInjectable } from "@solid-stack/di";
 import { Jwt } from "@/shared/jwt/Jwt.js";
 import { Clock } from "@/shared/time/Clock.js";
 import { Uuid } from "@/shared/uuid/Uuid.js";
+import { EmailAccessConfigToken } from "../configs/EmailAccessConfigToken.js";
 import type { EmailAccess } from "../domain/EmailAccess.js";
-import {
-	DEFAULT_EMAIL_ACCESS_CONFIG,
-	toDuration,
-} from "../domain/EmailAccessConfig.js";
 import { IEmailAccessRepository } from "../domain/IEmailAccessRepository.js";
 import { IOtpGateway } from "../domain/IOtpGateway.js";
 import { EmailAccessVerificationError } from "../errors/EmailAccessVerificationError.js";
-import { EmailAccessConfigToken } from "../tokens.js";
 
 export interface ValidateEmailAccessInput {
 	email: string;
@@ -76,8 +72,8 @@ export class ValidateEmailAccess {
 		}
 
 		// 2. Generate access jwt (email, purpose) with ttl = configs.jwtTtl
-		const config = this.deps.config || DEFAULT_EMAIL_ACCESS_CONFIG;
-		const ttl = toDuration(config.jwtTtl);
+		const config = this.deps.config;
+		const ttl = this.deps.clock.durationMillis(config.jwtTtl);
 		const jti = this.deps.uuid.generate();
 
 		const token = await this.deps.jwt.sign(

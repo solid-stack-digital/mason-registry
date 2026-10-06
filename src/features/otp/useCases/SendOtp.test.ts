@@ -1,9 +1,9 @@
 import type { Container } from "@solid-stack/di";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { Duration } from "@/shared/time/domain/Duration.js";
 import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
 import { ITimeEngine } from "@/shared/time/ports/ITimeEngine.js";
 import { getOtpTestContainer } from "../__tests__/utils/getOtpTestContainer.js";
+import { OtpConfigToken } from "../configs/OtpConfigToken.js";
 import { IOtpEmailGateway } from "../domain/IOtpEmailGateway.js";
 import { IOtpGenerator } from "../domain/IOtpGenerator.js";
 import { IOtpRepo } from "../domain/IOtpRepo.js";
@@ -14,7 +14,6 @@ import {
 	StubOtpGenerator,
 } from "../infrastructure/StubOtpGenerator.js";
 import { InitialOtps, StubOtpRepo } from "../infrastructure/StubOtpRepo.js";
-import { OtpConfigToken } from "../tokens.js";
 import { SendOtp, type SendOtpInput } from "./SendOtp.js";
 
 describe("SendOtp UseCase", () => {
@@ -37,8 +36,8 @@ describe("SendOtp UseCase", () => {
 
 		container.provideValue(NextOtp, "445566");
 		container.provideValue(OtpConfigToken, {
-			retryInterval: Duration.fromSeconds(30),
-			otpTtl: Duration.fromMinutes(5),
+			retryInterval: 30 * 1000,
+			otpTtl: 5 * 60 * 1000,
 			maxAttempts: 3,
 		});
 

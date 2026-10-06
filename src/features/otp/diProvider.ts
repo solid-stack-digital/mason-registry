@@ -1,13 +1,12 @@
 import type { Container, DIModule } from "@solid-stack/di";
+import { OtpConfigToken } from "./configs/OtpConfigToken.js";
 import { IOtpEmailGateway } from "./domain/IOtpEmailGateway.js";
 import { IOtpGenerator } from "./domain/IOtpGenerator.js";
 import { IOtpRepo } from "./domain/IOtpRepo.js";
-import { DEFAULT_OTP_CONFIG } from "./domain/OtpConfig.js";
 import { OtpError } from "./errors/OtpError.js";
 import { CryptoOtpGenerator } from "./infrastructure/CryptoOtpGenerator.js";
 import { MemoryOtpRepo } from "./infrastructure/MemoryOtpRepo.js";
 import { OtpEmailGateway } from "./infrastructure/OtpEmailGateway.js";
-import { OtpConfigToken } from "./tokens.js";
 
 export const OtpProvider: DIModule = (c: Container) => {
 	// TODO: Replace this environment lookup with your application's config loader after import.
@@ -24,7 +23,12 @@ export const OtpProvider: DIModule = (c: Container) => {
 	} else {
 		c.provide(IOtpRepo, MemoryOtpRepo);
 	}
-	c.provideValue(OtpConfigToken, DEFAULT_OTP_CONFIG);
+	// TODO: After import, resolve your application's Environment token and map its validated settings to the local OtpConfigToken (durations are milliseconds).
+	c.provideValue(OtpConfigToken, {
+		retryInterval: 30 * 1000,
+		otpTtl: 5 * 60 * 1000,
+		maxAttempts: 3,
+	});
 	c.provide(IOtpGenerator, CryptoOtpGenerator);
 	c.provide(IOtpEmailGateway, OtpEmailGateway);
 };

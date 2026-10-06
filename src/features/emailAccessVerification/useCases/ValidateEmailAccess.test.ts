@@ -1,12 +1,12 @@
 import type { Container } from "@solid-stack/di";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Jwt } from "@/shared/jwt/Jwt.js";
-import { Duration } from "@/shared/time/domain/Duration.js";
 import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
 import { ITimeEngine } from "@/shared/time/ports/ITimeEngine.js";
 import { CryptoIdGenerator } from "@/shared/uuid/infrastructure/CryptoIdGenerator.js";
 import { IIdGenerator } from "@/shared/uuid/ports/IIdGenerator.js";
 import { getEmailAccessVerificationTestContainer } from "../__tests__/utils/getEmailAccessVerificationTestContainer.js";
+import { EmailAccessConfigToken } from "../configs/EmailAccessConfigToken.js";
 import { IEmailAccessRepository } from "../domain/IEmailAccessRepository.js";
 import { IOtpGateway } from "../domain/IOtpGateway.js";
 import {
@@ -14,7 +14,6 @@ import {
 	StubEmailAccessRepository,
 } from "../infrastructure/StubEmailAccessRepository.js";
 import { StubOtpGateway } from "../infrastructure/StubOtpGateway.js";
-import { EmailAccessConfigToken } from "../tokens.js";
 import { ValidateEmailAccess } from "./ValidateEmailAccess.js";
 
 describe("ValidateEmailAccess Use Case", () => {
@@ -45,7 +44,7 @@ describe("ValidateEmailAccess Use Case", () => {
 
 		// Configure Config
 		container.provideValue(EmailAccessConfigToken, {
-			jwtTtl: Duration.fromMinutes(30),
+			jwtTtl: 30 * 60 * 1000,
 		});
 
 		stubRepo = container.resolve(

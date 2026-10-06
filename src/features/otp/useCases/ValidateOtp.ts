@@ -1,7 +1,7 @@
 import { type DepsType, MakeInjectable } from "@solid-stack/di";
 import { Clock } from "@/shared/time/Clock.js";
+import { OtpConfigToken } from "../configs/OtpConfigToken.js";
 import { IOtpRepo } from "../domain/IOtpRepo.js";
-import { DEFAULT_OTP_CONFIG, toMillis } from "../domain/OtpConfig.js";
 import { OtpError } from "../errors/OtpError.js";
 import {
 	OtpExpiredError,
@@ -9,7 +9,6 @@ import {
 	OtpMaxAttemptsExceededError,
 	OtpNotFoundError,
 } from "../errors/OtpErrors.js";
-import { OtpConfigToken } from "../tokens.js";
 
 export interface ValidateOtpInput {
 	recipientId?: string | undefined;
@@ -42,7 +41,7 @@ export class ValidateOtp {
 			throw new OtpError("recipientId and otp code are required");
 		}
 
-		const config = this.deps.otpConfig || DEFAULT_OTP_CONFIG;
+		const config = this.deps.otpConfig;
 		const now = this.deps.clock.now();
 
 		const existing = await this.deps.otpRepo.findLatestByRecipientAndPurpose(
@@ -59,7 +58,7 @@ export class ValidateOtp {
 		const isExpired =
 			now.isAfter(existing.expiresAt) ||
 			now.isEqual(existing.expiresAt) ||
-			now.millis - existing.createdAt.millis >= toMillis(config.otpTtl);
+			now.millis - existing.createdAt.millis >= config.otpTtl;
 
 		// If expired, prioritize the explicit message per Expected Behavior 3
 		if (isExpired) {

@@ -3,12 +3,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import mailingProvider from "@/features/mailing/diProvider.js";
 import { IMailer } from "@/features/mailing/domain/IMailer.js";
 import { MemoryMailer } from "@/features/mailing/infrastructure/MemoryMailer.js";
-import { Duration } from "@/shared/time/domain/Duration.js";
 import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
 import { ITimeEngine } from "@/shared/time/ports/ITimeEngine.js";
 import { CryptoIdGenerator } from "@/shared/uuid/infrastructure/CryptoIdGenerator.js";
 import { IIdGenerator } from "@/shared/uuid/ports/IIdGenerator.js";
 import { getOtpTestContainer } from "../__tests__/utils/getOtpTestContainer.js";
+import { OtpConfigToken } from "../configs/OtpConfigToken.js";
 import { OtpProvider } from "../diProvider.js";
 import { IOtpGenerator } from "../domain/IOtpGenerator.js";
 import {
@@ -16,7 +16,6 @@ import {
 	OtpInvalidCodeError,
 	OtpMaxAttemptsExceededError,
 } from "../errors/OtpErrors.js";
-import { OtpConfigToken } from "../tokens.js";
 import { SendOtp } from "../useCases/SendOtp.js";
 import { ValidateOtp } from "../useCases/ValidateOtp.js";
 
@@ -59,8 +58,8 @@ describe("OtpEmailGateway integration with mailing", () => {
 
 		// Provide explicit config for predictable test thresholds
 		c.provideValue(OtpConfigToken, {
-			retryInterval: Duration.fromSeconds(30),
-			otpTtl: Duration.fromMinutes(5),
+			retryInterval: 30 * 1000,
+			otpTtl: 5 * 60 * 1000,
 			maxAttempts: 3,
 		});
 

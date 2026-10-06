@@ -287,7 +287,11 @@ Placeholder configuration for secrets or external services MUST also carry an ac
 
 Features and shared modules MAY read only `INFRA_MODE` directly from the environment. They MUST NOT read other values through `process.env`, `import.meta.env`, or another global environment API.
 
-Other configuration values MUST be represented by local `ValueToken` classes in the module's configuration directory. The current JWT module uses `configs/SecretToken.ts` for this purpose. Infrastructure implementations consume these local tokens through DI; they MUST NOT read the environment or depend on the application's global `Environment` token themselves.
+All configurable runtime settings in both features and shared modules MUST be represented by local `ValueToken` classes under `<module>/configs/`. Keep the configuration contracts alongside their tokens, rather than in `domain/` or a root `tokens.ts`. The JWT module uses `configs/SecretToken.ts`; authn, emailAccessVerification, and otp use their own configuration tokens in `configs/`. Consumers obtain configuration through DI; they MUST NOT read the environment or depend on the application's global `Environment` token themselves.
+
+The module's `diProvider.ts` MUST bind example values with `provideValue` and place an actionable TODO immediately above the binding explaining that, after import, the application should resolve its root-provided `Environment` token and map validated settings into the local token. This rule applies to business settings such as TTLs, retry intervals, and attempt limits as well as secrets and external-service settings. Modules with no configurable runtime settings do not need empty configuration directories. Values used only to control test doubles are test setup, not application configuration.
+
+Duration settings MUST be plain numeric milliseconds with their units documented in the configuration contract. Configuration must not construct shared domain objects or invoke their static factories. A consumer needing a `Duration` injects `Clock` and calls `clock.durationMillis(config.jwtTtl)` (or the appropriate field). Consumers MUST use their provided configuration rather than embed fallback example values; providers own the example bindings.
 
 Registry providers MUST supply example configuration values and include TODOs explaining their replacement after import. Example values apply independently of infrastructure mode. They allow imported modules to demonstrate actual local behavior without introducing dependencies on an application-specific environment loader.
 

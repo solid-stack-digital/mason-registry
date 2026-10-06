@@ -1,11 +1,10 @@
 import type { Container, DIModule } from "@solid-stack/di";
-import { DEFAULT_EMAIL_ACCESS_CONFIG } from "./domain/EmailAccessConfig.js";
+import { EmailAccessConfigToken } from "./configs/EmailAccessConfigToken.js";
 import { IEmailAccessRepository } from "./domain/IEmailAccessRepository.js";
 import { IOtpGateway } from "./domain/IOtpGateway.js";
 import { EmailAccessVerificationError } from "./errors/EmailAccessVerificationError.js";
 import { MemoryEmailAccessRepository } from "./infrastructure/MemoryEmailAccessRepository.js";
 import { OtpGateway } from "./infrastructure/OtpGateway.js";
-import { EmailAccessConfigToken } from "./tokens.js";
 
 export const EmailAccessVerificationProvider: DIModule = (c: Container) => {
 	// TODO: Replace this environment lookup with your application's config loader after import.
@@ -24,7 +23,10 @@ export const EmailAccessVerificationProvider: DIModule = (c: Container) => {
 	} else {
 		c.provide(IEmailAccessRepository, MemoryEmailAccessRepository);
 	}
-	c.provideValue(EmailAccessConfigToken, DEFAULT_EMAIL_ACCESS_CONFIG);
+	// TODO: After import, resolve your application's Environment token and map its validated settings to the local EmailAccessConfigToken (durations are milliseconds).
+	c.provideValue(EmailAccessConfigToken, {
+		jwtTtl: 15 * 60 * 1000,
+	});
 	c.provide(IOtpGateway, OtpGateway);
 };
 

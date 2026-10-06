@@ -1,15 +1,13 @@
 import { type DepsType, MakeInjectable } from "@solid-stack/di";
 import { Clock } from "@/shared/time/Clock.js";
-import { Duration } from "@/shared/time/domain/Duration.js";
 import { Uuid } from "@/shared/uuid/Uuid.js";
+import { OtpConfigToken } from "../configs/OtpConfigToken.js";
 import { IOtpEmailGateway } from "../domain/IOtpEmailGateway.js";
 import { IOtpGenerator } from "../domain/IOtpGenerator.js";
 import { IOtpRepo } from "../domain/IOtpRepo.js";
 import type { Otp } from "../domain/Otp.js";
-import { DEFAULT_OTP_CONFIG, toMillis } from "../domain/OtpConfig.js";
 import { OtpError } from "../errors/OtpError.js";
 import { OtpCooldownError } from "../errors/OtpErrors.js";
-import { OtpConfigToken } from "../tokens.js";
 
 export type SendOtpMode = "email";
 
@@ -59,7 +57,7 @@ export class SendOtp {
 			throw new OtpError(`Unsupported OTP mode: ${mode}`);
 		}
 
-		const config = this.deps.otpConfig || DEFAULT_OTP_CONFIG;
+		const config = this.deps.otpConfig;
 		const now = this.deps.clock.now();
 
 		const existing = await this.deps.otpRepo.findLatestByRecipientAndPurpose(
@@ -78,7 +76,7 @@ export class SendOtp {
 		if (hasActive) {
 			// Cooldown = hasactive and sent within last configs.retryInterval
 			const elapsed = now.millis - existing.createdAt.millis;
-			const isCooldown = elapsed < toMillis(config.retryInterval);
+			const isCooldown = elapsed < config.retryInterval;
 
 			if (isCooldown) {
 				throw new OtpCooldownError(
@@ -95,7 +93,7 @@ export class SendOtp {
 		// Create otp
 		const otpCode = this.deps.otpGenerator.generate();
 		const id = this.deps.uuid.generate();
-		const ttlDuration = Duration.fromMillis(toMillis(config.otpTtl));
+		const ttlDuration = this.deps.clock.durationMillis(config.otpTtl);
 		const expiresAt = now.plus(ttlDuration);
 		const expiresAtIso = this.deps.clock.toIso(expiresAt);
 
@@ -118,7 +116,7 @@ export class SendOtp {
 			await this.deps.emailGateway.sendEmail({
 				to: recipientEmail,
 				subject: `Your verification code: ${otpCode}`,
-				body: `Your One-Time Password is ${otpCode}. It will expire in ${Math.round(toMillis(config.otpTtl) / 60000)} minutes.`,
+				body: `Your One-Time Password is ${otpCode}. It will expire in ${Math.round(config.otpTtl / 60000)} minutes.`,
 			});
 		}
 
