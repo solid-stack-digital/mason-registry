@@ -2,6 +2,8 @@
 
 Official code registry for Solid Stack Clean Architecture shared modules and features.
 
+See the [infrastructure mode specification](.docs/INFRA_MODE.md) for runtime adapter selection, integration availability, and explicit test-double configuration.
+
 The Mason Registry hosts reusable, production-ready modules that can be imported directly into applications using the [`mason import`](https://github.com/solid-stack-digital/mason) CLI.
 
 ---

@@ -6,7 +6,7 @@
 
 The supported modes are `isolated` and `integrated`.
 
-This document specifies the target behavior for registry modules and applications that import them. It is a normative specification, not a claim that every current provider already complies. Creating this document does not change any provider or test implementation.
+This document specifies the required behavior for registry modules and applications that import them. The registry providers implement these selection rules. Integrated capabilities that do not yet have external adapters fail explicitly; their current availability is listed in section 12.
 
 In this document:
 
@@ -482,22 +482,34 @@ No external service account is required for this flow. No stub is selected by a 
 
 This is an integration test even though infrastructure mode is isolated.
 
-## 12. Current implementation gaps and adoption
+## 12. Current implementation and integration availability
 
-Existing code must be reviewed against the rules above rather than used to infer the meaning of the modes.
+The current providers default an unset `INFRA_MODE` to `isolated`. Explicit empty strings, unsupported values, different casing, and surrounding whitespace are rejected. Providers validate the mode before registering their bindings.
 
-At the time this specification was written, examples of behavior requiring alignment include:
+All shared providers use their actual local engines in both modes. JWT configuration is loaded as follows:
 
-- Feature providers selecting `StubEAVGateway`, `StubOtpGateway`, or `StubOtpEmailGateway` in isolated mode.
-- Providers selecting stub repositories, publishers, mailers, clocks, UUID generators, or OTP generators as isolated runtime defaults.
-- Service-backed ports selecting memory adapters in integrated mode without an actual external adapter.
-- Unit tests resolving provider-selected stubs without explicitly overriding the consumed port first.
+- `JWT_SECRET` supplies the signing secret when present.
+- Isolated mode uses the documented local example secret `example-token` only when `JWT_SECRET` is unset.
+- Integrated JWT requires a nonempty `JWT_SECRET`.
+- An explicitly empty or whitespace-only secret is rejected in either mode.
+- Importing applications must replace the example-secret loader with their own signing configuration, as the provider's TODO explains.
 
-Some local engines already use their actual implementations in both modes. That behavior is consistent with this specification.
+Feature providers have the following availability:
 
-Adoption requires distinguishing local runtime implementations from test doubles, configuring actual integrated adapters where available, and making test overrides explicit. Existing test doubles can remain available for tests; the requirement is to remove their selection from production providers.
+| Feature | Isolated implementations | Integrated availability |
+| --- | --- | --- |
+| `authn` | Actual EAV gateway, memory credential and session repositories, memory event capture | Explicit provider error until external persistence and event-delivery adapters are implemented and configured |
+| `emailAccessVerification` | Actual OTP gateway and memory email-access repository | Explicit provider error until an external email-access repository is implemented and configured |
+| `otp` | Actual email gateway, cryptographic OTP generator, and memory OTP repository | Explicit provider error until an external OTP repository is implemented and configured |
+| `mailing` | Memory mail capture | Explicit provider error until an external delivery adapter is implemented and configured |
 
-This specification does not authorize or perform a runtime migration, registry metadata regeneration, or publication. Those are separate changes.
+No external database or mail-service vendor is selected by these registry examples. Importing applications must implement their chosen service adapters and replace the integrated error branches. An explicit error is intentional; registering a memory adapter in those branches would misrepresent integrated behavior.
+
+Memory mail capture does not deliver mail externally. Memory repositories and event capture are scoped to the container's adapter instances and do not provide durable storage or external event delivery. Their successful tests do not establish external-service correctness.
+
+Tests register controllable collaborators explicitly before resolving consumers. Gateway tests compose participating providers in isolated mode, exercising actual module adapters while keeping external boundaries in memory. No provider chooses a stub as a runtime default.
+
+Registry metadata regeneration and publication remain separate from source changes.
 
 ## 13. Compliance criteria
 

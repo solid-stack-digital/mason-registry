@@ -5,8 +5,11 @@ import { getEmailAccessVerificationTestContainer } from "../__tests__/utils/getE
 import type { EmailAccess } from "../domain/EmailAccess.js";
 import { IEmailAccessRepository } from "../domain/IEmailAccessRepository.js";
 import { IOtpGateway } from "../domain/IOtpGateway.js";
-import type { StubEmailAccessRepository } from "../infrastructure/StubEmailAccessRepository.js";
-import type { StubOtpGateway } from "../infrastructure/StubOtpGateway.js";
+import {
+	InitialEmailAccesses,
+	StubEmailAccessRepository,
+} from "../infrastructure/StubEmailAccessRepository.js";
+import { StubOtpGateway } from "../infrastructure/StubOtpGateway.js";
 import { RequestEmailAccessVerification } from "./RequestEmailAccessVerification.js";
 
 describe("RequestEmailAccessVerification Use Case", () => {
@@ -14,6 +17,12 @@ describe("RequestEmailAccessVerification Use Case", () => {
 		vi.stubEnv("INFRA_MODE", "isolated");
 
 		container = getEmailAccessVerificationTestContainer();
+
+		// Explicit test doubles; runtime providers keep actual or in-memory implementations.
+
+		container.provideValue(InitialEmailAccesses, []);
+		container.provide(IEmailAccessRepository, StubEmailAccessRepository);
+		container.provide(IOtpGateway, StubOtpGateway);
 
 		stubRepo = container.resolve(
 			IEmailAccessRepository,

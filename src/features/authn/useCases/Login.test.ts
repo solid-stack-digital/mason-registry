@@ -1,13 +1,23 @@
 import type { Container } from "@solid-stack/di";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { ICredentialRepo } from "@/features/authn/domain/ICredentialRepo.js";
+import { IRefreshTokenRepo } from "@/features/authn/domain/IRefreshTokenRepo.js";
+import { ISessionRepo } from "@/features/authn/domain/ISessionRepo.js";
 import { Hasher } from "@/shared/hasher/Hasher.js";
 import { JwtEngine } from "@/shared/jwt/infrastructure/JwtEngine.js";
 import { Clock } from "@/shared/time/Clock.js";
 import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
+import { ITimeEngine } from "@/shared/time/ports/ITimeEngine.js";
 import { getAuthnTestContainer } from "../__tests__/utils/getAuthnTestContainer.js";
 import type { Credential } from "../domain/Credential.js";
-import { StubCredentialRepo } from "../infrastructure/StubCredentialRepo.js";
-import { StubRefreshTokenRepo } from "../infrastructure/StubRefreshTokenRepo.js";
+import {
+	InitialCredentials,
+	StubCredentialRepo,
+} from "../infrastructure/StubCredentialRepo.js";
+import {
+	InitialRefreshTokens,
+	StubRefreshTokenRepo,
+} from "../infrastructure/StubRefreshTokenRepo.js";
 import { Login } from "./Login.js";
 
 describe("Login UseCase", () => {
@@ -15,6 +25,15 @@ describe("Login UseCase", () => {
 		vi.stubEnv("INFRA_MODE", "isolated");
 
 		container = getAuthnTestContainer();
+
+		// Explicit test doubles; runtime providers keep actual or in-memory implementations.
+
+		container.provide(ITimeEngine, StubTimeEngine);
+		container.provideValue(InitialCredentials, []);
+		container.provide(ICredentialRepo, StubCredentialRepo);
+		container.provideValue(InitialRefreshTokens, []);
+		container.provide(IRefreshTokenRepo, StubRefreshTokenRepo);
+		container.provide(ISessionRepo, StubRefreshTokenRepo);
 
 		stubTime = container.resolve(StubTimeEngine);
 		stubTime.setTime(1700000000000);
@@ -64,8 +83,10 @@ describe("Login UseCase", () => {
 		expect(result.accessToken).toBeDefined();
 		expect(result.refreshToken).toBeDefined();
 
-		const savedRefresh = await refreshTokenRepo.findById("stub-id-1");
-		expect(savedRefresh).toBeDefined();
+		const savedRefresh = await refreshTokenRepo.findByToken(
+			result.refreshToken,
+		);
+		expect(savedRefresh).not.toBeNull();
 		expect(savedRefresh?.credentialId).toBe("cred-1");
 		expect(savedRefresh?.clientDeviceId).toBe("device-123");
 	});

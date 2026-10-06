@@ -11,6 +11,8 @@ describe("Uuid", () => {
 	beforeEach(() => {
 		vi.stubEnv("INFRA_MODE", "isolated");
 		container = getUuidTestContainer();
+		// Explicit test doubles; runtime providers keep actual or in-memory implementations.
+		container.provide(IIdGenerator, StubIdGenerator);
 	});
 	afterEach(() => vi.unstubAllEnvs());
 	it("generates deterministic IDs with StubIdGenerator", () => {
@@ -35,4 +37,18 @@ describe("Uuid", () => {
 			/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 		expect(uuidv4Regex.test(id)).toBe(true);
 	});
+
+	it.each(["isolated", "integrated"])(
+		"generates actual UUIDs by default in %s mode",
+		(mode) => {
+			vi.stubEnv("INFRA_MODE", mode);
+			const uuid = getUuidTestContainer().resolve(Uuid);
+			const first = uuid.generate();
+			const second = uuid.generate();
+			expect(first).toMatch(
+				/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+			);
+			expect(second).not.toBe(first);
+		},
+	);
 });

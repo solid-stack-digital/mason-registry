@@ -1,13 +1,19 @@
 import type { Container } from "@solid-stack/di";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { IRefreshTokenRepo } from "@/features/authn/domain/IRefreshTokenRepo.js";
+import { ISessionRepo } from "@/features/authn/domain/ISessionRepo.js";
 import { Clock } from "@/shared/time/Clock.js";
 import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
+import { ITimeEngine } from "@/shared/time/ports/ITimeEngine.js";
 import { getAuthnTestContainer } from "../__tests__/utils/getAuthnTestContainer.js";
 import {
 	DeviceMismatchError,
 	RefreshTokenNotFoundError,
 } from "../errors/AuthnErrors.js";
-import { StubRefreshTokenRepo } from "../infrastructure/StubRefreshTokenRepo.js";
+import {
+	InitialRefreshTokens,
+	StubRefreshTokenRepo,
+} from "../infrastructure/StubRefreshTokenRepo.js";
 import { Logout } from "./Logout.js";
 
 describe("Logout UseCase", () => {
@@ -15,6 +21,13 @@ describe("Logout UseCase", () => {
 		vi.stubEnv("INFRA_MODE", "isolated");
 
 		container = getAuthnTestContainer();
+
+		// Explicit test doubles; runtime providers keep actual or in-memory implementations.
+
+		container.provide(ITimeEngine, StubTimeEngine);
+		container.provideValue(InitialRefreshTokens, []);
+		container.provide(IRefreshTokenRepo, StubRefreshTokenRepo);
+		container.provide(ISessionRepo, StubRefreshTokenRepo);
 
 		const stubTime = container.resolve(StubTimeEngine);
 		stubTime.setTime(1700000000000);

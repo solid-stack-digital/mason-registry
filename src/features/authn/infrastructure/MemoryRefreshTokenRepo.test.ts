@@ -2,6 +2,7 @@ import type { Container } from "@solid-stack/di";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Clock } from "@/shared/time/Clock.js";
 import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
+import { ITimeEngine } from "@/shared/time/ports/ITimeEngine.js";
 import { getAuthnTestContainer } from "../__tests__/utils/getAuthnTestContainer.js";
 import type { RefreshToken } from "../domain/RefreshToken.js";
 import { MemoryRefreshTokenRepo } from "./MemoryRefreshTokenRepo.js";
@@ -11,6 +12,10 @@ describe("MemoryRefreshTokenRepo", () => {
 		vi.stubEnv("INFRA_MODE", "isolated");
 
 		container = getAuthnTestContainer();
+
+		// Explicit test doubles; runtime providers keep actual or in-memory implementations.
+
+		container.provide(ITimeEngine, StubTimeEngine);
 
 		const stubTime = container.resolve(StubTimeEngine);
 		stubTime.setTime(1700000000000);

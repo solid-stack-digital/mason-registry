@@ -1,5 +1,6 @@
 import type { Container } from "@solid-stack/di";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { ITimeEngine } from "@/shared/time/ports/ITimeEngine.js";
 import { getTimeTestContainer } from "./__tests__/utils/getTimeTestContainer.js";
 import { Clock } from "./Clock.js";
 import { Duration } from "./domain/Duration.js";
@@ -10,6 +11,8 @@ describe("Clock", () => {
 	beforeEach(() => {
 		vi.stubEnv("INFRA_MODE", "isolated");
 		container = getTimeTestContainer();
+		// Explicit test doubles; runtime providers keep actual or in-memory implementations.
+		container.provide(ITimeEngine, StubTimeEngine);
 	});
 	afterEach(() => vi.unstubAllEnvs());
 	it("provides deterministic current time with StubTimeEngine", () => {
@@ -24,6 +27,18 @@ describe("Clock", () => {
 		stub.advance(1000);
 		expect(clock.now().millis).toBe(fixedMillis + 1000);
 	});
+
+	it.each(["isolated", "integrated"])(
+		"uses actual system time by default in %s mode",
+		(mode) => {
+			vi.stubEnv("INFRA_MODE", mode);
+			const clock = getTimeTestContainer().resolve(Clock);
+			const before = Date.now();
+			const now = clock.now().millis;
+			expect(now).toBeGreaterThanOrEqual(before);
+			expect(now).toBeLessThanOrEqual(Date.now());
+		},
+	);
 
 	it("parses duration strings correctly", () => {
 		const clock = container.resolve(Clock);

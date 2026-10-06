@@ -1,7 +1,6 @@
 import { type DepsType, MakeInjectable } from "@solid-stack/di";
 import { Clock } from "@/shared/time/Clock.js";
 import type { IMailer, SentMail } from "../domain/IMailer.js";
-import { MailingError } from "../errors/MailingError.js";
 
 @MakeInjectable
 export class MemoryMailer implements IMailer {
@@ -9,7 +8,6 @@ export class MemoryMailer implements IMailer {
 		clock: Clock,
 	};
 	private sentMails: SentMail[] = [];
-	private simulateFailure = false;
 
 	constructor(public deps: DepsType<typeof MemoryMailer.deps>) {}
 
@@ -19,9 +17,6 @@ export class MemoryMailer implements IMailer {
 		body: string;
 		isHtml?: boolean | undefined;
 	}): Promise<{ ok: boolean }> {
-		if (this.simulateFailure) {
-			throw new MailingError("External mailing service unavailable (500)");
-		}
 		const now = this.deps.clock.now();
 		this.sentMails.push({
 			to: mail.to,
@@ -39,9 +34,5 @@ export class MemoryMailer implements IMailer {
 
 	clear(): void {
 		this.sentMails = [];
-	}
-
-	setSimulateFailure(fail: boolean): void {
-		this.simulateFailure = fail;
 	}
 }

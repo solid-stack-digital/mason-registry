@@ -1,5 +1,6 @@
 import type { Container } from "@solid-stack/di";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { IEmailAccessRepository } from "@/features/emailAccessVerification/domain/IEmailAccessRepository.js";
 import { Time } from "@/shared/time/domain/Time.js";
 import { getEmailAccessVerificationTestContainer } from "../__tests__/utils/getEmailAccessVerificationTestContainer.js";
 import {
@@ -12,10 +13,14 @@ describe("StubEmailAccessRepository", () => {
 		vi.stubEnv("INFRA_MODE", "isolated");
 
 		container = getEmailAccessVerificationTestContainer();
+
+		// Explicit test doubles; runtime providers keep actual or in-memory implementations.
+
+		container.provideValue(InitialEmailAccesses, []);
+		container.provide(IEmailAccessRepository, StubEmailAccessRepository);
 	});
 	afterEach(() => vi.unstubAllEnvs());
 	let container: Container;
-
 	it("initializes with provided items and supports basic operations", async () => {
 		container.provideValue(InitialEmailAccesses, [
 			{

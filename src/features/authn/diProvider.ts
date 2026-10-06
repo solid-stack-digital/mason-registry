@@ -10,41 +10,28 @@ import { EAVGateway } from "./infrastructure/EAVGateway.js";
 import { MemoryCredentialRepo } from "./infrastructure/MemoryCredentialRepo.js";
 import { MemoryEventPublisher } from "./infrastructure/MemoryEventPublisher.js";
 import { MemoryRefreshTokenRepo } from "./infrastructure/MemoryRefreshTokenRepo.js";
-import {
-	InitialCredentials,
-	StubCredentialRepo,
-} from "./infrastructure/StubCredentialRepo.js";
-import { StubEAVGateway } from "./infrastructure/StubEAVGateway.js";
-import { StubEventPublisher } from "./infrastructure/StubEventPublisher.js";
-import {
-	InitialRefreshTokens,
-	StubRefreshTokenRepo,
-} from "./infrastructure/StubRefreshTokenRepo.js";
 import { AuthnConfigToken } from "./tokens.js";
 
 export const AuthnProvider: DIModule = (c: Container) => {
-	c.provideValue(AuthnConfigToken, DEFAULT_AUTHN_CONFIG);
 	// TODO: Replace this environment lookup with your application's config loader after import.
-	const infraMode = process.env.INFRA_MODE || "isolated";
-	if (infraMode === "isolated") {
-		c.provideValue(InitialCredentials, []);
-		c.provideValue(InitialRefreshTokens, []);
-		c.provide(ICredentialRepo, StubCredentialRepo);
-		c.provide(IRefreshTokenRepo, StubRefreshTokenRepo);
-		c.provide(ISessionRepo, StubRefreshTokenRepo);
-		c.provide(IAuthnEventPublisher, StubEventPublisher);
-		c.provide(IEAVGateway, StubEAVGateway);
-	} else if (infraMode === "integrated") {
+	// An unset mode defaults to isolated; explicit invalid values are rejected.
+	const infraMode = process.env.INFRA_MODE ?? "isolated";
+	if (infraMode !== "isolated" && infraMode !== "integrated") {
+		throw new AuthnError("Invalid INFRA_MODE: expected isolated or integrated");
+	}
+	if (infraMode === "integrated") {
+		// TODO: Implement and configure external adapters for credential and session persistence, and event delivery after import.
+		throw new AuthnError(
+			"Integrated authn infrastructure is not implemented: configure external adapters for credential and session persistence, and event delivery.",
+		);
+	} else {
 		c.provide(ICredentialRepo, MemoryCredentialRepo);
 		c.provide(IRefreshTokenRepo, MemoryRefreshTokenRepo);
 		c.provide(ISessionRepo, MemoryRefreshTokenRepo);
 		c.provide(IAuthnEventPublisher, MemoryEventPublisher);
-		c.provide(IEAVGateway, EAVGateway);
-	} else {
-		throw new AuthnError(
-			"Received an invalid INFRA_MODE env while loading authn provider",
-		);
 	}
+	c.provideValue(AuthnConfigToken, DEFAULT_AUTHN_CONFIG);
+	c.provide(IEAVGateway, EAVGateway);
 };
 
 export default AuthnProvider;

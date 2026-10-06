@@ -42,7 +42,7 @@ export class MemoryOtpRepo implements IOtpRepo {
 		if (matches.length === 0) {
 			return null;
 		}
-		matches.sort((a, b) => b.createdAt.millis - a.createdAt.millis);
+		matches.reverse().sort((a, b) => b.createdAt.millis - a.createdAt.millis);
 		return matches[0] ? this.cloneOtp(matches[0]) : null;
 	}
 

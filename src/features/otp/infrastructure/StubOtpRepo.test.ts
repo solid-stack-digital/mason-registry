@@ -1,5 +1,6 @@
 import type { Container } from "@solid-stack/di";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { IOtpRepo } from "@/features/otp/domain/IOtpRepo.js";
 import { Time } from "@/shared/time/domain/Time.js";
 import { getOtpTestContainer } from "../__tests__/utils/getOtpTestContainer.js";
 import type { Otp } from "../domain/Otp.js";
@@ -10,10 +11,14 @@ describe("StubOtpRepo", () => {
 		vi.stubEnv("INFRA_MODE", "isolated");
 
 		container = getOtpTestContainer();
+
+		// Explicit test doubles; runtime providers keep actual or in-memory implementations.
+
+		container.provideValue(InitialOtps, []);
+		container.provide(IOtpRepo, StubOtpRepo);
 	});
 	afterEach(() => vi.unstubAllEnvs());
 	let container: Container;
-
 	const sampleOtp: Otp = {
 		id: "otp-stub",
 		recipientId: "user-1",
@@ -27,7 +32,6 @@ describe("StubOtpRepo", () => {
 		createdAt: new Time(1700000000000),
 		updatedAt: new Time(1700000000000),
 	};
-
 	it("should initialize with empty array when InitialOtps token provides empty array", () => {
 		const repo = container.resolve(StubOtpRepo);
 		expect(repo.getOtps()).toHaveLength(0);
@@ -35,6 +39,9 @@ describe("StubOtpRepo", () => {
 
 	it("should initialize with provided InitialOtps token", async () => {
 		const c = getOtpTestContainer();
+		// Explicit test doubles; runtime providers keep actual or in-memory implementations.
+		c.provideValue(InitialOtps, []);
+		c.provide(IOtpRepo, StubOtpRepo);
 		c.provideValue(InitialOtps, [sampleOtp]);
 		const repo = c.resolve(StubOtpRepo);
 

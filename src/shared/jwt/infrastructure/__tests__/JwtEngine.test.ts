@@ -3,6 +3,7 @@ import jsonwebtoken from "jsonwebtoken";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Duration } from "@/shared/time/domain/Duration.js";
 import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
+import { ITimeEngine } from "@/shared/time/ports/ITimeEngine.js";
 import { getJwtTestContainer } from "../../__tests__/utils/getJwtTestContainer.js";
 import { SecretToken } from "../../configs/SecretToken.js";
 import { JwtError } from "../../errors/JwtError.js";
@@ -24,6 +25,8 @@ describe("JwtEngine", () => {
 	beforeEach(() => {
 		vi.stubEnv("INFRA_MODE", "isolated");
 		const container = getJwtTestContainer();
+		// Explicit test doubles; runtime providers keep actual or in-memory implementations.
+		container.provide(ITimeEngine, StubTimeEngine);
 		secret = container.resolve(SecretToken);
 		engine = container.resolve(JwtEngine);
 		clock = container.resolve(StubTimeEngine);
@@ -120,6 +123,8 @@ describe("JwtEngine", () => {
 
 	it("requires an explicit non-empty secret", async () => {
 		const container = getJwtTestContainer();
+		// Explicit test doubles; runtime providers keep actual or in-memory implementations.
+		container.provide(ITimeEngine, StubTimeEngine);
 		container.provideValue(SecretToken, "");
 		await expect(container.resolve(JwtEngine).sign({}, ttl)).rejects.toThrow(
 			JwtError,

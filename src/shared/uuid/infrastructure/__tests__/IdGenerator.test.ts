@@ -1,5 +1,6 @@
 import type { Container } from "@solid-stack/di";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { IIdGenerator } from "@/shared/uuid/ports/IIdGenerator.js";
 import { getUuidTestContainer } from "../../__tests__/utils/getUuidTestContainer.js";
 import { CryptoIdGenerator } from "../CryptoIdGenerator.js";
 import { StubIdGenerator } from "../StubIdGenerator.js";
@@ -9,6 +10,8 @@ describe("IdGenerator Adapters", () => {
 	beforeEach(() => {
 		vi.stubEnv("INFRA_MODE", "isolated");
 		container = getUuidTestContainer();
+		// Explicit test doubles; runtime providers keep actual or in-memory implementations.
+		container.provide(IIdGenerator, StubIdGenerator);
 	});
 	afterEach(() => vi.unstubAllEnvs());
 	it("CryptoIdGenerator generates non-empty UUID strings", () => {

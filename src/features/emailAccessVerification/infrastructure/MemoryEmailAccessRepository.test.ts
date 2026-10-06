@@ -62,6 +62,36 @@ describe("MemoryEmailAccessRepository", () => {
 		expect(latest?.jti).toBe("jti-newer");
 	});
 
+	it("returns the last saved record when creation timestamps are equal", async () => {
+		await repo.save(makeAccess({ id: "first", jti: "first-jti" }));
+		await repo.save(makeAccess({ id: "second", jti: "second-jti" }));
+		const latest = await repo.findLatestByEmailAndPurpose(
+			"test@example.com",
+			"RESET_PASSWORD",
+		);
+		expect(latest?.jti).toBe("second-jti");
+	});
+
+	it("isolates saved records from changes to inputs and inspection snapshots", async () => {
+		const input = makeAccess();
+		await repo.save(input);
+		input.isUsed = true;
+		const snapshot = repo.getAll()[0];
+		if (!snapshot) throw new Error("Expected a saved record");
+		snapshot.isInvalidated = true;
+		const stored = await repo.findByJti(input.jti);
+		expect(stored?.isUsed).toBe(false);
+		expect(stored?.isInvalidated).toBe(false);
+		expect(stored?.createdAt).not.toBe(input.createdAt);
+		expect(stored?.expiresAt).not.toBe(snapshot.expiresAt);
+		const otherContainer = getEmailAccessVerificationTestContainer();
+		expect(
+			await otherContainer
+				.resolve(MemoryEmailAccessRepository)
+				.findByJti(input.jti),
+		).toBeNull();
+	});
+
 	it("finds active records and invalidates all for email and purpose", async () => {
 		const active1 = makeAccess({ id: "acc-1", jti: "jti-1" });
 		const active2 = makeAccess({ id: "acc-2", jti: "jti-2" });

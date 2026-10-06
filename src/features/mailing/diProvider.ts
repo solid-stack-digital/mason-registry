@@ -2,20 +2,23 @@ import type { Container, DIModule } from "@solid-stack/di";
 import { IMailer } from "./domain/IMailer.js";
 import { MailingError } from "./errors/MailingError.js";
 import { MemoryMailer } from "./infrastructure/MemoryMailer.js";
-import { InitialSendStatus, StubMailer } from "./infrastructure/StubMailer.js";
 
 export const MailingProvider: DIModule = (c: Container) => {
 	// TODO: Replace this environment lookup with your application's config loader after import.
-	const infraMode = process.env.INFRA_MODE || "isolated";
-	if (infraMode === "isolated") {
-		c.provideValue(InitialSendStatus, true);
-		c.provide(IMailer, StubMailer);
-	} else if (infraMode === "integrated") {
-		c.provide(IMailer, MemoryMailer);
-	} else {
+	// An unset mode defaults to isolated; explicit invalid values are rejected.
+	const infraMode = process.env.INFRA_MODE ?? "isolated";
+	if (infraMode !== "isolated" && infraMode !== "integrated") {
 		throw new MailingError(
-			"Received an invalid INFRA_MODE env while loading mailing provider",
+			"Invalid INFRA_MODE: expected isolated or integrated",
 		);
+	}
+	if (infraMode === "integrated") {
+		// TODO: Implement and configure external adapters for mail delivery after import.
+		throw new MailingError(
+			"Integrated mailing infrastructure is not implemented: configure external adapters for mail delivery.",
+		);
+	} else {
+		c.provide(IMailer, MemoryMailer);
 	}
 };
 

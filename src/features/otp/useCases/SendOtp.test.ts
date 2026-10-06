@@ -8,12 +8,12 @@ import { IOtpEmailGateway } from "../domain/IOtpEmailGateway.js";
 import { IOtpGenerator } from "../domain/IOtpGenerator.js";
 import { IOtpRepo } from "../domain/IOtpRepo.js";
 import { OtpCooldownError } from "../errors/OtpErrors.js";
-import type { StubOtpEmailGateway } from "../infrastructure/StubOtpEmailGateway.js";
+import { StubOtpEmailGateway } from "../infrastructure/StubOtpEmailGateway.js";
 import {
 	NextOtp,
-	type StubOtpGenerator,
+	StubOtpGenerator,
 } from "../infrastructure/StubOtpGenerator.js";
-import type { StubOtpRepo } from "../infrastructure/StubOtpRepo.js";
+import { InitialOtps, StubOtpRepo } from "../infrastructure/StubOtpRepo.js";
 import { OtpConfigToken } from "../tokens.js";
 import { SendOtp, type SendOtpInput } from "./SendOtp.js";
 
@@ -23,7 +23,13 @@ describe("SendOtp UseCase", () => {
 
 		// Arrange: Fresh DI container for total isolation
 		container = getOtpTestContainer();
-
+		// Explicit test doubles; runtime providers keep actual or in-memory implementations.
+		container.provide(ITimeEngine, StubTimeEngine);
+		container.provideValue(InitialOtps, []);
+		container.provide(IOtpRepo, StubOtpRepo);
+		container.provideValue(NextOtp, "123456");
+		container.provide(IOtpGenerator, StubOtpGenerator);
+		container.provide(IOtpEmailGateway, StubOtpEmailGateway);
 		// Configure time & uuid stubs via DI
 		stubTime = container.resolve(StubTimeEngine);
 

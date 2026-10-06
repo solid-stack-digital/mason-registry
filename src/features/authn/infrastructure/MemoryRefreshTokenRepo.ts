@@ -65,7 +65,7 @@ export class MemoryRefreshTokenRepo implements IRefreshTokenRepo {
 		);
 		if (matches.length === 0 || !matches[0]) return null;
 
-		matches.sort((a, b) => b.createdAt.millis - a.createdAt.millis);
+		matches.reverse().sort((a, b) => b.createdAt.millis - a.createdAt.millis);
 		const latest = matches[0];
 		if (!latest) return null;
 		return this.cloneToken(latest);

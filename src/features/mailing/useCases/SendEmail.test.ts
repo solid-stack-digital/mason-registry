@@ -1,7 +1,8 @@
 import type { Container } from "@solid-stack/di";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { IMailer } from "@/features/mailing/domain/IMailer.js";
 import { getMailingTestContainer } from "../__tests__/utils/getMailingTestContainer.js";
-import { StubMailer } from "../infrastructure/StubMailer.js";
+import { InitialSendStatus, StubMailer } from "../infrastructure/StubMailer.js";
 import { SendEmail } from "./SendEmail.js";
 
 describe("SendEmail UseCase", () => {
@@ -9,6 +10,11 @@ describe("SendEmail UseCase", () => {
 		vi.stubEnv("INFRA_MODE", "isolated");
 
 		container = getMailingTestContainer();
+
+		// Explicit test doubles; runtime providers keep actual or in-memory implementations.
+
+		container.provideValue(InitialSendStatus, true);
+		container.provide(IMailer, StubMailer);
 
 		mailer = container.resolve(StubMailer);
 		sendEmail = container.resolve(SendEmail);

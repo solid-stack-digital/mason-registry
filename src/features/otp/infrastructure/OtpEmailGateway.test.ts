@@ -10,6 +10,7 @@ import { CryptoIdGenerator } from "@/shared/uuid/infrastructure/CryptoIdGenerato
 import { IIdGenerator } from "@/shared/uuid/ports/IIdGenerator.js";
 import { getOtpTestContainer } from "../__tests__/utils/getOtpTestContainer.js";
 import { OtpProvider } from "../diProvider.js";
+import { IOtpGenerator } from "../domain/IOtpGenerator.js";
 import {
 	OtpExpiredError,
 	OtpInvalidCodeError,
@@ -21,7 +22,7 @@ import { ValidateOtp } from "../useCases/ValidateOtp.js";
 
 describe("OtpEmailGateway integration with mailing", () => {
 	beforeEach(() => {
-		vi.stubEnv("INFRA_MODE", "integrated");
+		vi.stubEnv("INFRA_MODE", "isolated");
 
 		container = createTestContainer();
 
@@ -68,7 +69,9 @@ describe("OtpEmailGateway integration with mailing", () => {
 
 	describe("2. End-to-End Expected Behaviors", () => {
 		it("propagates delivery failures from the mailing feature", async () => {
-			memoryMailer.setSimulateFailure(true);
+			vi.spyOn(memoryMailer, "send").mockRejectedValueOnce(
+				new Error("External mailing service unavailable"),
+			);
 			await expect(
 				sendOtp.execute({
 					recipientId: "user-42",
@@ -240,6 +243,9 @@ describe("OtpEmailGateway integration with mailing", () => {
 		});
 
 		it("Behavior 5: Request OTP (Code A) -> Request OTP again (Code B) -> attempt to use Code A -> receives 'Invalid code' because Code B burned Code A", async () => {
+			vi.spyOn(container.resolve(IOtpGenerator), "generate")
+				.mockReturnValueOnce("111111")
+				.mockReturnValueOnce("222222");
 			// Arrange: 1. Request Code A
 			const sendResultA = await sendOtp.execute({
 				recipientId: "user-overlap",

@@ -1,7 +1,7 @@
 import type { Container } from "@solid-stack/di";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Time } from "@/shared/time/domain/Time.js";
-import type { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
+import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
 import { ITimeEngine } from "@/shared/time/ports/ITimeEngine.js";
 import { getEmailAccessVerificationTestContainer } from "../__tests__/utils/getEmailAccessVerificationTestContainer.js";
 import type {
@@ -14,7 +14,10 @@ import {
 	EmailAccessTokenAlreadyUsedError,
 	EmailAccessTokenExpiredError,
 } from "../errors/EmailAccessErrors.js";
-import type { StubEmailAccessRepository } from "../infrastructure/StubEmailAccessRepository.js";
+import {
+	InitialEmailAccesses,
+	StubEmailAccessRepository,
+} from "../infrastructure/StubEmailAccessRepository.js";
 import { DecodeAndValidateToken } from "../services/DecodeAndValidateToken.js";
 import { ConsumeEmailAccessToken } from "./ConsumeEmailAccessToken.js";
 
@@ -24,6 +27,11 @@ describe("ConsumeEmailAccessToken Use Case", () => {
 
 		container = getEmailAccessVerificationTestContainer();
 
+		// Explicit test doubles; runtime providers keep actual or in-memory implementations.
+
+		container.provide(ITimeEngine, StubTimeEngine);
+		container.provideValue(InitialEmailAccesses, []);
+		container.provide(IEmailAccessRepository, StubEmailAccessRepository);
 		// Configure Time
 
 		stubTime = container.resolve(ITimeEngine) as StubTimeEngine;

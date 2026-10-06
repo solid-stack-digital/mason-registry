@@ -1,5 +1,6 @@
 import type { Container } from "@solid-stack/di";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { IAuthnEventPublisher } from "@/features/authn/domain/IAuthnEventPublisher.js";
 import { getAuthnTestContainer } from "../__tests__/utils/getAuthnTestContainer.js";
 import { AccountRegisteredEvent } from "../domain/events/index.js";
 import { MemoryEventPublisher } from "./MemoryEventPublisher.js";
@@ -10,10 +11,13 @@ describe("EventPublishers", () => {
 		vi.stubEnv("INFRA_MODE", "isolated");
 
 		container = getAuthnTestContainer();
+
+		// Explicit test doubles; runtime providers keep actual or in-memory implementations.
+
+		container.provide(IAuthnEventPublisher, StubEventPublisher);
 	});
 	afterEach(() => vi.unstubAllEnvs());
 	let container: Container;
-
 	it("MemoryEventPublisher stores and retrieves published events", async () => {
 		const publisher = container.resolve(MemoryEventPublisher);
 		const event = new AccountRegisteredEvent({

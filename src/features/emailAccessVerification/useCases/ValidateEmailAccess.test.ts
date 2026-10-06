@@ -2,15 +2,18 @@ import type { Container } from "@solid-stack/di";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Jwt } from "@/shared/jwt/Jwt.js";
 import { Duration } from "@/shared/time/domain/Duration.js";
-import type { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
+import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
 import { ITimeEngine } from "@/shared/time/ports/ITimeEngine.js";
 import { CryptoIdGenerator } from "@/shared/uuid/infrastructure/CryptoIdGenerator.js";
 import { IIdGenerator } from "@/shared/uuid/ports/IIdGenerator.js";
 import { getEmailAccessVerificationTestContainer } from "../__tests__/utils/getEmailAccessVerificationTestContainer.js";
 import { IEmailAccessRepository } from "../domain/IEmailAccessRepository.js";
 import { IOtpGateway } from "../domain/IOtpGateway.js";
-import type { StubEmailAccessRepository } from "../infrastructure/StubEmailAccessRepository.js";
-import type { StubOtpGateway } from "../infrastructure/StubOtpGateway.js";
+import {
+	InitialEmailAccesses,
+	StubEmailAccessRepository,
+} from "../infrastructure/StubEmailAccessRepository.js";
+import { StubOtpGateway } from "../infrastructure/StubOtpGateway.js";
 import { EmailAccessConfigToken } from "../tokens.js";
 import { ValidateEmailAccess } from "./ValidateEmailAccess.js";
 
@@ -20,6 +23,12 @@ describe("ValidateEmailAccess Use Case", () => {
 
 		container = getEmailAccessVerificationTestContainer();
 
+		// Explicit test doubles; runtime providers keep actual or in-memory implementations.
+
+		container.provide(ITimeEngine, StubTimeEngine);
+		container.provideValue(InitialEmailAccesses, []);
+		container.provide(IEmailAccessRepository, StubEmailAccessRepository);
+		container.provide(IOtpGateway, StubOtpGateway);
 		// Configure Time
 
 		stubTime = container.resolve(ITimeEngine) as StubTimeEngine;

@@ -1,5 +1,6 @@
 import type { Container } from "@solid-stack/di";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { ITimeEngine } from "@/shared/time/ports/ITimeEngine.js";
 import { getTimeTestContainer } from "../../__tests__/utils/getTimeTestContainer.js";
 import { Clock } from "../../Clock.js";
 import { Duration } from "../../domain/Duration.js";
@@ -12,11 +13,12 @@ describe("Time Infrastructure & Clock", () => {
 	beforeEach(() => {
 		vi.stubEnv("INFRA_MODE", "isolated");
 		container = getTimeTestContainer();
+		// Explicit test doubles; runtime providers keep actual or in-memory implementations.
+		container.provide(ITimeEngine, StubTimeEngine);
 	});
 	afterEach(() => vi.unstubAllEnvs());
 	const baseMillis = 1700000000000; // 2023-11-14T22:13:20.000Z
 	const expectedIso = "2023-11-14T22:13:20.000Z";
-
 	describe("SystemTimeEngine", () => {
 		it("returns current timestamp within execution window", () => {
 			const engine = container.resolve(SystemTimeEngine);

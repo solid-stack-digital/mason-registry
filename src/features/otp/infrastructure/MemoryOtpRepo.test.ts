@@ -33,6 +33,16 @@ describe("MemoryOtpRepo Infrastructure Adapter", () => {
 	});
 
 	describe("Core Mechanics & Contract Fulfillment", () => {
+		it("returns the last saved OTP when creation timestamps are equal", async () => {
+			await repo.save(createSampleOtp({ id: "first", otpCode: "111111" }));
+			await repo.save(createSampleOtp({ id: "second", otpCode: "222222" }));
+			const latest = await repo.findLatestByRecipientAndPurpose(
+				"user-1",
+				"EMAIL_VERIFICATION",
+			);
+			expect(latest?.id).toBe("second");
+		});
+
 		it("should save and retrieve the latest OTP for recipient and purpose", async () => {
 			// Arrange
 			const otpOld = createSampleOtp({

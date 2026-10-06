@@ -13,7 +13,7 @@ import {
 	OtpMaxAttemptsExceededError,
 	OtpNotFoundError,
 } from "../errors/OtpErrors.js";
-import type { StubOtpRepo } from "../infrastructure/StubOtpRepo.js";
+import { InitialOtps, StubOtpRepo } from "../infrastructure/StubOtpRepo.js";
 import { OtpConfigToken } from "../tokens.js";
 import { ValidateOtp, type ValidateOtpInput } from "./ValidateOtp.js";
 
@@ -23,6 +23,10 @@ describe("ValidateOtp UseCase", () => {
 
 		// Arrange: Fresh DI container for total isolation
 		container = getOtpTestContainer();
+		// Explicit test doubles; runtime providers keep actual or in-memory implementations.
+		container.provide(ITimeEngine, StubTimeEngine);
+		container.provideValue(InitialOtps, []);
+		container.provide(IOtpRepo, StubOtpRepo);
 
 		stubTime = container.resolve(StubTimeEngine);
 

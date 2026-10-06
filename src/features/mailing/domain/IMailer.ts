@@ -17,5 +17,4 @@ export abstract class IMailer {
 	}): Promise<{ ok: boolean }>;
 	abstract getSentMails(): SentMail[];
 	abstract clear(): void;
-	abstract setSimulateFailure(fail: boolean): void;
 }

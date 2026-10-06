@@ -1,7 +1,10 @@
 import type { Container } from "@solid-stack/di";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { IAuthnEventPublisher } from "@/features/authn/domain/IAuthnEventPublisher.js";
+import { ICredentialRepo } from "@/features/authn/domain/ICredentialRepo.js";
 import { Clock } from "@/shared/time/Clock.js";
 import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
+import { ITimeEngine } from "@/shared/time/ports/ITimeEngine.js";
 import { getAuthnTestContainer } from "../__tests__/utils/getAuthnTestContainer.js";
 import { AccountRegisteredEvent } from "../domain/events/index.js";
 import {
@@ -9,7 +12,10 @@ import {
 	InvalidEmailError,
 	WeakPasswordError,
 } from "../errors/AuthnErrors.js";
-import { StubCredentialRepo } from "../infrastructure/StubCredentialRepo.js";
+import {
+	InitialCredentials,
+	StubCredentialRepo,
+} from "../infrastructure/StubCredentialRepo.js";
 import { StubEventPublisher } from "../infrastructure/StubEventPublisher.js";
 import { RegisterAccount } from "./RegisterAccount.js";
 
@@ -18,6 +24,13 @@ describe("RegisterAccount UseCase", () => {
 		vi.stubEnv("INFRA_MODE", "isolated");
 
 		container = getAuthnTestContainer();
+
+		// Explicit test doubles; runtime providers keep actual or in-memory implementations.
+
+		container.provide(ITimeEngine, StubTimeEngine);
+		container.provideValue(InitialCredentials, []);
+		container.provide(ICredentialRepo, StubCredentialRepo);
+		container.provide(IAuthnEventPublisher, StubEventPublisher);
 
 		const stubTime = container.resolve(StubTimeEngine);
 		stubTime.setTime(1700000000000);

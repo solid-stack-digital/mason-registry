@@ -1,23 +1,18 @@
 import type { Container } from "@solid-stack/di";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import emailAccessVerificationProvider from "@/features/emailAccessVerification/diProvider.js";
-import { IOtpGateway } from "@/features/emailAccessVerification/domain/IOtpGateway.js";
-import { OtpGateway } from "@/features/emailAccessVerification/infrastructure/OtpGateway.js";
 import { RequestEmailAccessVerification } from "@/features/emailAccessVerification/useCases/RequestEmailAccessVerification.js";
 import { ValidateEmailAccess } from "@/features/emailAccessVerification/useCases/ValidateEmailAccess.js";
 import mailingProvider from "@/features/mailing/diProvider.js";
 import { IMailer } from "@/features/mailing/domain/IMailer.js";
+import { MemoryMailer } from "@/features/mailing/infrastructure/MemoryMailer.js";
 import {
 	InitialSendStatus,
 	StubMailer,
 } from "@/features/mailing/infrastructure/StubMailer.js";
 import otpProvider from "@/features/otp/diProvider.js";
-import { IOtpEmailGateway } from "@/features/otp/domain/IOtpEmailGateway.js";
-import { OtpEmailGateway } from "@/features/otp/infrastructure/OtpEmailGateway.js";
 import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
 import { ITimeEngine } from "@/shared/time/ports/ITimeEngine.js";
-import { StubIdGenerator } from "@/shared/uuid/infrastructure/StubIdGenerator.js";
-import { IIdGenerator } from "@/shared/uuid/ports/IIdGenerator.js";
 import { getAuthnTestContainer } from "../__tests__/utils/getAuthnTestContainer.js";
 import {
 	AccountRegisteredEvent,
@@ -26,7 +21,6 @@ import {
 import { IAuthnEventPublisher } from "../domain/IAuthnEventPublisher.js";
 import { IEAVGateway } from "../domain/IEAVGateway.js";
 import type { MemoryEventPublisher } from "../infrastructure/MemoryEventPublisher.js";
-import type { StubEventPublisher } from "../infrastructure/StubEventPublisher.js";
 import { ChangePassword } from "../useCases/ChangePassword.js";
 import { GetCredentialById } from "../useCases/GetCredentialById.js";
 import { Login } from "../useCases/Login.js";
@@ -35,9 +29,8 @@ import { Refresh } from "../useCases/Refresh.js";
 import { RegisterAccount } from "../useCases/RegisterAccount.js";
 import { ResetPassword } from "../useCases/ResetPassword.js";
 import { VerifyEmail } from "../useCases/VerifyEmail.js";
-import { EAVGateway } from "./EAVGateway.js";
 
-describe.each(["isolated", "integrated"])(
+describe.each(["isolated"])(
 	"EAVGateway integration with email access verification (%s)",
 	(infraMode) => {
 		beforeEach(() => {
@@ -47,29 +40,24 @@ describe.each(["isolated", "integrated"])(
 			mailingProvider(container);
 			otpProvider(container);
 			emailAccessVerificationProvider(container);
-			container.provide(IOtpEmailGateway, OtpEmailGateway);
-			container.provide(IOtpGateway, OtpGateway);
-			container.provide(IEAVGateway, EAVGateway);
 
 			// Shared infrastructure test doubles
 			container.provide(ITimeEngine, StubTimeEngine);
 			const stubTime = container.resolve(ITimeEngine) as StubTimeEngine;
 			stubTime.setMillis(1700000000000);
 
-			container.provide(IIdGenerator, StubIdGenerator);
-			container.provideValue(InitialSendStatus, true);
-			container.provide(IMailer, StubMailer);
-
 			// Resolve publisher
-			eventPublisher = container.resolve(IAuthnEventPublisher) as
-				| MemoryEventPublisher
-				| StubEventPublisher;
+			eventPublisher = container.resolve(
+				IAuthnEventPublisher,
+			) as MemoryEventPublisher;
 		});
 		afterEach(() => vi.unstubAllEnvs());
 		let container: Container;
-		let eventPublisher: MemoryEventPublisher | StubEventPublisher;
+		let eventPublisher: MemoryEventPublisher;
 
 		it("propagates mail delivery failures through the email verification and OTP modules", async () => {
+			container.provideValue(InitialSendStatus, true);
+			container.provide(IMailer, StubMailer);
 			container
 				.resolve(StubMailer)
 				.setError(new Error("Mail delivery unavailable"));
@@ -146,7 +134,7 @@ describe.each(["isolated", "integrated"])(
 			});
 			expect(reqResult.success).toBe(true);
 			expect(reqResult.otpCode).toBeDefined();
-			const sentMail = container.resolve(StubMailer).getSentMails()[0];
+			const sentMail = container.resolve(MemoryMailer).getSentMails()[0];
 			expect(sentMail?.to).toBe(email);
 			expect(sentMail?.body).toContain(reqResult.otpCode);
 

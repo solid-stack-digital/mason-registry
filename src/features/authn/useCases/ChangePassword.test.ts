@@ -1,17 +1,28 @@
 import type { Container } from "@solid-stack/di";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { IAuthnEventPublisher } from "@/features/authn/domain/IAuthnEventPublisher.js";
+import { ICredentialRepo } from "@/features/authn/domain/ICredentialRepo.js";
+import { IRefreshTokenRepo } from "@/features/authn/domain/IRefreshTokenRepo.js";
+import { ISessionRepo } from "@/features/authn/domain/ISessionRepo.js";
 import { Hasher } from "@/shared/hasher/Hasher.js";
 import { Clock } from "@/shared/time/Clock.js";
 import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
+import { ITimeEngine } from "@/shared/time/ports/ITimeEngine.js";
 import { getAuthnTestContainer } from "../__tests__/utils/getAuthnTestContainer.js";
 import { PasswordChangedEvent } from "../domain/events/index.js";
 import {
 	PasswordMismatchError,
 	WeakPasswordError,
 } from "../errors/AuthnErrors.js";
-import { StubCredentialRepo } from "../infrastructure/StubCredentialRepo.js";
+import {
+	InitialCredentials,
+	StubCredentialRepo,
+} from "../infrastructure/StubCredentialRepo.js";
 import { StubEventPublisher } from "../infrastructure/StubEventPublisher.js";
-import { StubRefreshTokenRepo } from "../infrastructure/StubRefreshTokenRepo.js";
+import {
+	InitialRefreshTokens,
+	StubRefreshTokenRepo,
+} from "../infrastructure/StubRefreshTokenRepo.js";
 import { ChangePassword } from "./ChangePassword.js";
 
 describe("ChangePassword UseCase", () => {
@@ -19,6 +30,16 @@ describe("ChangePassword UseCase", () => {
 		vi.stubEnv("INFRA_MODE", "isolated");
 
 		container = getAuthnTestContainer();
+
+		// Explicit test doubles; runtime providers keep actual or in-memory implementations.
+
+		container.provide(ITimeEngine, StubTimeEngine);
+		container.provideValue(InitialCredentials, []);
+		container.provide(ICredentialRepo, StubCredentialRepo);
+		container.provideValue(InitialRefreshTokens, []);
+		container.provide(IRefreshTokenRepo, StubRefreshTokenRepo);
+		container.provide(ISessionRepo, StubRefreshTokenRepo);
+		container.provide(IAuthnEventPublisher, StubEventPublisher);
 		hasher = container.resolve(Hasher);
 
 		const stubTime = container.resolve(StubTimeEngine);

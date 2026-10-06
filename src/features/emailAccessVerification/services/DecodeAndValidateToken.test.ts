@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Jwt } from "@/shared/jwt/Jwt.js";
 import { Duration } from "@/shared/time/domain/Duration.js";
 import { Time } from "@/shared/time/domain/Time.js";
-import type { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
+import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
 import { ITimeEngine } from "@/shared/time/ports/ITimeEngine.js";
 import { getEmailAccessVerificationTestContainer } from "../__tests__/utils/getEmailAccessVerificationTestContainer.js";
 import type { EmailAccess } from "../domain/EmailAccess.js";
@@ -16,7 +16,10 @@ import {
 	EmailAccessTokenInvalidError,
 	EmailAccessTokenNotFoundError,
 } from "../errors/EmailAccessErrors.js";
-import type { StubEmailAccessRepository } from "../infrastructure/StubEmailAccessRepository.js";
+import {
+	InitialEmailAccesses,
+	StubEmailAccessRepository,
+} from "../infrastructure/StubEmailAccessRepository.js";
 import { DecodeAndValidateToken } from "./DecodeAndValidateToken.js";
 
 describe("DecodeAndValidateToken Service", () => {
@@ -25,6 +28,11 @@ describe("DecodeAndValidateToken Service", () => {
 
 		container = getEmailAccessVerificationTestContainer();
 
+		// Explicit test doubles; runtime providers keep actual or in-memory implementations.
+
+		container.provide(ITimeEngine, StubTimeEngine);
+		container.provideValue(InitialEmailAccesses, []);
+		container.provide(IEmailAccessRepository, StubEmailAccessRepository);
 		// Configure time
 
 		stubTime = container.resolve(ITimeEngine) as StubTimeEngine;

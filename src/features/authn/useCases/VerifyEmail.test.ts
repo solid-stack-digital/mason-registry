@@ -1,13 +1,19 @@
 import type { Container } from "@solid-stack/di";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { ICredentialRepo } from "@/features/authn/domain/ICredentialRepo.js";
+import { IEAVGateway } from "@/features/authn/domain/IEAVGateway.js";
 import { Clock } from "@/shared/time/Clock.js";
 import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
+import { ITimeEngine } from "@/shared/time/ports/ITimeEngine.js";
 import { getAuthnTestContainer } from "../__tests__/utils/getAuthnTestContainer.js";
 import {
 	AccountAlreadyVerifiedError,
 	AccountNotFoundError,
 } from "../errors/AuthnErrors.js";
-import { StubCredentialRepo } from "../infrastructure/StubCredentialRepo.js";
+import {
+	InitialCredentials,
+	StubCredentialRepo,
+} from "../infrastructure/StubCredentialRepo.js";
 import { StubEAVGateway } from "../infrastructure/StubEAVGateway.js";
 import { VerifyEmail } from "./VerifyEmail.js";
 
@@ -16,6 +22,13 @@ describe("VerifyEmail UseCase", () => {
 		vi.stubEnv("INFRA_MODE", "isolated");
 
 		container = getAuthnTestContainer();
+
+		// Explicit test doubles; runtime providers keep actual or in-memory implementations.
+
+		container.provide(ITimeEngine, StubTimeEngine);
+		container.provideValue(InitialCredentials, []);
+		container.provide(ICredentialRepo, StubCredentialRepo);
+		container.provide(IEAVGateway, StubEAVGateway);
 
 		const stubTime = container.resolve(StubTimeEngine);
 		stubTime.setTime(1700000000000);

@@ -1,5 +1,6 @@
 import type { Container } from "@solid-stack/di";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { IOtpGateway } from "@/features/emailAccessVerification/domain/IOtpGateway.js";
 import { getEmailAccessVerificationTestContainer } from "../__tests__/utils/getEmailAccessVerificationTestContainer.js";
 import { StubOtpGateway } from "./StubOtpGateway.js";
 
@@ -8,6 +9,10 @@ describe("StubOtpGateway", () => {
 		vi.stubEnv("INFRA_MODE", "isolated");
 
 		container = getEmailAccessVerificationTestContainer();
+
+		// Explicit test doubles; runtime providers keep actual or in-memory implementations.
+
+		container.provide(IOtpGateway, StubOtpGateway);
 		stub = container.resolve(StubOtpGateway);
 	});
 	afterEach(() => vi.unstubAllEnvs());

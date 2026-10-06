@@ -27,7 +27,7 @@ import { ValidateEmailAccess } from "../useCases/ValidateEmailAccess.js";
 
 describe("OtpGateway integration with OTP", () => {
 	beforeEach(() => {
-		vi.stubEnv("INFRA_MODE", "integrated");
+		vi.stubEnv("INFRA_MODE", "isolated");
 
 		container = createTestContainer();
 
