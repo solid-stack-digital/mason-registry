@@ -44,7 +44,6 @@ export default defineConfig({
     globals: true,
     include: [
       "src/**/*.test.{ts,tsx}",
-      "src/**/__tests__/**/*.{ts,tsx}",
       "tests/**/*.test.{ts,tsx}",
     ],
     exclude: ["node_modules", "dist"],

@@ -2,14 +2,15 @@ import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { type DepsType, MakeInjectable } from "@solid-stack/di";
 import { HmacError } from "../errors/HmacError.js";
 import type {
+	HmacData,
 	HmacEncoding,
-	HmacInput,
 	HmacOptions,
 	IHmacEngine,
 } from "../ports/IHmacEngine.js";
 
 /**
  * Production implementation of IHmacEngine using node:crypto.
+ * Uses UTF-8 strings for both message data and the explicit secret.
  */
 @MakeInjectable
 export class DefaultHmacEngine implements IHmacEngine {
@@ -17,70 +18,68 @@ export class DefaultHmacEngine implements IHmacEngine {
 
 	constructor(public deps: DepsType<typeof DefaultHmacEngine.deps>) {}
 
-	private resolveSecret(secret: HmacInput): HmacInput {
-		if (typeof secret === "string" && secret.length === 0) {
-			const envSecret = process.env.HMAC_SECRET;
-			if (envSecret && envSecret.length > 0) {
-				return envSecret;
-			}
+	private validateSecret(secret?: string): string {
+		if (typeof secret !== "string" || secret.length === 0) {
 			throw new HmacError("HMAC secret cannot be empty");
 		}
-		if (!secret) {
-			const envSecret = process.env.HMAC_SECRET;
-			if (envSecret && envSecret.length > 0) {
-				return envSecret;
-			}
-			throw new HmacError("HMAC secret cannot be empty");
-		}
+
 		return secret;
 	}
 
-	sign(data: HmacInput, secret: HmacInput, options?: HmacOptions): string {
-		const key = this.resolveSecret(secret);
-		if (data === undefined || data === null) {
-			throw new HmacError("HMAC data cannot be null or undefined");
+	sign(data: HmacData, options?: HmacOptions): string {
+		const key = this.validateSecret(options?.secret);
+		if (typeof data !== "string") {
+			throw new HmacError("HMAC data must be a string");
 		}
 
 		const algorithm = options?.algorithm ?? "sha256";
 		const encoding = options?.encoding ?? "hex";
 
-		const hmac = createHmac(algorithm, key);
-		hmac.update(data);
-		return hmac.digest(encoding);
+		if (!["hex", "base64", "base64url"].includes(encoding)) {
+			throw new HmacError("Unsupported HMAC encoding");
+		}
+		try {
+			return createHmac(algorithm, key).update(data, "utf8").digest(encoding);
+		} catch (cause) {
+			throw new HmacError("Failed to sign HMAC data", { cause });
+		}
 	}
 
 	verify(
-		data: HmacInput,
-		secret: HmacInput,
+		data: HmacData,
 		expectedDigest: string,
 		options?: HmacOptions,
 	): boolean {
-		if (typeof expectedDigest !== "string" || expectedDigest.length === 0) {
+		if (typeof expectedDigest !== "string" || !expectedDigest) {
 			return false;
 		}
-
+		let computedDigest: string;
 		try {
-			const computed = this.sign(data, secret, options);
-			const encoding = options?.encoding ?? "hex";
-
-			const expectedBuf = Buffer.from(expectedDigest, encoding);
-			const computedBuf = Buffer.from(computed, encoding);
-
-			if (expectedBuf.length !== computedBuf.length) {
-				return false;
-			}
-
-			return timingSafeEqual(expectedBuf, computedBuf);
+			computedDigest = this.sign(data, options);
 		} catch {
 			return false;
 		}
+		const computedBuf = Buffer.from(computedDigest);
+		const expectedBuf = Buffer.from(expectedDigest);
+
+		if (computedBuf.length !== expectedBuf.length) {
+			return false;
+		}
+
+		return timingSafeEqual(computedBuf, expectedBuf);
 	}
 
-	generateSecret(bytes: number = 32, encoding: HmacEncoding = "hex"): string {
-		if (bytes <= 0) {
-			throw new HmacError("Byte length must be greater than 0");
+	generateSecret(length = 32, encoding: HmacEncoding = "hex"): string {
+		if (!Number.isSafeInteger(length) || length <= 0) {
+			throw new HmacError("Byte length must be a positive safe integer");
 		}
-		const buf = randomBytes(bytes);
-		return buf.toString(encoding);
+		if (!["hex", "base64", "base64url"].includes(encoding)) {
+			throw new HmacError("Unsupported HMAC encoding");
+		}
+		try {
+			return randomBytes(length).toString(encoding);
+		} catch (cause) {
+			throw new HmacError("Failed to generate HMAC secret", { cause });
+		}
 	}
 }

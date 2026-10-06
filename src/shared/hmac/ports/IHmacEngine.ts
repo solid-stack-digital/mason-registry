@@ -1,6 +1,4 @@
-import type { BinaryLike } from "node:crypto";
-
-export type HmacInput = BinaryLike;
+export type HmacData = string;
 
 export type HmacAlgorithm =
 	| "sha256"
@@ -15,21 +13,15 @@ export type HmacEncoding = "hex" | "base64" | "base64url";
 export interface HmacOptions {
 	algorithm?: HmacAlgorithm;
 	encoding?: HmacEncoding;
+	secret: string;
 }
 
 export abstract class IHmacEngine {
-	abstract sign(
-		data: HmacInput,
-		secret: HmacInput,
-		options?: HmacOptions,
-	): string;
+	abstract sign(data: HmacData, options?: HmacOptions): string;
 
 	abstract verify(
-		data: HmacInput,
-		secret: HmacInput,
+		data: HmacData,
 		expectedDigest: string,
 		options?: HmacOptions,
 	): boolean;
-
-	abstract generateSecret(bytes?: number, encoding?: HmacEncoding): string;
 }
