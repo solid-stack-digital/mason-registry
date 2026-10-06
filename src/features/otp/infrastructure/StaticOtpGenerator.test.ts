@@ -1,14 +1,17 @@
-import { Container } from "@solid-stack/di";
-import { beforeEach, describe, expect, it } from "vitest";
+import type { Container } from "@solid-stack/di";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { getOtpTestContainer } from "../__tests__/utils/getOtpTestContainer.js";
 import { StaticOtpGenerator, StaticOtpToken } from "./StaticOtpGenerator.js";
 
 describe("StaticOtpGenerator Infrastructure Adapter", () => {
-	let container: Container;
-
 	beforeEach(() => {
-		container = new Container();
+		vi.stubEnv("INFRA_MODE", "isolated");
+
+		container = getOtpTestContainer();
 		container.provideValue(StaticOtpToken, "123456");
 	});
+	afterEach(() => vi.unstubAllEnvs());
+	let container: Container;
 
 	describe("Core Mechanics & Contract Fulfillment", () => {
 		it("should return configured static OTP", () => {

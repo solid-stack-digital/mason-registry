@@ -1,12 +1,22 @@
-import { describe, expect, it } from "vitest";
+import type { Container } from "@solid-stack/di";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { getTimeTestContainer } from "./__tests__/utils/getTimeTestContainer.js";
 import { Clock } from "./Clock.js";
-import { StubTimeEngine } from "./infrastructure/StubTimeEngine.js";
+import { Duration } from "./domain/Duration.js";
+import { StubClock, StubTimeEngine } from "./infrastructure/StubTimeEngine.js";
 
 describe("Clock", () => {
+	let container: Container;
+	beforeEach(() => {
+		vi.stubEnv("INFRA_MODE", "isolated");
+		container = getTimeTestContainer();
+	});
+	afterEach(() => vi.unstubAllEnvs());
 	it("provides deterministic current time with StubTimeEngine", () => {
 		const fixedMillis = 1700000000000;
-		const stub = new StubTimeEngine({}, fixedMillis);
-		const clock = new Clock({ timeEngine: stub });
+		const stub = container.resolve(StubTimeEngine);
+		stub.setMillis(fixedMillis);
+		const clock = container.resolve(Clock);
 
 		const now = clock.now();
 		expect(now.millis).toBe(fixedMillis);
@@ -16,8 +26,7 @@ describe("Clock", () => {
 	});
 
 	it("parses duration strings correctly", () => {
-		const stub = new StubTimeEngine({});
-		const clock = new Clock({ timeEngine: stub });
+		const clock = container.resolve(Clock);
 
 		expect(clock.duration("500ms").millis).toBe(500);
 		expect(clock.duration("10s").millis).toBe(10000);
@@ -28,8 +37,7 @@ describe("Clock", () => {
 	});
 
 	it("converts to and from ISO strings", () => {
-		const stub = new StubTimeEngine({});
-		const clock = new Clock({ timeEngine: stub });
+		const clock = container.resolve(Clock);
 
 		const iso = "2024-01-15T12:00:00.000Z";
 		const time = clock.fromIso(iso);
@@ -38,8 +46,7 @@ describe("Clock", () => {
 	});
 
 	it("converts to and from civil dates", () => {
-		const stub = new StubTimeEngine({});
-		const clock = new Clock({ timeEngine: stub });
+		const clock = container.resolve(Clock);
 
 		const time = clock.fromCivilDate(2025, 6, 20);
 		const civil = clock.toCivilDate(time);
@@ -48,9 +55,31 @@ describe("Clock", () => {
 	});
 
 	it("throws on invalid duration string", () => {
-		const stub = new StubTimeEngine({});
-		const clock = new Clock({ timeEngine: stub });
+		const clock = container.resolve(Clock);
 
 		expect(() => clock.duration("invalid")).toThrow("Invalid duration string");
 	});
+
+	describe.each([Clock, StubClock])(
+		"%s numeric duration factories",
+		(ClockType) => {
+			it.each([
+				["durationMillis", 1],
+				["durationSeconds", 1000],
+				["durationMinutes", 60000],
+				["durationHours", 3600000],
+				["durationDays", 86400000],
+			] as const)(
+				"%s returns a Duration in the requested unit",
+				(method, multiplier) => {
+					const clock = container.resolve(ClockType);
+					for (const value of [0, 2, 1.5, -2]) {
+						const result = clock[method](value);
+						expect(result).toBeInstanceOf(Duration);
+						expect(result.millis).toBe(value * multiplier);
+					}
+				},
+			);
+		},
+	);
 });

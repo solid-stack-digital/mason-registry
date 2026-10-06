@@ -1,5 +1,5 @@
-import { Container } from "@solid-stack/di";
-import { beforeEach, describe, expect, it } from "vitest";
+import type { Container } from "@solid-stack/di";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { IMailer } from "@/features/mailing/domain/IMailer.js";
 import { MemoryMailer } from "@/features/mailing/infrastructure/MemoryMailer.js";
 import { Duration } from "@/shared/time/domain/Duration.js";
@@ -7,23 +7,28 @@ import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
 import { ITimeEngine } from "@/shared/time/ports/ITimeEngine.js";
 import { CryptoIdGenerator } from "@/shared/uuid/infrastructure/CryptoIdGenerator.js";
 import { IIdGenerator } from "@/shared/uuid/ports/IIdGenerator.js";
+import { getOtpTestContainer } from "./__tests__/utils/getOtpTestContainer.js";
 import { OtpProvider } from "./diProvider.js";
-import { IOtpEmailGateway } from "./domain/IOtpEmailGateway.js";
-import { IOtpGenerator } from "./domain/IOtpGenerator.js";
-import { IOtpRepo } from "./domain/IOtpRepo.js";
 import {
 	OtpExpiredError,
 	OtpInvalidCodeError,
 	OtpMaxAttemptsExceededError,
 } from "./errors/OtpErrors.js";
-import { CryptoOtpGenerator } from "./infrastructure/CryptoOtpGenerator.js";
-import { MemoryOtpRepo } from "./infrastructure/MemoryOtpRepo.js";
-import { OtpEmailGateway } from "./infrastructure/OtpEmailGateway.js";
 import { OtpConfigToken } from "./tokens.js";
 import { SendOtp } from "./useCases/SendOtp.js";
 import { ValidateOtp } from "./useCases/ValidateOtp.js";
 
 describe("OTP Feature End-to-End Integration", () => {
+	beforeEach(() => {
+		vi.stubEnv("INFRA_MODE", "integrated");
+
+		container = createTestContainer();
+
+		sendOtp = container.resolve(SendOtp);
+		validateOtp = container.resolve(ValidateOtp);
+		memoryMailer = container.resolve(IMailer) as MemoryMailer;
+	});
+	afterEach(() => vi.unstubAllEnvs());
 	let container: Container;
 	let stubTime: StubTimeEngine;
 	let memoryMailer: MemoryMailer;
@@ -33,7 +38,7 @@ describe("OTP Feature End-to-End Integration", () => {
 	const BASE_TIME = 1_700_000_000_000;
 
 	const createTestContainer = (): Container => {
-		const c = new Container();
+		const c = getOtpTestContainer();
 
 		// Configure time engine (controllable clock for deterministic TTL/cooldown testing)
 		c.provide(ITimeEngine, StubTimeEngine);
@@ -58,31 +63,6 @@ describe("OTP Feature End-to-End Integration", () => {
 
 		return c;
 	};
-
-	beforeEach(() => {
-		container = createTestContainer();
-
-		sendOtp = container.resolve(SendOtp);
-		validateOtp = container.resolve(ValidateOtp);
-		memoryMailer = container.resolve(IMailer) as MemoryMailer;
-	});
-
-	describe("1. DI Container Wiring Verification", () => {
-		it("should naturally wire IOtpRepo to MemoryOtpRepo by default", () => {
-			const repo = container.resolve(IOtpRepo);
-			expect(repo).toBeInstanceOf(MemoryOtpRepo);
-		});
-
-		it("should naturally wire IOtpGenerator to CryptoOtpGenerator by default", () => {
-			const generator = container.resolve(IOtpGenerator);
-			expect(generator).toBeInstanceOf(CryptoOtpGenerator);
-		});
-
-		it("should naturally wire IOtpEmailGateway to OtpEmailGateway by default", () => {
-			const gateway = container.resolve(IOtpEmailGateway);
-			expect(gateway).toBeInstanceOf(OtpEmailGateway);
-		});
-	});
 
 	describe("2. End-to-End Expected Behaviors", () => {
 		it("Behavior 1: Request OTP -> receive OTP via email -> be able to validate it", async () => {

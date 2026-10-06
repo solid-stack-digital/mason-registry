@@ -37,6 +37,26 @@ export class Clock {
 	}
 
 	// duration is milliseconds by default
+	durationMillis(millis: number): Duration {
+		return Duration.fromMillis(millis);
+	}
+
+	durationSeconds(seconds: number): Duration {
+		return Duration.fromSeconds(seconds);
+	}
+
+	durationMinutes(minutes: number): Duration {
+		return Duration.fromMinutes(minutes);
+	}
+
+	durationHours(hours: number): Duration {
+		return Duration.fromHours(hours);
+	}
+
+	durationDays(days: number): Duration {
+		return Duration.fromDays(days);
+	}
+
 	duration(duration: string | number): Duration {
 		if (typeof duration === "string") {
 			// detect the unit from the string, e.g., "100ms", "5.5s", "-10m", "2h", "1.5 d"

@@ -1,42 +1,45 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import type { Container } from "@solid-stack/di";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Hasher } from "@/shared/hasher/Hasher.js";
-import { StubHashEngine } from "@/shared/hasher/infrastructure/StubHashEngine.js";
 import { Clock } from "@/shared/time/Clock.js";
 import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
+import { getAuthnTestContainer } from "../__tests__/utils/getAuthnTestContainer.js";
 import { PasswordChangedEvent } from "../domain/events/index.js";
 import {
 	PasswordMismatchError,
 	WeakPasswordError,
 } from "../errors/AuthnErrors.js";
-import { MemoryCredentialRepo } from "../infrastructure/MemoryCredentialRepo.js";
-import { MemoryEventPublisher } from "../infrastructure/MemoryEventPublisher.js";
-import { MemoryRefreshTokenRepo } from "../infrastructure/MemoryRefreshTokenRepo.js";
+import { StubCredentialRepo } from "../infrastructure/StubCredentialRepo.js";
+import { StubEventPublisher } from "../infrastructure/StubEventPublisher.js";
+import { StubRefreshTokenRepo } from "../infrastructure/StubRefreshTokenRepo.js";
 import { ChangePassword } from "./ChangePassword.js";
 
 describe("ChangePassword UseCase", () => {
-	let credRepo: MemoryCredentialRepo;
-	let refreshTokenRepo: MemoryRefreshTokenRepo;
-	let eventPublisher: MemoryEventPublisher;
+	beforeEach(() => {
+		vi.stubEnv("INFRA_MODE", "isolated");
+
+		container = getAuthnTestContainer();
+		hasher = container.resolve(Hasher);
+
+		const stubTime = container.resolve(StubTimeEngine);
+		stubTime.setTime(1700000000000);
+		clock = container.resolve(Clock);
+		credRepo = container.resolve(StubCredentialRepo);
+		refreshTokenRepo = container.resolve(StubRefreshTokenRepo);
+		eventPublisher = container.resolve(StubEventPublisher);
+
+		changePassword = container.resolve(ChangePassword);
+	});
+	afterEach(() => vi.unstubAllEnvs());
+	let container: Container;
 	let hasher: Hasher;
+
+	let credRepo: StubCredentialRepo;
+	let refreshTokenRepo: StubRefreshTokenRepo;
+	let eventPublisher: StubEventPublisher;
+
 	let clock: Clock;
 	let changePassword: ChangePassword;
-
-	beforeEach(() => {
-		const stubTime = new StubTimeEngine({}, 1700000000000);
-		clock = new Clock({ timeEngine: stubTime });
-		credRepo = new MemoryCredentialRepo({});
-		refreshTokenRepo = new MemoryRefreshTokenRepo({ clock });
-		eventPublisher = new MemoryEventPublisher({});
-		hasher = new Hasher({ hashEngine: new StubHashEngine({}) });
-
-		changePassword = new ChangePassword({
-			credRepo,
-			refreshTokenRepo,
-			hasher,
-			clock,
-			eventPublisher,
-		});
-	});
 
 	it("successfully changes password, keeps requesting device session, deletes others, and emits event", async () => {
 		const currentPasswordHash = await hasher.hash("oldPassword123");

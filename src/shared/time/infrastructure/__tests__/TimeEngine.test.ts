@@ -1,4 +1,6 @@
-import { describe, expect, it } from "vitest";
+import type { Container } from "@solid-stack/di";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { getTimeTestContainer } from "../../__tests__/utils/getTimeTestContainer.js";
 import { Clock } from "../../Clock.js";
 import { Duration } from "../../domain/Duration.js";
 import { Time } from "../../domain/Time.js";
@@ -6,12 +8,18 @@ import { StubClock, StubTimeEngine } from "../StubTimeEngine.js";
 import { SystemTimeEngine } from "../SystemTimeEngine.js";
 
 describe("Time Infrastructure & Clock", () => {
+	let container: Container;
+	beforeEach(() => {
+		vi.stubEnv("INFRA_MODE", "isolated");
+		container = getTimeTestContainer();
+	});
+	afterEach(() => vi.unstubAllEnvs());
 	const baseMillis = 1700000000000; // 2023-11-14T22:13:20.000Z
 	const expectedIso = "2023-11-14T22:13:20.000Z";
 
 	describe("SystemTimeEngine", () => {
 		it("returns current timestamp within execution window", () => {
-			const engine = new SystemTimeEngine({});
+			const engine = container.resolve(SystemTimeEngine);
 			const before = Date.now();
 			const now = engine.millisNow();
 			const after = Date.now();
@@ -21,17 +29,17 @@ describe("Time Infrastructure & Clock", () => {
 		});
 
 		it("transforms millis to ISO string", () => {
-			const engine = new SystemTimeEngine({});
+			const engine = container.resolve(SystemTimeEngine);
 			expect(engine.millisToIso(baseMillis)).toBe(expectedIso);
 		});
 
 		it("transforms ISO string to millis", () => {
-			const engine = new SystemTimeEngine({});
+			const engine = container.resolve(SystemTimeEngine);
 			expect(engine.isoToMillis(expectedIso)).toBe(baseMillis);
 		});
 
 		it("rejects invalid millis in millisToIso", () => {
-			const engine = new SystemTimeEngine({});
+			const engine = container.resolve(SystemTimeEngine);
 			expect(() => engine.millisToIso(NaN)).toThrow("Invalid millis");
 			expect(() => engine.millisToIso("invalid" as unknown as number)).toThrow(
 				"Invalid millis",
@@ -39,7 +47,7 @@ describe("Time Infrastructure & Clock", () => {
 		});
 
 		it("rejects invalid ISO strings", () => {
-			const engine = new SystemTimeEngine({});
+			const engine = container.resolve(SystemTimeEngine);
 			expect(() => engine.isoToMillis("not-a-date")).toThrow(
 				"Invalid ISO date string",
 			);
@@ -51,7 +59,7 @@ describe("Time Infrastructure & Clock", () => {
 
 		describe("Civil Date Calculations", () => {
 			it("computes exact civil date for Unix epoch (1970-01-01)", () => {
-				const engine = new SystemTimeEngine({});
+				const engine = container.resolve(SystemTimeEngine);
 				expect(engine.millisToCivilDate(0)).toEqual({
 					year: 1970,
 					month: 1,
@@ -61,7 +69,7 @@ describe("Time Infrastructure & Clock", () => {
 			});
 
 			it("handles leap year 2000 (divisible by 400)", () => {
-				const engine = new SystemTimeEngine({});
+				const engine = container.resolve(SystemTimeEngine);
 				// 2000-02-29T00:00:00.000Z -> 951782400000
 				expect(engine.millisToCivilDate(951782400000)).toEqual({
 					year: 2000,
@@ -72,7 +80,7 @@ describe("Time Infrastructure & Clock", () => {
 			});
 
 			it("handles standard leap year 2024", () => {
-				const engine = new SystemTimeEngine({});
+				const engine = container.resolve(SystemTimeEngine);
 				// 2024-02-28T00:00:00.000Z -> 1709078400000
 				expect(engine.millisToCivilDate(1709078400000)).toEqual({
 					year: 2024,
@@ -91,7 +99,7 @@ describe("Time Infrastructure & Clock", () => {
 			});
 
 			it("rejects invalid civil dates", () => {
-				const engine = new SystemTimeEngine({});
+				const engine = container.resolve(SystemTimeEngine);
 				expect(() => engine.civilDateToMillis(2024, 2, 30)).toThrow(
 					"Invalid civil date",
 				);
@@ -107,12 +115,14 @@ describe("Time Infrastructure & Clock", () => {
 
 	describe("StubTimeEngine", () => {
 		it("returns deterministic initial time", () => {
-			const stub = new StubTimeEngine({}, 1600000000000);
+			const stub = container.resolve(StubTimeEngine);
+			stub.setMillis(1600000000000);
 			expect(stub.millisNow()).toBe(1600000000000);
 		});
 
 		it("allows advancing time via Duration or number millis", () => {
-			const stub = new StubTimeEngine({}, 1000);
+			const stub = container.resolve(StubTimeEngine);
+			stub.setMillis(1000);
 			stub.advance(500);
 			expect(stub.millisNow()).toBe(1500);
 
@@ -121,7 +131,7 @@ describe("Time Infrastructure & Clock", () => {
 		});
 
 		it("allows setting time explicitly", () => {
-			const stub = new StubTimeEngine({});
+			const stub = container.resolve(StubTimeEngine);
 			stub.setTime(new Time(9999));
 			expect(stub.millisNow()).toBe(9999);
 
@@ -130,7 +140,7 @@ describe("Time Infrastructure & Clock", () => {
 		});
 
 		it("transforms millis and civil dates correctly", () => {
-			const stub = new StubTimeEngine({});
+			const stub = container.resolve(StubTimeEngine);
 			expect(stub.millisToIso(baseMillis)).toBe(expectedIso);
 			expect(stub.isoToMillis(expectedIso)).toBe(baseMillis);
 			expect(stub.millisToCivilDate(0)).toEqual({
@@ -144,13 +154,15 @@ describe("Time Infrastructure & Clock", () => {
 
 	describe("StubClock", () => {
 		it("instantiates as Clock with deterministic initial time", () => {
-			const stubClock = new StubClock({}, new Time(1600000000000));
+			const stubClock = container.resolve(StubClock);
+			stubClock.setMillis(1600000000000);
 			expect(stubClock.now()).toBeInstanceOf(Time);
 			expect(stubClock.now().millis).toBe(1600000000000);
 		});
 
 		it("advances time and affects now()", () => {
-			const stubClock = new StubClock({}, 1000);
+			const stubClock = container.resolve(StubClock);
+			stubClock.setMillis(1000);
 			stubClock.advance(500);
 			expect(stubClock.now().millis).toBe(1500);
 
@@ -159,7 +171,7 @@ describe("Time Infrastructure & Clock", () => {
 		});
 
 		it("supports setTime and setMillis", () => {
-			const stubClock = new StubClock({});
+			const stubClock = container.resolve(StubClock);
 			stubClock.setTime(new Time(5555));
 			expect(stubClock.now().millis).toBe(5555);
 
@@ -170,8 +182,9 @@ describe("Time Infrastructure & Clock", () => {
 
 	describe("Clock Service", () => {
 		it("delegates now, toIso, fromIso, toCivilDate, fromCivilDate to timeEngine", () => {
-			const stubEngine = new StubTimeEngine({}, baseMillis);
-			const clock = new Clock({ timeEngine: stubEngine });
+			const stubEngine = container.resolve(StubTimeEngine);
+			stubEngine.setMillis(baseMillis);
+			const clock = container.resolve(Clock);
 
 			expect(clock.now().millis).toBe(baseMillis);
 			expect(clock.toIso(new Time(baseMillis))).toBe(expectedIso);
@@ -185,7 +198,7 @@ describe("Time Infrastructure & Clock", () => {
 		});
 
 		it("parses duration strings across units", () => {
-			const clock = new Clock({ timeEngine: new StubTimeEngine({}) });
+			const clock = container.resolve(Clock);
 
 			expect(clock.duration("500ms").millis).toBe(500);
 			expect(clock.duration("10s").millis).toBe(10000);
@@ -199,7 +212,7 @@ describe("Time Infrastructure & Clock", () => {
 		});
 
 		it("throws on invalid duration input", () => {
-			const clock = new Clock({ timeEngine: new StubTimeEngine({}) });
+			const clock = container.resolve(Clock);
 
 			expect(() => clock.duration("invalid")).toThrow(
 				"Invalid duration string",

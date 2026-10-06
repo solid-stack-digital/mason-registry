@@ -1,10 +1,9 @@
-import { Container } from "@solid-stack/di";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { HmacJwtEngine } from "@/shared/jwt/infrastructure/HmacJwtEngine.js";
-import { IJwtEngine } from "@/shared/jwt/ports/IJwtEngine.js";
+import type { Container } from "@solid-stack/di";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Time } from "@/shared/time/domain/Time.js";
-import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
+import type { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
 import { ITimeEngine } from "@/shared/time/ports/ITimeEngine.js";
+import { getEmailAccessVerificationTestContainer } from "../__tests__/utils/getEmailAccessVerificationTestContainer.js";
 import type {
 	DecodedEmailAccessPayload,
 	EmailAccess,
@@ -15,36 +14,24 @@ import {
 	EmailAccessTokenAlreadyUsedError,
 	EmailAccessTokenExpiredError,
 } from "../errors/EmailAccessErrors.js";
-import {
-	InitialEmailAccesses,
-	StubEmailAccessRepository,
-} from "../infrastructure/StubEmailAccessRepository.js";
+import type { StubEmailAccessRepository } from "../infrastructure/StubEmailAccessRepository.js";
 import { DecodeAndValidateToken } from "../services/DecodeAndValidateToken.js";
 import { ConsumeEmailAccessToken } from "./ConsumeEmailAccessToken.js";
 
 describe("ConsumeEmailAccessToken Use Case", () => {
-	let container: Container;
-	let useCase: ConsumeEmailAccessToken;
-	let stubRepo: StubEmailAccessRepository;
-	let service: DecodeAndValidateToken;
-	let stubTime: StubTimeEngine;
-
-	const BASE_TIME = 1_700_000_000_000;
-
 	beforeEach(() => {
-		container = new Container();
+		vi.stubEnv("INFRA_MODE", "isolated");
+
+		container = getEmailAccessVerificationTestContainer();
 
 		// Configure Time
-		container.provide(ITimeEngine, StubTimeEngine);
+
 		stubTime = container.resolve(ITimeEngine) as StubTimeEngine;
 		stubTime.setMillis(BASE_TIME);
 
 		// Configure JWT
-		container.provide(IJwtEngine, HmacJwtEngine);
 
 		// Configure Repo stub
-		container.provide(IEmailAccessRepository, StubEmailAccessRepository);
-		container.provideValue(InitialEmailAccesses, []);
 
 		service = container.resolve(DecodeAndValidateToken);
 		useCase = container.resolve(ConsumeEmailAccessToken);
@@ -52,6 +39,14 @@ describe("ConsumeEmailAccessToken Use Case", () => {
 			IEmailAccessRepository,
 		) as StubEmailAccessRepository;
 	});
+	afterEach(() => vi.unstubAllEnvs());
+	let container: Container;
+	let useCase: ConsumeEmailAccessToken;
+	let stubRepo: StubEmailAccessRepository;
+	let service: DecodeAndValidateToken;
+	let stubTime: StubTimeEngine;
+
+	const BASE_TIME = 1_700_000_000_000;
 
 	const makeRecord = (overrides: Partial<EmailAccess> = {}): EmailAccess => ({
 		id: "id-1",

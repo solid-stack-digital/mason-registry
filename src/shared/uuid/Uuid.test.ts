@@ -1,12 +1,21 @@
-import { describe, expect, it } from "vitest";
+import type { Container } from "@solid-stack/di";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { getUuidTestContainer } from "./__tests__/utils/getUuidTestContainer.js";
 import { CryptoIdGenerator } from "./infrastructure/CryptoIdGenerator.js";
 import { StubIdGenerator } from "./infrastructure/StubIdGenerator.js";
+import { IIdGenerator } from "./ports/IIdGenerator.js";
 import { Uuid } from "./Uuid.js";
 
 describe("Uuid", () => {
+	let container: Container;
+	beforeEach(() => {
+		vi.stubEnv("INFRA_MODE", "isolated");
+		container = getUuidTestContainer();
+	});
+	afterEach(() => vi.unstubAllEnvs());
 	it("generates deterministic IDs with StubIdGenerator", () => {
-		const stub = new StubIdGenerator({});
-		const uuid = new Uuid({ idGenerator: stub });
+		const stub = container.resolve(StubIdGenerator);
+		const uuid = container.resolve(Uuid);
 
 		expect(uuid.generate()).toBe("stub-id-1");
 		expect(uuid.generate()).toBe("stub-id-2");
@@ -17,8 +26,8 @@ describe("Uuid", () => {
 	});
 
 	it("generates valid UUIDv4 strings with CryptoIdGenerator", () => {
-		const gen = new CryptoIdGenerator({});
-		const uuid = new Uuid({ idGenerator: gen });
+		container.provide(IIdGenerator, CryptoIdGenerator);
+		const uuid = container.resolve(Uuid);
 
 		const id = uuid.generate();
 		expect(typeof id).toBe("string");

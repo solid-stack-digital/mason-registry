@@ -1,14 +1,22 @@
-import { Container } from "@solid-stack/di";
-import { describe, expect, it } from "vitest";
+import type { Container } from "@solid-stack/di";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Time } from "@/shared/time/domain/Time.js";
+import { getEmailAccessVerificationTestContainer } from "../__tests__/utils/getEmailAccessVerificationTestContainer.js";
 import {
 	InitialEmailAccesses,
 	StubEmailAccessRepository,
 } from "./StubEmailAccessRepository.js";
 
 describe("StubEmailAccessRepository", () => {
+	beforeEach(() => {
+		vi.stubEnv("INFRA_MODE", "isolated");
+
+		container = getEmailAccessVerificationTestContainer();
+	});
+	afterEach(() => vi.unstubAllEnvs());
+	let container: Container;
+
 	it("initializes with provided items and supports basic operations", async () => {
-		const container = new Container();
 		container.provideValue(InitialEmailAccesses, [
 			{
 				id: "1",

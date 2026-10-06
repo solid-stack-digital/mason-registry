@@ -1,16 +1,19 @@
-import { Container } from "@solid-stack/di";
-import { beforeEach, describe, expect, it } from "vitest";
+import type { Container } from "@solid-stack/di";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { getOtpTestContainer } from "../__tests__/utils/getOtpTestContainer.js";
 import { CryptoOtpGenerator } from "./CryptoOtpGenerator.js";
 
 describe("CryptoOtpGenerator Infrastructure Adapter", () => {
-	let container: Container;
-	let generator: CryptoOtpGenerator;
-
 	beforeEach(() => {
+		vi.stubEnv("INFRA_MODE", "isolated");
+
 		// Arrange: Fresh DI container for total isolation
-		container = new Container();
+		container = getOtpTestContainer();
 		generator = container.resolve(CryptoOtpGenerator);
 	});
+	afterEach(() => vi.unstubAllEnvs());
+	let container: Container;
+	let generator: CryptoOtpGenerator;
 
 	describe("Core Mechanics & Contract Fulfillment", () => {
 		it("should generate a 6-digit numeric OTP by default", () => {

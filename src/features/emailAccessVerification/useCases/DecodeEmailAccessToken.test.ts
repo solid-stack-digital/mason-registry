@@ -1,39 +1,28 @@
-import { Container } from "@solid-stack/di";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { HmacJwtEngine } from "@/shared/jwt/infrastructure/HmacJwtEngine.js";
-import { IJwtEngine } from "@/shared/jwt/ports/IJwtEngine.js";
-import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
-import { ITimeEngine } from "@/shared/time/ports/ITimeEngine.js";
+import type { Container } from "@solid-stack/di";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { getEmailAccessVerificationTestContainer } from "../__tests__/utils/getEmailAccessVerificationTestContainer.js";
 import type { DecodedEmailAccessPayload } from "../domain/EmailAccess.js";
-import { IEmailAccessRepository } from "../domain/IEmailAccessRepository.js";
 import {
 	EmailAccessPurposeMismatchError,
 	EmailAccessTokenExpiredError,
 	EmailAccessTokenNotFoundError,
 } from "../errors/EmailAccessErrors.js";
-import {
-	InitialEmailAccesses,
-	StubEmailAccessRepository,
-} from "../infrastructure/StubEmailAccessRepository.js";
 import { DecodeAndValidateToken } from "../services/DecodeAndValidateToken.js";
 import { DecodeEmailAccessToken } from "./DecodeEmailAccessToken.js";
 
 describe("DecodeEmailAccessToken Use Case", () => {
-	let container: Container;
-	let useCase: DecodeEmailAccessToken;
-	let service: DecodeAndValidateToken;
-
 	beforeEach(() => {
-		container = new Container();
+		vi.stubEnv("INFRA_MODE", "isolated");
 
-		container.provide(ITimeEngine, StubTimeEngine);
-		container.provide(IJwtEngine, HmacJwtEngine);
-		container.provide(IEmailAccessRepository, StubEmailAccessRepository);
-		container.provideValue(InitialEmailAccesses, []);
+		container = getEmailAccessVerificationTestContainer();
 
 		service = container.resolve(DecodeAndValidateToken);
 		useCase = container.resolve(DecodeEmailAccessToken);
 	});
+	afterEach(() => vi.unstubAllEnvs());
+	let container: Container;
+	let useCase: DecodeEmailAccessToken;
+	let service: DecodeAndValidateToken;
 
 	describe("Success Paths & Interactions", () => {
 		it("should delegate to services.decodeAndValidateToken and return decoded payload", async () => {

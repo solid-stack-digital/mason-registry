@@ -1,18 +1,27 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import type { Container } from "@solid-stack/di";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Clock } from "@/shared/time/Clock.js";
 import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
+import { getAuthnTestContainer } from "../__tests__/utils/getAuthnTestContainer.js";
 import type { RefreshToken } from "../domain/RefreshToken.js";
 import { MemoryRefreshTokenRepo } from "./MemoryRefreshTokenRepo.js";
 
 describe("MemoryRefreshTokenRepo", () => {
+	beforeEach(() => {
+		vi.stubEnv("INFRA_MODE", "isolated");
+
+		container = getAuthnTestContainer();
+
+		const stubTime = container.resolve(StubTimeEngine);
+		stubTime.setTime(1700000000000);
+		clock = container.resolve(Clock);
+		repo = container.resolve(MemoryRefreshTokenRepo);
+	});
+	afterEach(() => vi.unstubAllEnvs());
+	let container: Container;
+
 	let repo: MemoryRefreshTokenRepo;
 	let clock: Clock;
-
-	beforeEach(() => {
-		const stubTime = new StubTimeEngine({}, 1700000000000);
-		clock = new Clock({ timeEngine: stubTime });
-		repo = new MemoryRefreshTokenRepo({ clock });
-	});
 
 	it("saves, finds, and deletes sessions by token, id, and jti", async () => {
 		const session: RefreshToken = {

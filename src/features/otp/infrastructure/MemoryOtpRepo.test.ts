@@ -1,10 +1,19 @@
-import { Container } from "@solid-stack/di";
-import { beforeEach, describe, expect, it } from "vitest";
+import type { Container } from "@solid-stack/di";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Time } from "@/shared/time/domain/Time.js";
+import { getOtpTestContainer } from "../__tests__/utils/getOtpTestContainer.js";
 import type { Otp } from "../domain/Otp.js";
 import { MemoryOtpRepo } from "./MemoryOtpRepo.js";
 
 describe("MemoryOtpRepo Infrastructure Adapter", () => {
+	beforeEach(() => {
+		vi.stubEnv("INFRA_MODE", "isolated");
+
+		// Arrange: Fresh DI container for total isolation
+		container = getOtpTestContainer();
+		repo = container.resolve(MemoryOtpRepo);
+	});
+	afterEach(() => vi.unstubAllEnvs());
 	let container: Container;
 	let repo: MemoryOtpRepo;
 
@@ -21,12 +30,6 @@ describe("MemoryOtpRepo Infrastructure Adapter", () => {
 		createdAt: new Time(1700000000000),
 		updatedAt: new Time(1700000000000),
 		...overrides,
-	});
-
-	beforeEach(() => {
-		// Arrange: Fresh DI container for total isolation
-		container = new Container();
-		repo = container.resolve(MemoryOtpRepo);
 	});
 
 	describe("Core Mechanics & Contract Fulfillment", () => {

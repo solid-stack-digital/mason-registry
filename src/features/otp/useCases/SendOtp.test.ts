@@ -1,48 +1,34 @@
-import { Container } from "@solid-stack/di";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { Container } from "@solid-stack/di";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Duration } from "@/shared/time/domain/Duration.js";
 import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
 import { ITimeEngine } from "@/shared/time/ports/ITimeEngine.js";
-import { StubIdGenerator } from "@/shared/uuid/infrastructure/StubIdGenerator.js";
-import { IIdGenerator } from "@/shared/uuid/ports/IIdGenerator.js";
+import { getOtpTestContainer } from "../__tests__/utils/getOtpTestContainer.js";
 import { IOtpEmailGateway } from "../domain/IOtpEmailGateway.js";
 import { IOtpGenerator } from "../domain/IOtpGenerator.js";
 import { IOtpRepo } from "../domain/IOtpRepo.js";
 import { OtpCooldownError } from "../errors/OtpErrors.js";
-import { StubOtpEmailGateway } from "../infrastructure/StubOtpEmailGateway.js";
+import type { StubOtpEmailGateway } from "../infrastructure/StubOtpEmailGateway.js";
 import {
 	NextOtp,
-	StubOtpGenerator,
+	type StubOtpGenerator,
 } from "../infrastructure/StubOtpGenerator.js";
-import { InitialOtps, StubOtpRepo } from "../infrastructure/StubOtpRepo.js";
+import type { StubOtpRepo } from "../infrastructure/StubOtpRepo.js";
 import { OtpConfigToken } from "../tokens.js";
 import { SendOtp, type SendOtpInput } from "./SendOtp.js";
 
 describe("SendOtp UseCase", () => {
-	let container: Container;
-	let useCase: SendOtp;
-	let otpRepo: StubOtpRepo;
-	let otpGenerator: StubOtpGenerator;
-	let emailGateway: StubOtpEmailGateway;
-	let stubTime: StubTimeEngine;
-
-	const BASE_TIME = 1_700_000_000_000;
-
 	beforeEach(() => {
+		vi.stubEnv("INFRA_MODE", "isolated");
+
 		// Arrange: Fresh DI container for total isolation
-		container = new Container();
+		container = getOtpTestContainer();
 
 		// Configure time & uuid stubs via DI
-		stubTime = new StubTimeEngine({}, BASE_TIME);
-		container.provide(ITimeEngine, StubTimeEngine);
-		container.provide(IIdGenerator, StubIdGenerator);
+		stubTime = container.resolve(StubTimeEngine);
 
 		// Provide Stubs for domain ports
-		container.provide(IOtpRepo, StubOtpRepo);
-		container.provide(IOtpGenerator, StubOtpGenerator);
-		container.provide(IOtpEmailGateway, StubOtpEmailGateway);
 
-		container.provideValue(InitialOtps, []);
 		container.provideValue(NextOtp, "445566");
 		container.provideValue(OtpConfigToken, {
 			retryInterval: Duration.fromSeconds(30),
@@ -56,8 +42,18 @@ describe("SendOtp UseCase", () => {
 		otpGenerator = container.resolve(IOtpGenerator) as StubOtpGenerator;
 		emailGateway = container.resolve(IOtpEmailGateway) as StubOtpEmailGateway;
 		stubTime = container.resolve(ITimeEngine) as StubTimeEngine;
+		stubTime.setTime(BASE_TIME);
 		stubTime.setMillis(BASE_TIME);
 	});
+	afterEach(() => vi.unstubAllEnvs());
+	let container: Container;
+	let useCase: SendOtp;
+	let otpRepo: StubOtpRepo;
+	let otpGenerator: StubOtpGenerator;
+	let emailGateway: StubOtpEmailGateway;
+	let stubTime: StubTimeEngine;
+
+	const BASE_TIME = 1_700_000_000_000;
 
 	describe("Success Paths & Interactions (Contract Enforcement)", () => {
 		it("should generate, persist, and send OTP via email for initial request", async () => {

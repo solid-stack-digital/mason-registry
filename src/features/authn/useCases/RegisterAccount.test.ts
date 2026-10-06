@@ -1,44 +1,41 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { Hasher } from "@/shared/hasher/Hasher.js";
-import { StubHashEngine } from "@/shared/hasher/infrastructure/StubHashEngine.js";
+import type { Container } from "@solid-stack/di";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Clock } from "@/shared/time/Clock.js";
 import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
-import { StubIdGenerator } from "@/shared/uuid/infrastructure/StubIdGenerator.js";
-import { Uuid } from "@/shared/uuid/Uuid.js";
+import { getAuthnTestContainer } from "../__tests__/utils/getAuthnTestContainer.js";
 import { AccountRegisteredEvent } from "../domain/events/index.js";
 import {
 	AccountAlreadyExistsError,
 	InvalidEmailError,
 	WeakPasswordError,
 } from "../errors/AuthnErrors.js";
-import { MemoryCredentialRepo } from "../infrastructure/MemoryCredentialRepo.js";
-import { MemoryEventPublisher } from "../infrastructure/MemoryEventPublisher.js";
+import { StubCredentialRepo } from "../infrastructure/StubCredentialRepo.js";
+import { StubEventPublisher } from "../infrastructure/StubEventPublisher.js";
 import { RegisterAccount } from "./RegisterAccount.js";
 
 describe("RegisterAccount UseCase", () => {
-	let credRepo: MemoryCredentialRepo;
-	let eventPublisher: MemoryEventPublisher;
-	let hasher: Hasher;
-	let clock: Clock;
-	let uuid: Uuid;
-	let registerAccount: RegisterAccount;
-
 	beforeEach(() => {
-		const stubTime = new StubTimeEngine({}, 1700000000000);
-		clock = new Clock({ timeEngine: stubTime });
-		credRepo = new MemoryCredentialRepo({});
-		eventPublisher = new MemoryEventPublisher({});
-		hasher = new Hasher({ hashEngine: new StubHashEngine({}) });
-		uuid = new Uuid({ idGenerator: new StubIdGenerator({}) });
+		vi.stubEnv("INFRA_MODE", "isolated");
 
-		registerAccount = new RegisterAccount({
-			credRepo,
-			hasher,
-			uuid,
-			clock,
-			eventPublisher,
-		});
+		container = getAuthnTestContainer();
+
+		const stubTime = container.resolve(StubTimeEngine);
+		stubTime.setTime(1700000000000);
+		clock = container.resolve(Clock);
+		credRepo = container.resolve(StubCredentialRepo);
+		eventPublisher = container.resolve(StubEventPublisher);
+
+		registerAccount = container.resolve(RegisterAccount);
 	});
+	afterEach(() => vi.unstubAllEnvs());
+	let container: Container;
+
+	let credRepo: StubCredentialRepo;
+	let eventPublisher: StubEventPublisher;
+
+	let clock: Clock;
+
+	let registerAccount: RegisterAccount;
 
 	it("successfully registers new account, hashes password, saves with isVerified false, emits event, and returns credential id", async () => {
 		const credId = await registerAccount.execute({

@@ -1,10 +1,18 @@
-import { describe, expect, it } from "vitest";
+import type { Container } from "@solid-stack/di";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { getUuidTestContainer } from "../../__tests__/utils/getUuidTestContainer.js";
 import { CryptoIdGenerator } from "../CryptoIdGenerator.js";
 import { StubIdGenerator } from "../StubIdGenerator.js";
 
 describe("IdGenerator Adapters", () => {
+	let container: Container;
+	beforeEach(() => {
+		vi.stubEnv("INFRA_MODE", "isolated");
+		container = getUuidTestContainer();
+	});
+	afterEach(() => vi.unstubAllEnvs());
 	it("CryptoIdGenerator generates non-empty UUID strings", () => {
-		const generator = new CryptoIdGenerator({});
+		const generator = container.resolve(CryptoIdGenerator);
 		const id1 = generator.generate();
 		const id2 = generator.generate();
 
@@ -15,20 +23,20 @@ describe("IdGenerator Adapters", () => {
 
 	describe("StubIdGenerator", () => {
 		it("returns sequential stub IDs", () => {
-			const stub = new StubIdGenerator({});
+			const stub = container.resolve(StubIdGenerator);
 			expect(stub.generate()).toBe("stub-id-1");
 			expect(stub.generate()).toBe("stub-id-2");
 		});
 
 		it("allows setting next explicit ID", () => {
-			const stub = new StubIdGenerator({});
+			const stub = container.resolve(StubIdGenerator);
 			stub.setNextId("custom-test-uuid");
 			expect(stub.generate()).toBe("custom-test-uuid");
 			expect(stub.generate()).toBe("stub-id-1");
 		});
 
 		it("resets state", () => {
-			const stub = new StubIdGenerator({});
+			const stub = container.resolve(StubIdGenerator);
 			stub.generate();
 			stub.generate();
 			stub.reset();

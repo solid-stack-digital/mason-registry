@@ -1,10 +1,18 @@
-import { Container } from "@solid-stack/di";
-import { beforeEach, describe, expect, it } from "vitest";
+import type { Container } from "@solid-stack/di";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Time } from "@/shared/time/domain/Time.js";
+import { getEmailAccessVerificationTestContainer } from "../__tests__/utils/getEmailAccessVerificationTestContainer.js";
 import type { EmailAccess } from "../domain/EmailAccess.js";
 import { MemoryEmailAccessRepository } from "./MemoryEmailAccessRepository.js";
 
 describe("MemoryEmailAccessRepository", () => {
+	beforeEach(() => {
+		vi.stubEnv("INFRA_MODE", "isolated");
+
+		container = getEmailAccessVerificationTestContainer();
+		repo = container.resolve(MemoryEmailAccessRepository);
+	});
+	afterEach(() => vi.unstubAllEnvs());
 	let container: Container;
 	let repo: MemoryEmailAccessRepository;
 
@@ -19,11 +27,6 @@ describe("MemoryEmailAccessRepository", () => {
 		createdAt: new Time(100000),
 		updatedAt: new Time(100000),
 		...overrides,
-	});
-
-	beforeEach(() => {
-		container = new Container();
-		repo = container.resolve(MemoryEmailAccessRepository);
 	});
 
 	it("saves and finds record by JTI", async () => {

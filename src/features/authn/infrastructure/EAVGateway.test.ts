@@ -1,17 +1,24 @@
-import { describe, expect, it, vi } from "vitest";
-import type { ConsumeEmailAccessToken } from "@/features/emailAccessVerification/useCases/ConsumeEmailAccessToken.js";
+import type { Container } from "@solid-stack/di";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { ConsumeEmailAccessToken } from "@/features/emailAccessVerification/useCases/ConsumeEmailAccessToken.js";
+import { getAuthnTestContainer } from "../__tests__/utils/getAuthnTestContainer.js";
 import { AuthnError } from "../errors/AuthnError.js";
 import { EAVGateway } from "./EAVGateway.js";
 import { StubEAVGateway } from "./StubEAVGateway.js";
 
 describe("EAVGateway", () => {
-	it("delegates consumeEmailAccessToken to the usecase", async () => {
-		const mockExecute = vi.fn().mockResolvedValue(true);
-		const mockUc = {
-			execute: mockExecute,
-		} as unknown as ConsumeEmailAccessToken;
+	beforeEach(() => {
+		vi.stubEnv("INFRA_MODE", "isolated");
 
-		const gateway = new EAVGateway({ consumeEmailAccessToken: mockUc });
+		container = getAuthnTestContainer();
+	});
+	afterEach(() => vi.unstubAllEnvs());
+	let container: Container;
+
+	it("delegates consumeEmailAccessToken to the usecase", async () => {
+		const mockUc = container.resolve(ConsumeEmailAccessToken);
+		const mockExecute = vi.spyOn(mockUc, "execute").mockResolvedValue(true);
+		const gateway = container.resolve(EAVGateway);
 		const result = await gateway.consumeEmailAccessToken({
 			token: "test-token",
 			purpose: "email_verification",
@@ -27,7 +34,7 @@ describe("EAVGateway", () => {
 	});
 
 	it("StubEAVGateway works and throws error when configured", async () => {
-		const stub = new StubEAVGateway({});
+		const stub = container.resolve(StubEAVGateway);
 		expect(
 			await stub.consumeEmailAccessToken({
 				token: "t",

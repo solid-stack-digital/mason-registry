@@ -1,28 +1,19 @@
-import { Container } from "@solid-stack/di";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { Container } from "@solid-stack/di";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Time } from "@/shared/time/domain/Time.js";
+import { getEmailAccessVerificationTestContainer } from "../__tests__/utils/getEmailAccessVerificationTestContainer.js";
 import type { EmailAccess } from "../domain/EmailAccess.js";
 import { IEmailAccessRepository } from "../domain/IEmailAccessRepository.js";
 import { IOtpGateway } from "../domain/IOtpGateway.js";
-import {
-	InitialEmailAccesses,
-	StubEmailAccessRepository,
-} from "../infrastructure/StubEmailAccessRepository.js";
-import { StubOtpGateway } from "../infrastructure/StubOtpGateway.js";
+import type { StubEmailAccessRepository } from "../infrastructure/StubEmailAccessRepository.js";
+import type { StubOtpGateway } from "../infrastructure/StubOtpGateway.js";
 import { RequestEmailAccessVerification } from "./RequestEmailAccessVerification.js";
 
 describe("RequestEmailAccessVerification Use Case", () => {
-	let container: Container;
-	let useCase: RequestEmailAccessVerification;
-	let stubRepo: StubEmailAccessRepository;
-	let stubOtpGateway: StubOtpGateway;
-
 	beforeEach(() => {
-		container = new Container();
+		vi.stubEnv("INFRA_MODE", "isolated");
 
-		container.provide(IEmailAccessRepository, StubEmailAccessRepository);
-		container.provideValue(InitialEmailAccesses, []);
-		container.provide(IOtpGateway, StubOtpGateway);
+		container = getEmailAccessVerificationTestContainer();
 
 		stubRepo = container.resolve(
 			IEmailAccessRepository,
@@ -30,6 +21,11 @@ describe("RequestEmailAccessVerification Use Case", () => {
 		stubOtpGateway = container.resolve(IOtpGateway) as StubOtpGateway;
 		useCase = container.resolve(RequestEmailAccessVerification);
 	});
+	afterEach(() => vi.unstubAllEnvs());
+	let container: Container;
+	let useCase: RequestEmailAccessVerification;
+	let stubRepo: StubEmailAccessRepository;
+	let stubOtpGateway: StubOtpGateway;
 
 	const makeRecord = (overrides: Partial<EmailAccess> = {}): EmailAccess => ({
 		id: "id-1",

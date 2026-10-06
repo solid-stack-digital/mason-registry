@@ -1,62 +1,43 @@
-import { describe, expect, it } from "vitest";
-import { Clock } from "@/shared/time/Clock.js";
-import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
-import { HmacJwtEngine } from "./infrastructure/HmacJwtEngine.js";
-import { StubJwtEngine } from "./infrastructure/StubJwtEngine.js";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { Duration } from "@/shared/time/domain/Duration.js";
+import { getJwtTestContainer } from "./__tests__/utils/getJwtTestContainer.js";
+import { TokenExpiredError } from "./errors/TokenExpiredError.js";
+import { TokenIntegrityError } from "./errors/TokenIntegrityError.js";
+import { JwtEngine } from "./infrastructure/JwtEngine.js";
 import { Jwt } from "./Jwt.js";
 
 describe("Jwt", () => {
-	it("signs and verifies tokens using StubJwtEngine", async () => {
-		const stubTime = new StubTimeEngine({}, 1700000000000);
-		const clock = new Clock({ timeEngine: stubTime });
-		const stubEngine = new StubJwtEngine({});
-		const jwt = new Jwt({ jwtEngine: stubEngine, clock });
+	let jwt: Jwt;
+	let engine: JwtEngine;
+	beforeEach(() => {
+		vi.stubEnv("INFRA_MODE", "isolated");
+		const container = getJwtTestContainer();
+		jwt = container.resolve(Jwt);
+		engine = container.resolve(JwtEngine);
+	});
+	afterEach(() => vi.unstubAllEnvs());
 
-		stubEngine.setNextToken("custom-stub-token");
-		stubEngine.setNextPayload({ userId: "user-123" });
-
-		const token = await jwt.sign(
-			{ userId: "user-123" },
-			{ ttl: clock.duration("1h") },
-		);
-		expect(token).toBe("custom-stub-token");
-
-		const payload = await jwt.verify<{ userId: string }>(token);
-		expect(payload.userId).toBe("user-123");
+	it("forwards payload and TTL to the engine", async () => {
+		const sign = vi.spyOn(engine, "sign").mockResolvedValue("controlled-token");
+		const payload = { sub: "user-123" };
+		const ttl = Duration.fromMinutes(5);
+		const token = await jwt.sign(payload, { ttl });
+		expect(token).toBe("controlled-token");
+		expect(sign).toHaveBeenCalledWith(payload, ttl);
+		const verify = vi.spyOn(engine, "verify").mockResolvedValue(payload);
+		expect(await jwt.verify(token)).toMatchObject(payload);
+		expect(verify).toHaveBeenCalledWith(token);
 	});
 
-	it("signs and verifies tokens using HmacJwtEngine", async () => {
-		const stubTime = new StubTimeEngine({}, 1700000000000);
-		const clock = new Clock({ timeEngine: stubTime });
-		const hmacEngine = new HmacJwtEngine({ clock });
-		const jwt = new Jwt({ jwtEngine: hmacEngine, clock });
-
-		const token = await jwt.sign(
-			{ sub: "user-456", role: "admin" },
-			{ ttl: clock.duration("1h") },
-		);
-		expect(typeof token).toBe("string");
-		expect(token.split(".").length).toBe(3);
-
-		const verified = await jwt.verify<{ sub: string; role: string }>(token);
-		expect(verified.sub).toBe("user-456");
-		expect(verified.role).toBe("admin");
+	it("propagates expiration errors", async () => {
+		const error = new TokenExpiredError("Token expired");
+		vi.spyOn(engine, "verify").mockRejectedValue(error);
+		await expect(jwt.verify("expired-token")).rejects.toBe(error);
 	});
 
-	it("fails verification on expired token with HmacJwtEngine", async () => {
-		const stubTime = new StubTimeEngine({}, 1700000000000);
-		const clock = new Clock({ timeEngine: stubTime });
-		const hmacEngine = new HmacJwtEngine({ clock });
-		const jwt = new Jwt({ jwtEngine: hmacEngine, clock });
-
-		const token = await jwt.sign(
-			{ sub: "user-456" },
-			{ ttl: clock.duration("10s") },
-		);
-
-		// Advance time past expiration (15 seconds)
-		stubTime.advance(15000);
-
-		await expect(jwt.verify(token)).rejects.toThrow("Token expired");
+	it("propagates integrity errors", async () => {
+		const error = new TokenIntegrityError("Invalid token");
+		vi.spyOn(engine, "verify").mockRejectedValue(error);
+		await expect(jwt.verify("invalid")).rejects.toBe(error);
 	});
 });

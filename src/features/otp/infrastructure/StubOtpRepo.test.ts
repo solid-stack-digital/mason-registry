@@ -1,10 +1,17 @@
-import { Container } from "@solid-stack/di";
-import { beforeEach, describe, expect, it } from "vitest";
+import type { Container } from "@solid-stack/di";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Time } from "@/shared/time/domain/Time.js";
+import { getOtpTestContainer } from "../__tests__/utils/getOtpTestContainer.js";
 import type { Otp } from "../domain/Otp.js";
 import { InitialOtps, StubOtpRepo } from "./StubOtpRepo.js";
 
 describe("StubOtpRepo", () => {
+	beforeEach(() => {
+		vi.stubEnv("INFRA_MODE", "isolated");
+
+		container = getOtpTestContainer();
+	});
+	afterEach(() => vi.unstubAllEnvs());
 	let container: Container;
 
 	const sampleOtp: Otp = {
@@ -21,18 +28,13 @@ describe("StubOtpRepo", () => {
 		updatedAt: new Time(1700000000000),
 	};
 
-	beforeEach(() => {
-		container = new Container();
-		container.provideValue(InitialOtps, []);
-	});
-
 	it("should initialize with empty array when InitialOtps token provides empty array", () => {
 		const repo = container.resolve(StubOtpRepo);
 		expect(repo.getOtps()).toHaveLength(0);
 	});
 
 	it("should initialize with provided InitialOtps token", async () => {
-		const c = new Container();
+		const c = getOtpTestContainer();
 		c.provideValue(InitialOtps, [sampleOtp]);
 		const repo = c.resolve(StubOtpRepo);
 

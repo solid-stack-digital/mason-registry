@@ -1,12 +1,20 @@
-import { describe, expect, it } from "vitest";
+import type { Container } from "@solid-stack/di";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { getHasherTestContainer } from "../../__tests__/utils/getHasherTestContainer.js";
 import { Hasher } from "../../Hasher.js";
 import { ScryptHashEngine } from "../ScryptHashEngine.js";
 import { StubHashEngine, StubHasher } from "../StubHashEngine.js";
 
 describe("Hasher Infrastructure & Hasher Service", () => {
+	let container: Container;
+	beforeEach(() => {
+		vi.stubEnv("INFRA_MODE", "isolated");
+		container = getHasherTestContainer();
+	});
+	afterEach(() => vi.unstubAllEnvs());
 	describe("ScryptHashEngine", () => {
 		it("hashes and verifies passwords correctly", async () => {
-			const engine = new ScryptHashEngine({});
+			const engine = container.resolve(ScryptHashEngine);
 			const hash = await engine.hash("my-secret-password");
 
 			expect(hash).toBeDefined();
@@ -20,7 +28,7 @@ describe("Hasher Infrastructure & Hasher Service", () => {
 		});
 
 		it("generates unique hashes for identical passwords due to salt", async () => {
-			const engine = new ScryptHashEngine({});
+			const engine = container.resolve(ScryptHashEngine);
 			const hash1 = await engine.hash("same-password");
 			const hash2 = await engine.hash("same-password");
 
@@ -30,7 +38,7 @@ describe("Hasher Infrastructure & Hasher Service", () => {
 		});
 
 		it("verifies plaintext against hash via verify()", async () => {
-			const engine = new ScryptHashEngine({});
+			const engine = container.resolve(ScryptHashEngine);
 			const hash = await engine.hash("admin-pass");
 
 			expect(await engine.verify("admin-pass", hash)).toBe(true);
@@ -38,7 +46,7 @@ describe("Hasher Infrastructure & Hasher Service", () => {
 		});
 
 		it("rejects empty or non-string inputs in hash()", async () => {
-			const engine = new ScryptHashEngine({});
+			const engine = container.resolve(ScryptHashEngine);
 
 			await expect(engine.hash("")).rejects.toThrow(
 				"Password must be a non-empty string",
@@ -49,7 +57,7 @@ describe("Hasher Infrastructure & Hasher Service", () => {
 		});
 
 		it("handles malformed hashes gracefully in verify()", async () => {
-			const engine = new ScryptHashEngine({});
+			const engine = container.resolve(ScryptHashEngine);
 
 			expect(await engine.verify("password", "invalid-hash")).toBe(false);
 			expect(await engine.verify("password", "scrypt$only-salt")).toBe(false);
@@ -63,7 +71,7 @@ describe("Hasher Infrastructure & Hasher Service", () => {
 
 	describe("StubHashEngine", () => {
 		it("provides predictable hashing and verification", async () => {
-			const stub = new StubHashEngine({});
+			const stub = container.resolve(StubHashEngine);
 			const hash = await stub.hash("test-password");
 
 			expect(hash).toBe("mock-hash$test-password");
@@ -72,7 +80,7 @@ describe("Hasher Infrastructure & Hasher Service", () => {
 		});
 
 		it("allows custom prefix", async () => {
-			const stub = new StubHashEngine({});
+			const stub = container.resolve(StubHashEngine);
 			stub.setPrefix("custom$");
 			const hash = await stub.hash("test");
 
@@ -81,7 +89,7 @@ describe("Hasher Infrastructure & Hasher Service", () => {
 		});
 
 		it("allows setting synthetic errors", async () => {
-			const stub = new StubHashEngine({});
+			const stub = container.resolve(StubHashEngine);
 			stub.setError(new Error("Database connection lost"));
 
 			await expect(stub.hash("pass")).rejects.toThrow(
@@ -95,7 +103,7 @@ describe("Hasher Infrastructure & Hasher Service", () => {
 
 	describe("StubHasher", () => {
 		it("functions as Hasher with stub behavior", async () => {
-			const stubHasher = new StubHasher({});
+			const stubHasher = container.resolve(StubHasher);
 			const hash = await stubHasher.hash("hello");
 
 			expect(hash).toBe("mock-hash$hello");
@@ -103,7 +111,7 @@ describe("Hasher Infrastructure & Hasher Service", () => {
 		});
 
 		it("allows setting synthetic errors on StubHasher", async () => {
-			const stubHasher = new StubHasher({});
+			const stubHasher = container.resolve(StubHasher);
 			stubHasher.setError(new Error("Hasher failure"));
 
 			await expect(stubHasher.hash("any")).rejects.toThrow("Hasher failure");
@@ -112,8 +120,7 @@ describe("Hasher Infrastructure & Hasher Service", () => {
 
 	describe("Hasher Service", () => {
 		it("delegates hash and verify to injected hashEngine", async () => {
-			const stubEngine = new StubHashEngine({});
-			const hasher = new Hasher({ hashEngine: stubEngine });
+			const hasher = container.resolve(Hasher);
 
 			const hash = await hasher.hash("plain");
 			expect(hash).toBe("mock-hash$plain");

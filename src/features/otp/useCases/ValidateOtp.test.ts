@@ -1,9 +1,10 @@
-import { Container } from "@solid-stack/di";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { Container } from "@solid-stack/di";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Duration } from "@/shared/time/domain/Duration.js";
 import { Time } from "@/shared/time/domain/Time.js";
 import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
 import { ITimeEngine } from "@/shared/time/ports/ITimeEngine.js";
+import { getOtpTestContainer } from "../__tests__/utils/getOtpTestContainer.js";
 import { IOtpRepo } from "../domain/IOtpRepo.js";
 import type { Otp } from "../domain/Otp.js";
 import {
@@ -12,11 +13,32 @@ import {
 	OtpMaxAttemptsExceededError,
 	OtpNotFoundError,
 } from "../errors/OtpErrors.js";
-import { InitialOtps, StubOtpRepo } from "../infrastructure/StubOtpRepo.js";
+import type { StubOtpRepo } from "../infrastructure/StubOtpRepo.js";
 import { OtpConfigToken } from "../tokens.js";
 import { ValidateOtp, type ValidateOtpInput } from "./ValidateOtp.js";
 
 describe("ValidateOtp UseCase", () => {
+	beforeEach(() => {
+		vi.stubEnv("INFRA_MODE", "isolated");
+
+		// Arrange: Fresh DI container for total isolation
+		container = getOtpTestContainer();
+
+		stubTime = container.resolve(StubTimeEngine);
+
+		container.provideValue(OtpConfigToken, {
+			retryInterval: Duration.fromSeconds(30),
+			otpTtl: Duration.fromMinutes(5),
+			maxAttempts: 3,
+		});
+
+		useCase = container.resolve(ValidateOtp);
+		otpRepo = container.resolve(IOtpRepo) as StubOtpRepo;
+		stubTime = container.resolve(ITimeEngine) as StubTimeEngine;
+		stubTime.setTime(BASE_TIME);
+		stubTime.setMillis(BASE_TIME);
+	});
+	afterEach(() => vi.unstubAllEnvs());
 	let container: Container;
 	let useCase: ValidateOtp;
 	let otpRepo: StubOtpRepo;
@@ -38,27 +60,6 @@ describe("ValidateOtp UseCase", () => {
 		createdAt: new Time(BASE_TIME),
 		updatedAt: new Time(BASE_TIME),
 		...overrides,
-	});
-
-	beforeEach(() => {
-		// Arrange: Fresh DI container for total isolation
-		container = new Container();
-
-		stubTime = new StubTimeEngine({}, BASE_TIME);
-		container.provide(ITimeEngine, StubTimeEngine);
-
-		container.provide(IOtpRepo, StubOtpRepo);
-		container.provideValue(InitialOtps, []);
-		container.provideValue(OtpConfigToken, {
-			retryInterval: Duration.fromSeconds(30),
-			otpTtl: Duration.fromMinutes(5),
-			maxAttempts: 3,
-		});
-
-		useCase = container.resolve(ValidateOtp);
-		otpRepo = container.resolve(IOtpRepo) as StubOtpRepo;
-		stubTime = container.resolve(ITimeEngine) as StubTimeEngine;
-		stubTime.setMillis(BASE_TIME);
 	});
 
 	describe("Success Paths & Interactions (Contract Enforcement)", () => {

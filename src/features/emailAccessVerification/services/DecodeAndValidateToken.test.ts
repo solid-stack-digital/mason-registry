@@ -1,12 +1,11 @@
-import { Container } from "@solid-stack/di";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { HmacJwtEngine } from "@/shared/jwt/infrastructure/HmacJwtEngine.js";
+import type { Container } from "@solid-stack/di";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Jwt } from "@/shared/jwt/Jwt.js";
-import { IJwtEngine } from "@/shared/jwt/ports/IJwtEngine.js";
 import { Duration } from "@/shared/time/domain/Duration.js";
 import { Time } from "@/shared/time/domain/Time.js";
-import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
+import type { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
 import { ITimeEngine } from "@/shared/time/ports/ITimeEngine.js";
+import { getEmailAccessVerificationTestContainer } from "../__tests__/utils/getEmailAccessVerificationTestContainer.js";
 import type { EmailAccess } from "../domain/EmailAccess.js";
 import { IEmailAccessRepository } from "../domain/IEmailAccessRepository.js";
 import {
@@ -17,36 +16,26 @@ import {
 	EmailAccessTokenInvalidError,
 	EmailAccessTokenNotFoundError,
 } from "../errors/EmailAccessErrors.js";
-import {
-	InitialEmailAccesses,
-	StubEmailAccessRepository,
-} from "../infrastructure/StubEmailAccessRepository.js";
+import type { StubEmailAccessRepository } from "../infrastructure/StubEmailAccessRepository.js";
 import { DecodeAndValidateToken } from "./DecodeAndValidateToken.js";
 
 describe("DecodeAndValidateToken Service", () => {
-	let container: Container;
-	let service: DecodeAndValidateToken;
-	let stubTime: StubTimeEngine;
-	let stubRepo: StubEmailAccessRepository;
-	let jwt: Jwt;
-
-	const BASE_TIME = 1_700_000_000_000;
-
 	beforeEach(() => {
-		container = new Container();
+		vi.stubEnv("INFRA_MODE", "isolated");
+
+		container = getEmailAccessVerificationTestContainer();
 
 		// Configure time
-		container.provide(ITimeEngine, StubTimeEngine);
+
 		stubTime = container.resolve(ITimeEngine) as StubTimeEngine;
 		stubTime.setMillis(BASE_TIME);
 
 		// Configure JWT
-		container.provide(IJwtEngine, HmacJwtEngine);
+
 		jwt = container.resolve(Jwt);
 
 		// Configure Repository stub
-		container.provide(IEmailAccessRepository, StubEmailAccessRepository);
-		container.provideValue(InitialEmailAccesses, []);
+
 		stubRepo = container.resolve(
 			IEmailAccessRepository,
 		) as StubEmailAccessRepository;
@@ -54,6 +43,14 @@ describe("DecodeAndValidateToken Service", () => {
 		// Service
 		service = container.resolve(DecodeAndValidateToken);
 	});
+	afterEach(() => vi.unstubAllEnvs());
+	let container: Container;
+	let service: DecodeAndValidateToken;
+	let stubTime: StubTimeEngine;
+	let stubRepo: StubEmailAccessRepository;
+	let jwt: Jwt;
+
+	const BASE_TIME = 1_700_000_000_000;
 
 	const createToken = async (
 		payload: { jti: string; email: string; purpose: string },

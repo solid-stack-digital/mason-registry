@@ -1,5 +1,5 @@
-import { Container } from "@solid-stack/di";
-import { beforeEach, describe, expect, it } from "vitest";
+import type { Container } from "@solid-stack/di";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { EmailAccessVerificationProvider } from "@/features/emailAccessVerification/diProvider.js";
 import { RequestEmailAccessVerification } from "@/features/emailAccessVerification/useCases/RequestEmailAccessVerification.js";
 import { ValidateEmailAccess } from "@/features/emailAccessVerification/useCases/ValidateEmailAccess.js";
@@ -8,12 +8,13 @@ import { IOtpEmailGateway } from "@/features/otp/domain/IOtpEmailGateway.js";
 import { StubOtpEmailGateway } from "@/features/otp/infrastructure/StubOtpEmailGateway.js";
 import { StubHashEngine } from "@/shared/hasher/infrastructure/StubHashEngine.js";
 import { IHashEngine } from "@/shared/hasher/ports/IHashEngine.js";
-import { HmacJwtEngine } from "@/shared/jwt/infrastructure/HmacJwtEngine.js";
+import { JwtEngine } from "@/shared/jwt/infrastructure/JwtEngine.js";
 import { IJwtEngine } from "@/shared/jwt/ports/IJwtEngine.js";
 import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
 import { ITimeEngine } from "@/shared/time/ports/ITimeEngine.js";
 import { StubIdGenerator } from "@/shared/uuid/infrastructure/StubIdGenerator.js";
 import { IIdGenerator } from "@/shared/uuid/ports/IIdGenerator.js";
+import { getAuthnTestContainer } from "./__tests__/utils/getAuthnTestContainer.js";
 import { AuthnProvider } from "./diProvider.js";
 import {
 	AccountRegisteredEvent,
@@ -31,11 +32,10 @@ import { ResetPassword } from "./useCases/ResetPassword.js";
 import { VerifyEmail } from "./useCases/VerifyEmail.js";
 
 describe("Authn Feature Integration", () => {
-	let container: Container;
-	let eventPublisher: MemoryEventPublisher;
-
 	beforeEach(() => {
-		container = new Container();
+		vi.stubEnv("INFRA_MODE", "integrated");
+
+		container = getAuthnTestContainer();
 
 		// Shared infrastructure test doubles
 		container.provide(ITimeEngine, StubTimeEngine);
@@ -43,7 +43,7 @@ describe("Authn Feature Integration", () => {
 		stubTime.setMillis(1700000000000);
 
 		container.provide(IHashEngine, StubHashEngine);
-		container.provide(IJwtEngine, HmacJwtEngine);
+		container.provide(IJwtEngine, JwtEngine);
 		container.provide(IIdGenerator, StubIdGenerator);
 
 		// Feature providers
@@ -57,6 +57,9 @@ describe("Authn Feature Integration", () => {
 			IAuthnEventPublisher,
 		) as MemoryEventPublisher;
 	});
+	afterEach(() => vi.unstubAllEnvs());
+	let container: Container;
+	let eventPublisher: MemoryEventPublisher;
 
 	it("executes the complete authentication, email verification, session refresh, password management lifecycle", async () => {
 		const registerAccountUc = container.resolve(RegisterAccount);

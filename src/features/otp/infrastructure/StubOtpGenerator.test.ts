@@ -1,14 +1,17 @@
-import { Container } from "@solid-stack/di";
-import { beforeEach, describe, expect, it } from "vitest";
+import type { Container } from "@solid-stack/di";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { getOtpTestContainer } from "../__tests__/utils/getOtpTestContainer.js";
 import { NextOtp, StubOtpGenerator } from "./StubOtpGenerator.js";
 
 describe("StubOtpGenerator", () => {
-	let container: Container;
-
 	beforeEach(() => {
-		container = new Container();
+		vi.stubEnv("INFRA_MODE", "isolated");
+
+		container = getOtpTestContainer();
 		container.provideValue(NextOtp, "123456");
 	});
+	afterEach(() => vi.unstubAllEnvs());
+	let container: Container;
 
 	it("should return default nextOtp when standard token provided", () => {
 		const stub = container.resolve(StubOtpGenerator);

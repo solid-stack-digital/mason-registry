@@ -5,7 +5,7 @@ import { StubHmacEngine } from "./infrastructure/StubHmacEngine.js";
 import { IHmacEngine } from "./ports/IHmacEngine.js";
 
 export const HmacProvider = (c: Container): void => {
-	// TODO: change this with your app's env loader.
+	// TODO: Replace this environment lookup with your application's config loader after import.
 	const infra_mode = process.env.INFRA_MODE || "isolated";
 
 	if (infra_mode === "isolated") {

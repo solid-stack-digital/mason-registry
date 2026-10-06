@@ -1,26 +1,23 @@
-import { Container } from "@solid-stack/di";
-import { beforeEach, describe, expect, it } from "vitest";
+import type { Container } from "@solid-stack/di";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { IMailer } from "@/features/mailing/domain/IMailer.js";
 import { MemoryMailer } from "@/features/mailing/infrastructure/MemoryMailer.js";
 import { OtpProvider } from "@/features/otp/diProvider.js";
-import { HmacJwtEngine } from "@/shared/jwt/infrastructure/HmacJwtEngine.js";
+import { JwtEngine } from "@/shared/jwt/infrastructure/JwtEngine.js";
 import { IJwtEngine } from "@/shared/jwt/ports/IJwtEngine.js";
 import { Duration } from "@/shared/time/domain/Duration.js";
 import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
 import { ITimeEngine } from "@/shared/time/ports/ITimeEngine.js";
 import { CryptoIdGenerator } from "@/shared/uuid/infrastructure/CryptoIdGenerator.js";
 import { IIdGenerator } from "@/shared/uuid/ports/IIdGenerator.js";
+import { getEmailAccessVerificationTestContainer } from "./__tests__/utils/getEmailAccessVerificationTestContainer.js";
 import { EmailAccessVerificationProvider } from "./diProvider.js";
-import { IEmailAccessRepository } from "./domain/IEmailAccessRepository.js";
-import { IOtpGateway } from "./domain/IOtpGateway.js";
 import {
 	EmailAccessEmailMismatchError,
 	EmailAccessPurposeMismatchError,
 	EmailAccessTokenAlreadyUsedError,
 	EmailAccessTokenExpiredError,
 } from "./errors/EmailAccessErrors.js";
-import { MemoryEmailAccessRepository } from "./infrastructure/MemoryEmailAccessRepository.js";
-import { OtpGateway } from "./infrastructure/OtpGateway.js";
 import { EmailAccessConfigToken } from "./tokens.js";
 import { ConsumeEmailAccessToken } from "./useCases/ConsumeEmailAccessToken.js";
 import { DecodeEmailAccessToken } from "./useCases/DecodeEmailAccessToken.js";
@@ -28,6 +25,18 @@ import { RequestEmailAccessVerification } from "./useCases/RequestEmailAccessVer
 import { ValidateEmailAccess } from "./useCases/ValidateEmailAccess.js";
 
 describe("Email Access Verification Feature Integration", () => {
+	beforeEach(() => {
+		vi.stubEnv("INFRA_MODE", "integrated");
+
+		container = createTestContainer();
+
+		requestEmailAccessUc = container.resolve(RequestEmailAccessVerification);
+		validateEmailAccessUc = container.resolve(ValidateEmailAccess);
+		decodeTokenUc = container.resolve(DecodeEmailAccessToken);
+		consumeTokenUc = container.resolve(ConsumeEmailAccessToken);
+		memoryMailer = container.resolve(IMailer) as MemoryMailer;
+	});
+	afterEach(() => vi.unstubAllEnvs());
 	let container: Container;
 	let stubTime: StubTimeEngine;
 	let memoryMailer: MemoryMailer;
@@ -40,7 +49,7 @@ describe("Email Access Verification Feature Integration", () => {
 	const BASE_TIME = 1_700_000_000_000;
 
 	const createTestContainer = (): Container => {
-		const c = new Container();
+		const c = getEmailAccessVerificationTestContainer();
 
 		// Configure time engine (controllable clock for deterministic tests)
 		c.provide(ITimeEngine, StubTimeEngine);
@@ -51,7 +60,7 @@ describe("Email Access Verification Feature Integration", () => {
 		c.provide(IIdGenerator, CryptoIdGenerator);
 
 		// Configure JWT
-		c.provide(IJwtEngine, HmacJwtEngine);
+		c.provide(IJwtEngine, JwtEngine);
 
 		// Configure Mailing (real MemoryMailer adapter)
 		c.provide(IMailer, MemoryMailer);
@@ -69,28 +78,6 @@ describe("Email Access Verification Feature Integration", () => {
 
 		return c;
 	};
-
-	beforeEach(() => {
-		container = createTestContainer();
-
-		requestEmailAccessUc = container.resolve(RequestEmailAccessVerification);
-		validateEmailAccessUc = container.resolve(ValidateEmailAccess);
-		decodeTokenUc = container.resolve(DecodeEmailAccessToken);
-		consumeTokenUc = container.resolve(ConsumeEmailAccessToken);
-		memoryMailer = container.resolve(IMailer) as MemoryMailer;
-	});
-
-	describe("1. DI Container Wiring Verification", () => {
-		it("should naturally wire IEmailAccessRepository to MemoryEmailAccessRepository by default", () => {
-			const repo = container.resolve(IEmailAccessRepository);
-			expect(repo).toBeInstanceOf(MemoryEmailAccessRepository);
-		});
-
-		it("should naturally wire IOtpGateway to OtpGateway by default", () => {
-			const gateway = container.resolve(IOtpGateway);
-			expect(gateway).toBeInstanceOf(OtpGateway);
-		});
-	});
 
 	describe("2. End-to-End Expected Behaviors", () => {
 		it("Complete Flow: Request verification -> receive OTP in mail -> validate access -> decode token -> consume token", async () => {

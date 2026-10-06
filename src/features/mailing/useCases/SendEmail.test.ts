@@ -1,18 +1,23 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { Clock } from "@/shared/time/Clock.js";
-import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
-import { MemoryMailer } from "../infrastructure/MemoryMailer.js";
+import type { Container } from "@solid-stack/di";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { getMailingTestContainer } from "../__tests__/utils/getMailingTestContainer.js";
+import { StubMailer } from "../infrastructure/StubMailer.js";
 import { SendEmail } from "./SendEmail.js";
 
 describe("SendEmail UseCase", () => {
-	let mailer: MemoryMailer;
-	let sendEmail: SendEmail;
-
 	beforeEach(() => {
-		const clock = new Clock({ timeEngine: new StubTimeEngine({}) });
-		mailer = new MemoryMailer({ clock });
-		sendEmail = new SendEmail({ mailer });
+		vi.stubEnv("INFRA_MODE", "isolated");
+
+		container = getMailingTestContainer();
+
+		mailer = container.resolve(StubMailer);
+		sendEmail = container.resolve(SendEmail);
 	});
+	afterEach(() => vi.unstubAllEnvs());
+	let container: Container;
+
+	let mailer: StubMailer;
+	let sendEmail: SendEmail;
 
 	it("successfully sends valid email", async () => {
 		const res = await sendEmail.execute({

@@ -1,53 +1,44 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import type { Container } from "@solid-stack/di";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Hasher } from "@/shared/hasher/Hasher.js";
-import { StubHashEngine } from "@/shared/hasher/infrastructure/StubHashEngine.js";
-import { StubJwtEngine } from "@/shared/jwt/infrastructure/StubJwtEngine.js";
-import { Jwt } from "@/shared/jwt/Jwt.js";
+import { JwtEngine } from "@/shared/jwt/infrastructure/JwtEngine.js";
 import { Clock } from "@/shared/time/Clock.js";
 import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
-import { StubIdGenerator } from "@/shared/uuid/infrastructure/StubIdGenerator.js";
-import { Uuid } from "@/shared/uuid/Uuid.js";
-import { DEFAULT_AUTHN_CONFIG } from "../domain/AuthnConfig.js";
+import { getAuthnTestContainer } from "../__tests__/utils/getAuthnTestContainer.js";
 import type { Credential } from "../domain/Credential.js";
-import { MemoryCredentialRepo } from "../infrastructure/MemoryCredentialRepo.js";
-import { MemoryRefreshTokenRepo } from "../infrastructure/MemoryRefreshTokenRepo.js";
+import { StubCredentialRepo } from "../infrastructure/StubCredentialRepo.js";
+import { StubRefreshTokenRepo } from "../infrastructure/StubRefreshTokenRepo.js";
 import { Login } from "./Login.js";
 
 describe("Login UseCase", () => {
-	let credRepo: MemoryCredentialRepo;
-	let refreshTokenRepo: MemoryRefreshTokenRepo;
+	beforeEach(() => {
+		vi.stubEnv("INFRA_MODE", "isolated");
+
+		container = getAuthnTestContainer();
+
+		stubTime = container.resolve(StubTimeEngine);
+		stubTime.setTime(1700000000000);
+		clock = container.resolve(Clock);
+		credRepo = container.resolve(StubCredentialRepo);
+		refreshTokenRepo = container.resolve(StubRefreshTokenRepo);
+
+		hasher = container.resolve(Hasher);
+		stubJwt = container.resolve(JwtEngine);
+
+		login = container.resolve(Login);
+	});
+	afterEach(() => vi.unstubAllEnvs());
+	let container: Container;
+
+	let credRepo: StubCredentialRepo;
+	let refreshTokenRepo: StubRefreshTokenRepo;
 	let clock: Clock;
 	let stubTime: StubTimeEngine;
 	let hasher: Hasher;
-	let stubHash: StubHashEngine;
-	let jwt: Jwt;
-	let stubJwt: StubJwtEngine;
-	let uuid: Uuid;
-	let stubId: StubIdGenerator;
+
+	let stubJwt: JwtEngine;
+
 	let login: Login;
-
-	beforeEach(() => {
-		stubTime = new StubTimeEngine({}, 1700000000000);
-		clock = new Clock({ timeEngine: stubTime });
-		credRepo = new MemoryCredentialRepo({});
-		refreshTokenRepo = new MemoryRefreshTokenRepo({ clock });
-		stubHash = new StubHashEngine({});
-		hasher = new Hasher({ hashEngine: stubHash });
-		stubJwt = new StubJwtEngine({});
-		jwt = new Jwt({ jwtEngine: stubJwt, clock });
-		stubId = new StubIdGenerator({});
-		uuid = new Uuid({ idGenerator: stubId });
-
-		login = new Login({
-			credRepo,
-			refreshTokenRepo,
-			hasher,
-			jwt,
-			uuid,
-			clock,
-			authnConfig: DEFAULT_AUTHN_CONFIG,
-		});
-	});
 
 	it("successfully logs in verified user with valid credentials", async () => {
 		const hashedPassword = await hasher.hash("secretPassword");
@@ -61,7 +52,7 @@ describe("Login UseCase", () => {
 		};
 		await credRepo.save(testCred);
 
-		stubJwt.setNextToken("signed-access-token");
+		vi.spyOn(stubJwt, "sign").mockResolvedValue("signed-access-token");
 
 		const result = await login.execute({
 			email: "test@example.com",

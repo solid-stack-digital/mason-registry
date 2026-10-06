@@ -1,15 +1,18 @@
-import { Container } from "@solid-stack/di";
-import { beforeEach, describe, expect, it } from "vitest";
+import type { Container } from "@solid-stack/di";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { getEmailAccessVerificationTestContainer } from "../__tests__/utils/getEmailAccessVerificationTestContainer.js";
 import { StubOtpGateway } from "./StubOtpGateway.js";
 
 describe("StubOtpGateway", () => {
-	let container: Container;
-	let stub: StubOtpGateway;
-
 	beforeEach(() => {
-		container = new Container();
+		vi.stubEnv("INFRA_MODE", "isolated");
+
+		container = getEmailAccessVerificationTestContainer();
 		stub = container.resolve(StubOtpGateway);
 	});
+	afterEach(() => vi.unstubAllEnvs());
+	let container: Container;
+	let stub: StubOtpGateway;
 
 	it("sends OTP and tracks calls", async () => {
 		const res = await stub.sendOtp({

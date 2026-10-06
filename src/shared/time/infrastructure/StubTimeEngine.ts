@@ -152,6 +152,26 @@ export class StubClock implements Clock {
 		return this.internalClock.duration(duration);
 	}
 
+	durationMillis(millis: number): Duration {
+		return this.internalClock.durationMillis(millis);
+	}
+
+	durationSeconds(seconds: number): Duration {
+		return this.internalClock.durationSeconds(seconds);
+	}
+
+	durationMinutes(minutes: number): Duration {
+		return this.internalClock.durationMinutes(minutes);
+	}
+
+	durationHours(hours: number): Duration {
+		return this.internalClock.durationHours(hours);
+	}
+
+	durationDays(days: number): Duration {
+		return this.internalClock.durationDays(days);
+	}
+
 	setTime(time: Time | number): void {
 		this.stubTimeEngine.setTime(time);
 	}

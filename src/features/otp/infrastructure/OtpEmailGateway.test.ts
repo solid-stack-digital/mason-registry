@@ -1,18 +1,24 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { SendEmail } from "@/features/mailing/useCases/SendEmail.js";
+import type { Container } from "@solid-stack/di";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { SendEmail } from "@/features/mailing/useCases/SendEmail.js";
+import { getOtpTestContainer } from "../__tests__/utils/getOtpTestContainer.js";
 import { OtpEmailGateway } from "./OtpEmailGateway.js";
 
 describe("OtpEmailGateway Infrastructure Adapter", () => {
+	beforeEach(() => {
+		vi.stubEnv("INFRA_MODE", "isolated");
+
+		container = getOtpTestContainer();
+
+		sendEmailMock = container.resolve(SendEmail);
+		vi.spyOn(sendEmailMock, "execute").mockResolvedValue({ ok: true });
+		gateway = container.resolve(OtpEmailGateway);
+	});
+	afterEach(() => vi.unstubAllEnvs());
+	let container: Container;
+
 	let gateway: OtpEmailGateway;
 	let sendEmailMock: SendEmail;
-
-	beforeEach(() => {
-		sendEmailMock = {
-			execute: vi.fn().mockResolvedValue({ ok: true }),
-		} as unknown as SendEmail;
-
-		gateway = new OtpEmailGateway({ sendEmail: sendEmailMock });
-	});
 
 	describe("Core Mechanics & Contract Fulfillment", () => {
 		it("should delegate email sending to the mailing feature SendEmail usecase", async () => {

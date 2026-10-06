@@ -1,38 +1,27 @@
-import { Container } from "@solid-stack/di";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { HmacJwtEngine } from "@/shared/jwt/infrastructure/HmacJwtEngine.js";
+import type { Container } from "@solid-stack/di";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Jwt } from "@/shared/jwt/Jwt.js";
-import { IJwtEngine } from "@/shared/jwt/ports/IJwtEngine.js";
 import { Duration } from "@/shared/time/domain/Duration.js";
-import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
+import type { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
 import { ITimeEngine } from "@/shared/time/ports/ITimeEngine.js";
 import { CryptoIdGenerator } from "@/shared/uuid/infrastructure/CryptoIdGenerator.js";
 import { IIdGenerator } from "@/shared/uuid/ports/IIdGenerator.js";
+import { getEmailAccessVerificationTestContainer } from "../__tests__/utils/getEmailAccessVerificationTestContainer.js";
 import { IEmailAccessRepository } from "../domain/IEmailAccessRepository.js";
 import { IOtpGateway } from "../domain/IOtpGateway.js";
-import {
-	InitialEmailAccesses,
-	StubEmailAccessRepository,
-} from "../infrastructure/StubEmailAccessRepository.js";
-import { StubOtpGateway } from "../infrastructure/StubOtpGateway.js";
+import type { StubEmailAccessRepository } from "../infrastructure/StubEmailAccessRepository.js";
+import type { StubOtpGateway } from "../infrastructure/StubOtpGateway.js";
 import { EmailAccessConfigToken } from "../tokens.js";
 import { ValidateEmailAccess } from "./ValidateEmailAccess.js";
 
 describe("ValidateEmailAccess Use Case", () => {
-	let container: Container;
-	let useCase: ValidateEmailAccess;
-	let stubRepo: StubEmailAccessRepository;
-	let stubOtpGateway: StubOtpGateway;
-	let jwt: Jwt;
-	let stubTime: StubTimeEngine;
-
-	const BASE_TIME = 1_700_000_000_000;
-
 	beforeEach(() => {
-		container = new Container();
+		vi.stubEnv("INFRA_MODE", "isolated");
+
+		container = getEmailAccessVerificationTestContainer();
 
 		// Configure Time
-		container.provide(ITimeEngine, StubTimeEngine);
+
 		stubTime = container.resolve(ITimeEngine) as StubTimeEngine;
 		stubTime.setMillis(BASE_TIME);
 
@@ -40,13 +29,10 @@ describe("ValidateEmailAccess Use Case", () => {
 		container.provide(IIdGenerator, CryptoIdGenerator);
 
 		// Configure JWT
-		container.provide(IJwtEngine, HmacJwtEngine);
+
 		jwt = container.resolve(Jwt);
 
 		// Configure Repo & Gateway stubs
-		container.provide(IEmailAccessRepository, StubEmailAccessRepository);
-		container.provideValue(InitialEmailAccesses, []);
-		container.provide(IOtpGateway, StubOtpGateway);
 
 		// Configure Config
 		container.provideValue(EmailAccessConfigToken, {
@@ -59,6 +45,15 @@ describe("ValidateEmailAccess Use Case", () => {
 		stubOtpGateway = container.resolve(IOtpGateway) as StubOtpGateway;
 		useCase = container.resolve(ValidateEmailAccess);
 	});
+	afterEach(() => vi.unstubAllEnvs());
+	let container: Container;
+	let useCase: ValidateEmailAccess;
+	let stubRepo: StubEmailAccessRepository;
+	let stubOtpGateway: StubOtpGateway;
+	let jwt: Jwt;
+	let stubTime: StubTimeEngine;
+
+	const BASE_TIME = 1_700_000_000_000;
 
 	describe("Success Paths & Interactions", () => {
 		it("should validate OTP, generate JWT with configured TTL, save record in repo, and return JWT", async () => {

@@ -1,26 +1,32 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { SendOtp } from "@/features/otp/useCases/SendOtp.js";
-import type { ValidateOtp } from "@/features/otp/useCases/ValidateOtp.js";
+import type { Container } from "@solid-stack/di";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { SendOtp } from "@/features/otp/useCases/SendOtp.js";
+import { ValidateOtp } from "@/features/otp/useCases/ValidateOtp.js";
+import { getEmailAccessVerificationTestContainer } from "../__tests__/utils/getEmailAccessVerificationTestContainer.js";
 import { OtpGateway } from "./OtpGateway.js";
 
 describe("OtpGateway", () => {
+	beforeEach(() => {
+		vi.stubEnv("INFRA_MODE", "isolated");
+
+		container = getEmailAccessVerificationTestContainer();
+
+		sendOtpMock = container.resolve(SendOtp);
+		validateOtpMock = container.resolve(ValidateOtp);
+		vi.spyOn(sendOtpMock, "execute").mockResolvedValue({
+			expiresAt: "2023-11-14T22:18:20.000Z",
+			otpCode: "123456",
+			otpId: "otp-1",
+		});
+		vi.spyOn(validateOtpMock, "execute").mockResolvedValue(true);
+		gateway = container.resolve(OtpGateway);
+	});
+	afterEach(() => vi.unstubAllEnvs());
+	let container: Container;
+
 	let gateway: OtpGateway;
 	let sendOtpMock: SendOtp;
 	let validateOtpMock: ValidateOtp;
-
-	beforeEach(() => {
-		sendOtpMock = {
-			execute: vi.fn().mockResolvedValue({ otpCode: "123456" }),
-		} as unknown as SendOtp;
-		validateOtpMock = {
-			execute: vi.fn().mockResolvedValue(true),
-		} as unknown as ValidateOtp;
-
-		gateway = new OtpGateway({
-			sendOtp: sendOtpMock,
-			validateOtp: validateOtpMock,
-		});
-	});
 
 	it("delegates sendOtp to OTP usecase", async () => {
 		const res = await gateway.sendOtp({

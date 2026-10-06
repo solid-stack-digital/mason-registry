@@ -1,24 +1,33 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import type { Container } from "@solid-stack/di";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Clock } from "@/shared/time/Clock.js";
 import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
+import { getAuthnTestContainer } from "../__tests__/utils/getAuthnTestContainer.js";
 import {
 	DeviceMismatchError,
 	RefreshTokenNotFoundError,
 } from "../errors/AuthnErrors.js";
-import { MemoryRefreshTokenRepo } from "../infrastructure/MemoryRefreshTokenRepo.js";
+import { StubRefreshTokenRepo } from "../infrastructure/StubRefreshTokenRepo.js";
 import { Logout } from "./Logout.js";
 
 describe("Logout UseCase", () => {
-	let refreshTokenRepo: MemoryRefreshTokenRepo;
+	beforeEach(() => {
+		vi.stubEnv("INFRA_MODE", "isolated");
+
+		container = getAuthnTestContainer();
+
+		const stubTime = container.resolve(StubTimeEngine);
+		stubTime.setTime(1700000000000);
+		clock = container.resolve(Clock);
+		refreshTokenRepo = container.resolve(StubRefreshTokenRepo);
+		logout = container.resolve(Logout);
+	});
+	afterEach(() => vi.unstubAllEnvs());
+	let container: Container;
+
+	let refreshTokenRepo: StubRefreshTokenRepo;
 	let clock: Clock;
 	let logout: Logout;
-
-	beforeEach(() => {
-		const stubTime = new StubTimeEngine({}, 1700000000000);
-		clock = new Clock({ timeEngine: stubTime });
-		refreshTokenRepo = new MemoryRefreshTokenRepo({ clock });
-		logout = new Logout({ refreshTokenRepo });
-	});
 
 	it("successfully logs out session with deviceId + jti combination and keeps other device session alive", async () => {
 		await refreshTokenRepo.save({

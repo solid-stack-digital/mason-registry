@@ -1,47 +1,43 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { StubJwtEngine } from "@/shared/jwt/infrastructure/StubJwtEngine.js";
-import { Jwt } from "@/shared/jwt/Jwt.js";
+import type { Container } from "@solid-stack/di";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { JwtEngine } from "@/shared/jwt/infrastructure/JwtEngine.js";
 import { Clock } from "@/shared/time/Clock.js";
 import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
-import { StubIdGenerator } from "@/shared/uuid/infrastructure/StubIdGenerator.js";
-import { Uuid } from "@/shared/uuid/Uuid.js";
-import { DEFAULT_AUTHN_CONFIG } from "../domain/AuthnConfig.js";
+import { getAuthnTestContainer } from "../__tests__/utils/getAuthnTestContainer.js";
 import {
 	DeviceMismatchError,
 	RefreshTokenExpiredError,
 	RefreshTokenNotFoundError,
 } from "../errors/AuthnErrors.js";
-import { MemoryCredentialRepo } from "../infrastructure/MemoryCredentialRepo.js";
-import { MemoryRefreshTokenRepo } from "../infrastructure/MemoryRefreshTokenRepo.js";
+import { StubCredentialRepo } from "../infrastructure/StubCredentialRepo.js";
+import { StubRefreshTokenRepo } from "../infrastructure/StubRefreshTokenRepo.js";
 import { Refresh } from "./Refresh.js";
 
 describe("Refresh UseCase", () => {
-	let credRepo: MemoryCredentialRepo;
-	let refreshTokenRepo: MemoryRefreshTokenRepo;
-	let clock: Clock;
-	let jwt: Jwt;
-	let stubJwt: StubJwtEngine;
-	let uuid: Uuid;
-	let refresh: Refresh;
-
 	beforeEach(() => {
-		const stubTime = new StubTimeEngine({}, 1700000000000);
-		clock = new Clock({ timeEngine: stubTime });
-		credRepo = new MemoryCredentialRepo({});
-		refreshTokenRepo = new MemoryRefreshTokenRepo({ clock });
-		stubJwt = new StubJwtEngine({});
-		jwt = new Jwt({ jwtEngine: stubJwt, clock });
-		uuid = new Uuid({ idGenerator: new StubIdGenerator({}) });
+		vi.stubEnv("INFRA_MODE", "isolated");
 
-		refresh = new Refresh({
-			credRepo,
-			refreshTokenRepo,
-			jwt,
-			uuid,
-			clock,
-			authnConfig: DEFAULT_AUTHN_CONFIG,
-		});
+		container = getAuthnTestContainer();
+
+		const stubTime = container.resolve(StubTimeEngine);
+		stubTime.setTime(1700000000000);
+		clock = container.resolve(Clock);
+		credRepo = container.resolve(StubCredentialRepo);
+		refreshTokenRepo = container.resolve(StubRefreshTokenRepo);
+		stubJwt = container.resolve(JwtEngine);
+
+		refresh = container.resolve(Refresh);
 	});
+	afterEach(() => vi.unstubAllEnvs());
+	let container: Container;
+
+	let credRepo: StubCredentialRepo;
+	let refreshTokenRepo: StubRefreshTokenRepo;
+	let clock: Clock;
+
+	let stubJwt: JwtEngine;
+
+	let refresh: Refresh;
 
 	it("successfully refreshes token, deletes old session, creates new session, and returns new tokens", async () => {
 		await credRepo.save({
@@ -65,7 +61,7 @@ describe("Refresh UseCase", () => {
 			updatedAt: clock.now(),
 		});
 
-		stubJwt.setNextToken("new-access-jwt");
+		vi.spyOn(stubJwt, "sign").mockResolvedValue("new-access-jwt");
 
 		const result = await refresh.execute({
 			refreshToken: "old-token-abc",

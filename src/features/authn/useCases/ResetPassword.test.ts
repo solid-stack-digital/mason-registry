@@ -1,43 +1,45 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import type { Container } from "@solid-stack/di";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Hasher } from "@/shared/hasher/Hasher.js";
-import { StubHashEngine } from "@/shared/hasher/infrastructure/StubHashEngine.js";
 import { Clock } from "@/shared/time/Clock.js";
 import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
+import { getAuthnTestContainer } from "../__tests__/utils/getAuthnTestContainer.js";
 import { PasswordChangedEvent } from "../domain/events/index.js";
 import { AccountNotFoundError } from "../errors/AuthnErrors.js";
-import { MemoryCredentialRepo } from "../infrastructure/MemoryCredentialRepo.js";
-import { MemoryEventPublisher } from "../infrastructure/MemoryEventPublisher.js";
-import { MemoryRefreshTokenRepo } from "../infrastructure/MemoryRefreshTokenRepo.js";
+import { StubCredentialRepo } from "../infrastructure/StubCredentialRepo.js";
 import { StubEAVGateway } from "../infrastructure/StubEAVGateway.js";
+import { StubEventPublisher } from "../infrastructure/StubEventPublisher.js";
+import { StubRefreshTokenRepo } from "../infrastructure/StubRefreshTokenRepo.js";
 import { ResetPassword } from "./ResetPassword.js";
 
 describe("ResetPassword UseCase", () => {
-	let credRepo: MemoryCredentialRepo;
-	let refreshTokenRepo: MemoryRefreshTokenRepo;
-	let eventPublisher: MemoryEventPublisher;
-	let eavGateway: StubEAVGateway;
+	beforeEach(() => {
+		vi.stubEnv("INFRA_MODE", "isolated");
+
+		container = getAuthnTestContainer();
+		hasher = container.resolve(Hasher);
+
+		const stubTime = container.resolve(StubTimeEngine);
+		stubTime.setTime(1700000000000);
+		clock = container.resolve(Clock);
+		credRepo = container.resolve(StubCredentialRepo);
+		refreshTokenRepo = container.resolve(StubRefreshTokenRepo);
+		eventPublisher = container.resolve(StubEventPublisher);
+		eavGateway = container.resolve(StubEAVGateway);
+
+		resetPassword = container.resolve(ResetPassword);
+	});
+	afterEach(() => vi.unstubAllEnvs());
+	let container: Container;
 	let hasher: Hasher;
+
+	let credRepo: StubCredentialRepo;
+	let refreshTokenRepo: StubRefreshTokenRepo;
+	let eventPublisher: StubEventPublisher;
+	let eavGateway: StubEAVGateway;
+
 	let clock: Clock;
 	let resetPassword: ResetPassword;
-
-	beforeEach(() => {
-		const stubTime = new StubTimeEngine({}, 1700000000000);
-		clock = new Clock({ timeEngine: stubTime });
-		credRepo = new MemoryCredentialRepo({});
-		refreshTokenRepo = new MemoryRefreshTokenRepo({ clock });
-		eventPublisher = new MemoryEventPublisher({});
-		eavGateway = new StubEAVGateway({});
-		hasher = new Hasher({ hashEngine: new StubHashEngine({}) });
-
-		resetPassword = new ResetPassword({
-			credRepo,
-			refreshTokenRepo,
-			hasher,
-			eavGateway,
-			clock,
-			eventPublisher,
-		});
-	});
 
 	it("successfully resets password, consumes token, deletes all sessions across devices, and emits event", async () => {
 		const oldHash = await hasher.hash("oldPassword123");
