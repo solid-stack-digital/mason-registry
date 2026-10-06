@@ -1,6 +1,6 @@
 allowBuilds:
   esbuild: true
 minimumReleaseAgeExclude:
-  - '@solid-stack/mason@1.0.12 || 1.0.13 || 1.0.14 || 1.0.16 || 1.0.17 || 1.0.18 || 1.0.37'
+  - '@solid-stack/mason@1.0.12 || 1.0.13 || 1.0.14 || 1.0.16 || 1.0.17 || 1.0.18 || 1.0.37 || 1.0.38'
 overrides:
   '@solid-stack/mason': link:../mason
