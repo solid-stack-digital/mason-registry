@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getHasherTestContainer } from "./__tests__/utils/getHasherTestContainer.js";
 import { Hasher } from "./Hasher.js";
 import { ScryptHashEngine } from "./infrastructure/ScryptHashEngine.js";
+import { StubHashEngine } from "./infrastructure/StubHashEngine.js";
 import { IHashEngine } from "./ports/IHashEngine.js";
 
 describe("Hasher", () => {
@@ -13,6 +14,7 @@ describe("Hasher", () => {
 	});
 	afterEach(() => vi.unstubAllEnvs());
 	describe("with StubHashEngine", () => {
+		beforeEach(() => container.provide(IHashEngine, StubHashEngine));
 		it("hashes and verifies plain text correctly", async () => {
 			const hasher = container.resolve(Hasher);
 

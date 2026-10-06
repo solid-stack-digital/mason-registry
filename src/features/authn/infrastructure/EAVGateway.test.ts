@@ -1,51 +1,249 @@
 import type { Container } from "@solid-stack/di";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ConsumeEmailAccessToken } from "@/features/emailAccessVerification/useCases/ConsumeEmailAccessToken.js";
+import emailAccessVerificationProvider from "@/features/emailAccessVerification/diProvider.js";
+import { IOtpGateway } from "@/features/emailAccessVerification/domain/IOtpGateway.js";
+import { OtpGateway } from "@/features/emailAccessVerification/infrastructure/OtpGateway.js";
+import { RequestEmailAccessVerification } from "@/features/emailAccessVerification/useCases/RequestEmailAccessVerification.js";
+import { ValidateEmailAccess } from "@/features/emailAccessVerification/useCases/ValidateEmailAccess.js";
+import mailingProvider from "@/features/mailing/diProvider.js";
+import { IMailer } from "@/features/mailing/domain/IMailer.js";
+import {
+	InitialSendStatus,
+	StubMailer,
+} from "@/features/mailing/infrastructure/StubMailer.js";
+import otpProvider from "@/features/otp/diProvider.js";
+import { IOtpEmailGateway } from "@/features/otp/domain/IOtpEmailGateway.js";
+import { OtpEmailGateway } from "@/features/otp/infrastructure/OtpEmailGateway.js";
+import { StubTimeEngine } from "@/shared/time/infrastructure/StubTimeEngine.js";
+import { ITimeEngine } from "@/shared/time/ports/ITimeEngine.js";
+import { StubIdGenerator } from "@/shared/uuid/infrastructure/StubIdGenerator.js";
+import { IIdGenerator } from "@/shared/uuid/ports/IIdGenerator.js";
 import { getAuthnTestContainer } from "../__tests__/utils/getAuthnTestContainer.js";
-import { AuthnError } from "../errors/AuthnError.js";
+import {
+	AccountRegisteredEvent,
+	PasswordChangedEvent,
+} from "../domain/events/index.js";
+import { IAuthnEventPublisher } from "../domain/IAuthnEventPublisher.js";
+import { IEAVGateway } from "../domain/IEAVGateway.js";
+import type { MemoryEventPublisher } from "../infrastructure/MemoryEventPublisher.js";
+import type { StubEventPublisher } from "../infrastructure/StubEventPublisher.js";
+import { ChangePassword } from "../useCases/ChangePassword.js";
+import { GetCredentialById } from "../useCases/GetCredentialById.js";
+import { Login } from "../useCases/Login.js";
+import { Logout } from "../useCases/Logout.js";
+import { Refresh } from "../useCases/Refresh.js";
+import { RegisterAccount } from "../useCases/RegisterAccount.js";
+import { ResetPassword } from "../useCases/ResetPassword.js";
+import { VerifyEmail } from "../useCases/VerifyEmail.js";
 import { EAVGateway } from "./EAVGateway.js";
-import { StubEAVGateway } from "./StubEAVGateway.js";
 
-describe("EAVGateway", () => {
-	beforeEach(() => {
-		vi.stubEnv("INFRA_MODE", "isolated");
+describe.each(["isolated", "integrated"])(
+	"EAVGateway integration with email access verification (%s)",
+	(infraMode) => {
+		beforeEach(() => {
+			vi.stubEnv("INFRA_MODE", infraMode);
 
-		container = getAuthnTestContainer();
-	});
-	afterEach(() => vi.unstubAllEnvs());
-	let container: Container;
+			container = getAuthnTestContainer();
+			mailingProvider(container);
+			otpProvider(container);
+			emailAccessVerificationProvider(container);
+			container.provide(IOtpEmailGateway, OtpEmailGateway);
+			container.provide(IOtpGateway, OtpGateway);
+			container.provide(IEAVGateway, EAVGateway);
 
-	it("delegates consumeEmailAccessToken to the usecase", async () => {
-		const mockUc = container.resolve(ConsumeEmailAccessToken);
-		const mockExecute = vi.spyOn(mockUc, "execute").mockResolvedValue(true);
-		const gateway = container.resolve(EAVGateway);
-		const result = await gateway.consumeEmailAccessToken({
-			token: "test-token",
-			purpose: "email_verification",
-			email: "user@example.com",
+			// Shared infrastructure test doubles
+			container.provide(ITimeEngine, StubTimeEngine);
+			const stubTime = container.resolve(ITimeEngine) as StubTimeEngine;
+			stubTime.setMillis(1700000000000);
+
+			container.provide(IIdGenerator, StubIdGenerator);
+			container.provideValue(InitialSendStatus, true);
+			container.provide(IMailer, StubMailer);
+
+			// Resolve publisher
+			eventPublisher = container.resolve(IAuthnEventPublisher) as
+				| MemoryEventPublisher
+				| StubEventPublisher;
+		});
+		afterEach(() => vi.unstubAllEnvs());
+		let container: Container;
+		let eventPublisher: MemoryEventPublisher | StubEventPublisher;
+
+		it("propagates mail delivery failures through the email verification and OTP modules", async () => {
+			container
+				.resolve(StubMailer)
+				.setError(new Error("Mail delivery unavailable"));
+			await expect(
+				container.resolve(RequestEmailAccessVerification).execute({
+					email: "user@example.com",
+					purpose: "email_verification",
+				}),
+			).rejects.toThrow("Mail delivery unavailable");
+			expect(container.resolve(StubMailer).getSentMails()).toHaveLength(0);
 		});
 
-		expect(result).toBe(true);
-		expect(mockExecute).toHaveBeenCalledWith({
-			token: "test-token",
-			purpose: "email_verification",
-			email: "user@example.com",
+		it("rejects an incorrect OTP through the real verification gateway", async () => {
+			const email = "user@example.com";
+			const result = await container
+				.resolve(RequestEmailAccessVerification)
+				.execute({
+					email,
+					purpose: "email_verification",
+				});
+			const wrongCode = result.otpCode === "000000" ? "999999" : "000000";
+			await expect(
+				container.resolve(ValidateEmailAccess).execute({
+					email,
+					purpose: "email_verification",
+					code: wrongCode,
+				}),
+			).rejects.toThrow("Invalid code");
 		});
-	});
 
-	it("StubEAVGateway works and throws error when configured", async () => {
-		const stub = container.resolve(StubEAVGateway);
-		expect(
-			await stub.consumeEmailAccessToken({
-				token: "t",
-				purpose: "p",
-				email: "e",
-			}),
-		).toBe(true);
+		it("executes the complete authentication, email verification, session refresh, password management lifecycle", async () => {
+			const registerAccountUc = container.resolve(RegisterAccount);
+			const loginUc = container.resolve(Login);
+			const verifyEmailUc = container.resolve(VerifyEmail);
+			const refreshUc = container.resolve(Refresh);
+			const changePasswordUc = container.resolve(ChangePassword);
+			const resetPasswordUc = container.resolve(ResetPassword);
+			const logoutUc = container.resolve(Logout);
+			const getCredByIdUc = container.resolve(GetCredentialById);
 
-		stub.setErrorToThrow(new AuthnError("Custom gateway error"));
-		await expect(
-			stub.consumeEmailAccessToken({ token: "t", purpose: "p", email: "e" }),
-		).rejects.toThrow("Custom gateway error");
-	});
-});
+			const requestEavUc = container.resolve(RequestEmailAccessVerification);
+			const validateEavUc = container.resolve(ValidateEmailAccess);
+
+			// 1. Register Account
+			const email = "user@example.com";
+			const password = "mySecurePassword123";
+			const credId = await registerAccountUc.execute({ email, password });
+			expect(credId).toBeDefined();
+
+			// Check emitted event
+			const regEvents = eventPublisher.getEvents();
+			expect(regEvents).toHaveLength(1);
+			expect(regEvents[0]).toBeInstanceOf(AccountRegisteredEvent);
+
+			// Check unverified credential
+			const cred = await getCredByIdUc.execute({ id: credId });
+			expect(cred).not.toBeNull();
+			expect(cred?.isVerified).toBe(false);
+			expect(cred?.passwordHash.startsWith("scrypt$")).toBe(true);
+
+			// 2. Login fails before verification
+			await expect(
+				loginUc.execute({
+					email,
+					password,
+					clientDeviceId: "device-desktop",
+				}),
+			).rejects.toThrow("Email has not been verified");
+
+			// 3. Email Access Verification flow
+			const reqResult = await requestEavUc.execute({
+				email,
+				purpose: "email_verification",
+			});
+			expect(reqResult.success).toBe(true);
+			expect(reqResult.otpCode).toBeDefined();
+			const sentMail = container.resolve(StubMailer).getSentMails()[0];
+			expect(sentMail?.to).toBe(email);
+			expect(sentMail?.body).toContain(reqResult.otpCode);
+
+			const valResult = await validateEavUc.execute({
+				email,
+				purpose: "email_verification",
+				code: reqResult.otpCode || "",
+			});
+			expect(valResult.emailAccessJwt).toBeDefined();
+
+			// 4. Verify Email in Authn
+			const verifyResult = await verifyEmailUc.execute({
+				email,
+				emailAccessToken: valResult.emailAccessJwt,
+			});
+			expect(verifyResult).toBe(true);
+			await expect(
+				container.resolve(IEAVGateway).consumeEmailAccessToken({
+					token: valResult.emailAccessJwt,
+					email,
+					purpose: "email_verification",
+				}),
+			).rejects.toThrow("Email access token has already been used");
+
+			const verifiedCred = await getCredByIdUc.execute({ id: credId });
+			expect(verifiedCred?.isVerified).toBe(true);
+
+			// 5. Login succeeds
+			const loginResult = await loginUc.execute({
+				email,
+				password,
+				clientDeviceId: "device-desktop",
+			});
+			expect(loginResult.accessToken).toBeDefined();
+			expect(loginResult.refreshToken).toBeDefined();
+
+			// 6. Refresh token
+			const refreshResult = await refreshUc.execute({
+				refreshToken: loginResult.refreshToken,
+				clientDeviceId: "device-desktop",
+			});
+			expect(refreshResult.accessToken).toBeDefined();
+			expect(refreshResult.refreshToken).toBeDefined();
+
+			// 7. Change Password
+			eventPublisher.clear();
+			const newPassword = "newPasswordSuperSecure1";
+			const changeResult = await changePasswordUc.execute({
+				refreshtoken: refreshResult.refreshToken,
+				clientDeviceId: "device-desktop",
+				currentPassword: password,
+				newPassword,
+			});
+			expect(changeResult).toBe(true);
+
+			const pwEvents = eventPublisher.getEvents();
+			expect(pwEvents).toHaveLength(1);
+			expect(pwEvents[0]).toBeInstanceOf(PasswordChangedEvent);
+
+			// 8. Logout
+			const logoutResult = await logoutUc.execute({
+				refreshToken: refreshResult.refreshToken,
+				clientDeviceId: "device-desktop",
+			});
+			expect(logoutResult).toBe(true);
+
+			// 9. Reset Password flow using EAV
+			const reqResetEav = await requestEavUc.execute({
+				email,
+				purpose: "password_reset",
+			});
+			const valResetEav = await validateEavUc.execute({
+				email,
+				purpose: "password_reset",
+				code: reqResetEav.otpCode || "",
+			});
+
+			eventPublisher.clear();
+			const finalPassword = "finalResetPassword999";
+			const resetResult = await resetPasswordUc.execute({
+				email,
+				emailAccessToken: valResetEav.emailAccessJwt,
+				newPassword: finalPassword,
+			});
+			expect(resetResult).toBe(true);
+
+			const resetEvents = eventPublisher.getEvents();
+			expect(resetEvents).toHaveLength(1);
+			expect(resetEvents[0]).toBeInstanceOf(PasswordChangedEvent);
+
+			// 10. Login with new password succeeds
+			const finalLogin = await loginUc.execute({
+				email,
+				password: finalPassword,
+				clientDeviceId: "device-desktop",
+			});
+			expect(finalLogin.accessToken).toBeDefined();
+		});
+	},
+);

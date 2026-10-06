@@ -2,6 +2,7 @@ import type { Container } from "@solid-stack/di";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getHasherTestContainer } from "../../__tests__/utils/getHasherTestContainer.js";
 import { Hasher } from "../../Hasher.js";
+import { IHashEngine } from "../../ports/IHashEngine.js";
 import { ScryptHashEngine } from "../ScryptHashEngine.js";
 import { StubHashEngine, StubHasher } from "../StubHashEngine.js";
 
@@ -119,6 +120,7 @@ describe("Hasher Infrastructure & Hasher Service", () => {
 	});
 
 	describe("Hasher Service", () => {
+		beforeEach(() => container.provide(IHashEngine, StubHashEngine));
 		it("delegates hash and verify to injected hashEngine", async () => {
 			const hasher = container.resolve(Hasher);
 
