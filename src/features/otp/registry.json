@@ -14,14 +14,14 @@
     ]
   },
   "files": [
-    "OtpIntegration.test.ts",
+    "__tests__/utils/getOtpTestContainer.ts",
+    "configs/OtpConfigToken.test.ts",
+    "configs/OtpConfigToken.ts",
     "diProvider.ts",
     "domain/IOtpEmailGateway.ts",
     "domain/IOtpGenerator.ts",
     "domain/IOtpRepo.ts",
     "domain/Otp.ts",
-    "domain/OtpConfig.test.ts",
-    "domain/OtpConfig.ts",
     "errors/OtpError.ts",
     "errors/OtpErrors.test.ts",
     "errors/OtpErrors.ts",
@@ -39,13 +39,11 @@
     "infrastructure/StubOtpGenerator.ts",
     "infrastructure/StubOtpRepo.test.ts",
     "infrastructure/StubOtpRepo.ts",
-    "tokens.test.ts",
-    "tokens.ts",
     "useCases/SendOtp.test.ts",
     "useCases/SendOtp.ts",
     "useCases/ValidateOtp.test.ts",
     "useCases/ValidateOtp.ts"
   ],
-  "integrity": "sha256-4fae3666bd8f1db392942726794dc5736eee3a8f0e4b61c5ad03e6e998923507",
-  "commit": "8e46d077cea5c41775bb5e835773bcf989effa49"
+  "integrity": "sha256-eb9484b3b084ae202e9dfb8a3602e6e384b896b7ba106245d423eb6fff8f9644",
+  "commit": "217ddede5dfb158e8ee64f148fc93a3b561d8ca0"
 }

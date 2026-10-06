@@ -11,6 +11,7 @@
   "files": [
     "Hasher.test.ts",
     "Hasher.ts",
+    "__tests__/utils/getHasherTestContainer.ts",
     "diProvider.ts",
     "errors/HasherError.ts",
     "infrastructure/ScryptHashEngine.ts",
@@ -18,6 +19,6 @@
     "infrastructure/__tests__/HashEngine.test.ts",
     "ports/IHashEngine.ts"
   ],
-  "integrity": "sha256-20d1ff8a9bb492796c6e9d426a0101f63ac25bdc276445dd6e1223f55f01b520",
-  "commit": "5db89381a28a6e95af3605c14f2f4e0c15d182b0"
+  "integrity": "sha256-fd26844318c270d52f288765d14f89dcf93d0062a1d1e44983c3f7657e9f6084",
+  "commit": "fe4e35092e166cb2876f181088c39c3d143af440"
 }

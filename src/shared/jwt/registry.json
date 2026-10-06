@@ -13,14 +13,16 @@
   "files": [
     "Jwt.test.ts",
     "Jwt.ts",
+    "__tests__/utils/getJwtTestContainer.ts",
+    "configs/SecretToken.ts",
     "diProvider.ts",
     "errors/JwtError.ts",
     "errors/TokenExpiredError.ts",
     "errors/TokenIntegrityError.ts",
-    "infrastructure/HmacJwtEngine.ts",
-    "infrastructure/StubJwtEngine.ts",
+    "infrastructure/JwtEngine.ts",
+    "infrastructure/__tests__/JwtEngine.test.ts",
     "ports/IJwtEngine.ts"
   ],
-  "integrity": "sha256-c36e17161ca947297278ee7adfd4ad0be1447dbaf1ba546e82c208d3853c3327",
-  "commit": "067c8a9e6df8b69e5e190a42f36df5514f75a657"
+  "integrity": "sha256-c6bb6ada820fad4890b0ea63f6c23f69e865246c215a6ef7dcacc0d90ded8b3e",
+  "commit": "1adf6b7469c13d8c2fa5050394436d5b22acf63b"
 }

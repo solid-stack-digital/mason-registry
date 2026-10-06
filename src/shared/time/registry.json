@@ -11,6 +11,7 @@
   "files": [
     "Clock.test.ts",
     "Clock.ts",
+    "__tests__/utils/getTimeTestContainer.ts",
     "diProvider.ts",
     "domain/Duration.ts",
     "domain/Time.ts",
@@ -23,6 +24,6 @@
     "infrastructure/__tests__/TimeEngine.test.ts",
     "ports/ITimeEngine.ts"
   ],
-  "integrity": "sha256-88b8cb1d2373185907cafd79f34013f401383204e2120ef281d9ae2e316a8e3c",
-  "commit": "067c8a9e6df8b69e5e190a42f36df5514f75a657"
+  "integrity": "sha256-9ceae58081c20b905b8b9a54ebbb69cf028d7878c5941f388e1e0a8a2e20d7b4",
+  "commit": "fe4e35092e166cb2876f181088c39c3d143af440"
 }

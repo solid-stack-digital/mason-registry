@@ -20,6 +20,6 @@
     "infrastructure/StubHmacEngine.ts",
     "ports/IHmacEngine.ts"
   ],
-  "integrity": "sha256-fe58344b963dd2723686e61cd0b0d00a95ab115feac3d9a15dabf9d506bf3ab7",
-  "commit": "6bcae7f8b1823974503c791dd506052a75343bc0"
+  "integrity": "sha256-c59b3566fbb0dd5ffb8f7e9923c32124b3b4c37311c1be397ff4aa284261d264",
+  "commit": "fe4e35092e166cb2876f181088c39c3d143af440"
 }

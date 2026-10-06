@@ -15,11 +15,11 @@
     ]
   },
   "files": [
-    "EmailAccessVerificationIntegration.test.ts",
+    "__tests__/utils/getEmailAccessVerificationTestContainer.ts",
+    "configs/EmailAccessConfigToken.test.ts",
+    "configs/EmailAccessConfigToken.ts",
     "diProvider.ts",
     "domain/EmailAccess.ts",
-    "domain/EmailAccessConfig.test.ts",
-    "domain/EmailAccessConfig.ts",
     "domain/IEmailAccessRepository.ts",
     "domain/IOtpGateway.ts",
     "errors/EmailAccessErrors.test.ts",
@@ -35,8 +35,6 @@
     "infrastructure/StubOtpGateway.ts",
     "services/DecodeAndValidateToken.test.ts",
     "services/DecodeAndValidateToken.ts",
-    "tokens.test.ts",
-    "tokens.ts",
     "useCases/ConsumeEmailAccessToken.test.ts",
     "useCases/ConsumeEmailAccessToken.ts",
     "useCases/DecodeEmailAccessToken.test.ts",
@@ -46,6 +44,6 @@
     "useCases/ValidateEmailAccess.test.ts",
     "useCases/ValidateEmailAccess.ts"
   ],
-  "integrity": "sha256-6c12bd2d20a6ff4d937fab9c7cc7e2ac9a537af24f3fbde34d46f5bd3a361542",
-  "commit": "75a2e74e59b2caa45eeb4244843c50492ebb80ca"
+  "integrity": "sha256-9c6834c7f96dc5b2c8dec6989202ef3881329031b1303ba39d508d1c9620800e",
+  "commit": "217ddede5dfb158e8ee64f148fc93a3b561d8ca0"
 }

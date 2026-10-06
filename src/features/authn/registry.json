@@ -19,10 +19,10 @@
     ]
   },
   "files": [
-    "AuthnIntegration.test.ts",
+    "__tests__/utils/getAuthnTestContainer.ts",
+    "configs/AuthnConfigToken.test.ts",
+    "configs/AuthnConfigToken.ts",
     "diProvider.ts",
-    "domain/AuthnConfig.test.ts",
-    "domain/AuthnConfig.ts",
     "domain/Credential.ts",
     "domain/IAuthnEventPublisher.ts",
     "domain/ICredentialRepo.ts",
@@ -56,8 +56,6 @@
     "pxExpress/handlers/ResetPasswordHttp.ts",
     "pxExpress/handlers/VerifyEmailHttp.ts",
     "pxExpress/index.ts",
-    "tokens.test.ts",
-    "tokens.ts",
     "useCases/ChangePassword.test.ts",
     "useCases/ChangePassword.ts",
     "useCases/GetCredentialById.test.ts",
@@ -75,6 +73,6 @@
     "useCases/VerifyEmail.test.ts",
     "useCases/VerifyEmail.ts"
   ],
-  "integrity": "sha256-d991b69bdfd45b84f38f7c2a9706bb2f72674d6dfc8500705a5e73045767a272",
-  "commit": "6d8a71b7f961d23e236350cd93a03bcaddad05ef"
+  "integrity": "sha256-7ffae7a8ebdf60fd277614a864937e0f69f28e6ef1dde7288bf7972595dde88b",
+  "commit": "217ddede5dfb158e8ee64f148fc93a3b561d8ca0"
 }

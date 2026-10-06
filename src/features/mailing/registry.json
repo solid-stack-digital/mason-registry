@@ -11,6 +11,7 @@
     "features": []
   },
   "files": [
+    "__tests__/utils/getMailingTestContainer.ts",
     "diProvider.ts",
     "domain/IMailer.ts",
     "errors/MailingError.ts",
@@ -19,6 +20,6 @@
     "useCases/SendEmail.test.ts",
     "useCases/SendEmail.ts"
   ],
-  "integrity": "sha256-379f878b13f761644cb3be666e336cbb4d065e0e2a95061ef12b7071e9349848",
-  "commit": "48bc3f036ceba2d3f90ac2e7a239d0fc388cf37d"
+  "integrity": "sha256-12ed3371a55408570750362f0509c97296725cf3be68ca95b4c31c7aa332e31d",
+  "commit": "fe4e35092e166cb2876f181088c39c3d143af440"
 }

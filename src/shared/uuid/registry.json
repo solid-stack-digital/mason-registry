@@ -11,6 +11,7 @@
   "files": [
     "Uuid.test.ts",
     "Uuid.ts",
+    "__tests__/utils/getUuidTestContainer.ts",
     "diProvider.ts",
     "domain/Id.ts",
     "errors/UuidError.ts",
@@ -19,6 +20,6 @@
     "infrastructure/__tests__/IdGenerator.test.ts",
     "ports/IIdGenerator.ts"
   ],
-  "integrity": "sha256-8a13847fe64b4386a5db663010b4d9d5764325d086233c6700dbae59193b1606",
-  "commit": "8e46d077cea5c41775bb5e835773bcf989effa49"
+  "integrity": "sha256-e21931ca6c36a6ccd07ac0a61f5038a5da079c72e1400bb8b70e4f39f9d99b9a",
+  "commit": "fe4e35092e166cb2876f181088c39c3d143af440"
 }
