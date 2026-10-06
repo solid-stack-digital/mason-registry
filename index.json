@@ -11,8 +11,8 @@
       "name": "hmac",
       "description": "HMAC (Hash-based Message Authentication Code) cryptographic signing and verification abstraction",
       "version": "1.0.0",
-      "integrity": "sha256-7a9b3bfeb9e330a3b35737bb876ddbef8f0b9b4855ccaa0ea2f70ba928b35327",
-      "commit": "c0e6ae944117f8022125245d2a87c5bc55156f65"
+      "integrity": "sha256-fe58344b963dd2723686e61cd0b0d00a95ab115feac3d9a15dabf9d506bf3ab7",
+      "commit": "6bcae7f8b1823974503c791dd506052a75343bc0"
     },
     {
       "name": "jwt",
