@@ -11,14 +11,8 @@ export const diProvider = (c: Container): void => {
 	if (infraMode !== "isolated" && infraMode !== "integrated") {
 		throw new JwtError("Invalid INFRA_MODE: expected isolated or integrated");
 	}
-	// TODO: Replace JWT_SECRET and the local example secret with your application's signing configuration after import.
-	const secret =
-		process.env.JWT_SECRET ??
-		(infraMode === "isolated" ? "example-token" : undefined);
-	if (!secret?.trim()) {
-		throw new JwtError("JWT_SECRET is required and must not be empty");
-	}
-	c.provideValue(SecretToken, secret);
+	// TODO: After import, resolve your application's Environment token and forward its JWT_SECRET to the local SecretToken.
+	c.provideValue(SecretToken, "example-token");
 	c.provide(IJwtEngine, JwtEngine);
 };
 

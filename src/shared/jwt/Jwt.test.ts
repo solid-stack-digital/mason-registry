@@ -17,6 +17,19 @@ describe("Jwt", () => {
 	});
 	afterEach(() => vi.unstubAllEnvs());
 
+	it.each(["isolated", "integrated"])(
+		"signs and verifies using the registry example config in %s mode",
+		async (mode) => {
+			vi.stubEnv("INFRA_MODE", mode);
+			const jwt = getJwtTestContainer().resolve(Jwt);
+			const token = await jwt.sign(
+				{ sub: "user-123" },
+				{ ttl: Duration.fromMinutes(5) },
+			);
+			expect(await jwt.verify(token)).toMatchObject({ sub: "user-123" });
+		},
+	);
+
 	it("forwards payload and TTL to the engine", async () => {
 		const sign = vi.spyOn(engine, "sign").mockResolvedValue("controlled-token");
 		const payload = { sub: "user-123" };

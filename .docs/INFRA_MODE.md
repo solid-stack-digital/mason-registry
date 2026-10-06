@@ -285,6 +285,36 @@ Registry providers that read environment values directly MUST include an actiona
 
 Placeholder configuration for secrets or external services MUST also carry an actionable TODO. Importing applications MUST supply actual required configuration through their own configuration mechanism.
 
+Features and shared modules MAY read only `INFRA_MODE` directly from the environment. They MUST NOT read other values through `process.env`, `import.meta.env`, or another global environment API.
+
+Other configuration values MUST be represented by local `ValueToken` classes in the module's configuration directory. The current JWT module uses `configs/SecretToken.ts` for this purpose. Infrastructure implementations consume these local tokens through DI; they MUST NOT read the environment or depend on the application's global `Environment` token themselves.
+
+Registry providers MUST supply example configuration values and include TODOs explaining their replacement after import. Example values apply independently of infrastructure mode. They allow imported modules to demonstrate actual local behavior without introducing dependencies on an application-specific environment loader.
+
+In an actual application, configuration follows this sequence:
+
+1. The application's root loader reads and validates environment values.
+2. It provides the validated configuration as the application's `Environment` value token in the container.
+3. Each imported module's customized provider resolves that token, selects the values the module needs, and provides them through its own local configuration tokens.
+4. Consumers are resolved after the environment and module configuration tokens have been provided.
+
+For example, the JWT registry provider supplies its example value:
+
+```ts
+// TODO: After import, resolve your application's Environment token and forward its JWT_SECRET to the local SecretToken.
+c.provideValue(SecretToken, "example-token");
+```
+
+The importing application replaces that line with its own configuration mapping:
+
+```ts
+// Environment is supplied and validated by the application's root loader.
+const environment = c.resolve(Environment);
+c.provideValue(SecretToken, environment.JWT_SECRET);
+```
+
+`Environment` and its import path belong to the importing application. The registry MUST NOT introduce a placeholder global `Environment` token or require an application-specific import to use its examples. The customized provider is the boundary between application configuration and the module's local configuration contract.
+
 A placeholder secret is not a stub implementation, but replacing an engine with a stub is not a solution for missing signing configuration. The two concerns MUST be handled separately.
 
 ### 7.4 Integrated configuration failures
@@ -486,13 +516,12 @@ This is an integration test even though infrastructure mode is isolated.
 
 The current providers default an unset `INFRA_MODE` to `isolated`. Explicit empty strings, unsupported values, different casing, and surrounding whitespace are rejected. Providers validate the mode before registering their bindings.
 
-All shared providers use their actual local engines in both modes. JWT configuration is loaded as follows:
+All shared providers use their actual local engines in both modes. JWT configuration is supplied as follows:
 
-- `JWT_SECRET` supplies the signing secret when present.
-- Isolated mode uses the documented local example secret `example-token` only when `JWT_SECRET` is unset.
-- Integrated JWT requires a nonempty `JWT_SECRET`.
-- An explicitly empty or whitespace-only secret is rejected in either mode.
-- Importing applications must replace the example-secret loader with their own signing configuration, as the provider's TODO explains.
+- The registry provider supplies `example-token` through its local `SecretToken` in both modes.
+- The provider does not read `JWT_SECRET` directly from the environment.
+- After import, the application replaces the example binding by resolving its root-provided `Environment` token and forwarding `environment.JWT_SECRET` into `SecretToken`.
+- Required application signing configuration is validated by the application's root loader. Infrastructure mode does not change this configuration workflow.
 
 Feature providers have the following availability:
 
@@ -521,6 +550,7 @@ A module complies when all applicable statements below hold:
 - Integrated service-backed ports use configured actual adapters and do not silently substitute memory adapters.
 - Production providers do not select test doubles in either mode.
 - Environment and placeholder configuration loaders carry actionable import-customization TODOs.
+- Providers read only `INFRA_MODE` directly from the environment; other configuration is supplied through local value tokens, mapped from the application's root-provided `Environment` after import.
 - Tests register the stubs and value tokens they need before resolving consumers.
 - Feature tests can replace gateways to remain independent of downstream features.
 - Actual gateway tests exercise participating modules together through their actual boundaries.
