@@ -21,3 +21,7 @@ build:
 # Tear down containers and remove volumes
 clean:
 	$(COMPOSE) down -v --remove-orphans
+
+
+look: 
+	@find scripts src biome.json index.json mason.config.json package.json tsconfig.json vitest.config.ts -type f -exec tail -n +1 {} + 
