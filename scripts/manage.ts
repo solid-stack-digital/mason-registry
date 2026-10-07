@@ -5,6 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import * as p from "@clack/prompts";
 import pc from "picocolors";
+import { validateManifestNpmDependencies } from "./utils/externalImports.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,6 +20,7 @@ export interface ModuleManifest {
 	commit?: string;
 	dependencies: {
 		npm: string[];
+		npmDev?: string[];
 		shared: string[];
 		features: string[];
 	};
@@ -279,6 +281,17 @@ export function validateModuleLinting(
 ): { ok: boolean; errors: string[] } {
 	const errors: string[] = [];
 	const relPath = path.relative(rootDir, dirPath);
+	const manifestPath = path.join(dirPath, "registry.json");
+	if (fs.existsSync(manifestPath)) {
+		try {
+			validateManifestNpmDependencies(
+				dirPath,
+				JSON.parse(fs.readFileSync(manifestPath, "utf-8")) as ModuleManifest,
+			);
+		} catch (error) {
+			errors.push(error instanceof Error ? error.message : String(error));
+		}
+	}
 
 	// 1. Biome linting & format check on the module directory
 	try {

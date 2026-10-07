@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { validateManifestNpmDependencies } from "./utils/externalImports.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,6 +18,7 @@ interface ModuleManifest {
 	commit?: string;
 	dependencies: {
 		npm: string[];
+		npmDev?: string[];
 		shared: string[];
 		features: string[];
 	};
@@ -257,6 +259,7 @@ function processDirectory(type: "shared" | "feature"): IndexEntry[] {
 		}
 
 		// Auto-discover all files (including test files)
+		validateManifestNpmDependencies(modDir, manifest);
 		const files = collectAllModuleFiles(modDir);
 		manifest.files = files;
 

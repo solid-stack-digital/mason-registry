@@ -8,6 +8,9 @@
       "@solid-stack/agnos-express",
       "express"
     ],
+    "npmDev": [
+      "@types/express@^5.0.6"
+    ],
     "shared": [
       "hasher",
       "jwt",

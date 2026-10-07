@@ -4,7 +4,12 @@
   "description": "JSON Web Token (JWT) signing, verification, and expiration handling",
   "version": "1.0.0",
   "dependencies": {
-    "npm": [],
+    "npm": [
+      "jsonwebtoken@^9.0.3"
+    ],
+    "npmDev": [
+      "@types/jsonwebtoken@^9.0.10"
+    ],
     "shared": [
       "time"
     ],
