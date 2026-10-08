@@ -17,6 +17,7 @@
     "__tests__/utils/getOtpTestContainer.ts",
     "configs/OtpConfigToken.test.ts",
     "configs/OtpConfigToken.ts",
+    "configs/StaticOtpToken.ts",
     "diProvider.ts",
     "domain/IOtpEmailGateway.ts",
     "domain/IOtpGenerator.ts",
@@ -44,6 +45,6 @@
     "useCases/ValidateOtp.test.ts",
     "useCases/ValidateOtp.ts"
   ],
-  "integrity": "sha256-eb9484b3b084ae202e9dfb8a3602e6e384b896b7ba106245d423eb6fff8f9644",
-  "commit": "217ddede5dfb158e8ee64f148fc93a3b561d8ca0"
+  "integrity": "sha256-63e4e62618cbb38148d174cdf02ca352c02e9ad76748c3dc64730e4753fda4ae",
+  "commit": "012656b25993a5df6626e320b7ed3490cb9c7826"
 }
