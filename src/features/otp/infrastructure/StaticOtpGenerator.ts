@@ -1,9 +1,7 @@
-import { type DepsType, MakeInjectable, ValueToken } from "@solid-stack/di";
+import { type DepsType, MakeInjectable } from "@solid-stack/di";
+import { StaticOtpToken } from "../configs/StaticOtpToken.js";
 import type { IOtpGenerator } from "../domain/IOtpGenerator.js";
 import { OtpError } from "../errors/OtpError.js";
-
-export type StaticOtp = string;
-export class StaticOtpToken extends ValueToken<StaticOtp> {}
 
 @MakeInjectable
 export class StaticOtpGenerator implements IOtpGenerator {

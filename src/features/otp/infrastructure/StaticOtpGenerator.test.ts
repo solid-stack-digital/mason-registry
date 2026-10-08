@@ -1,7 +1,8 @@
 import type { Container } from "@solid-stack/di";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getOtpTestContainer } from "../__tests__/utils/getOtpTestContainer.js";
-import { StaticOtpGenerator, StaticOtpToken } from "./StaticOtpGenerator.js";
+import { StaticOtpToken } from "../configs/StaticOtpToken.js";
+import { StaticOtpGenerator } from "./StaticOtpGenerator.js";
 
 describe("StaticOtpGenerator Infrastructure Adapter", () => {
 	beforeEach(() => {
