@@ -22,8 +22,8 @@ importers:
         specifier: ^1.8.1
         version: 1.8.1
       '@solid-stack/agnos-express':
-        specifier: ^1.0.2
-        version: 1.0.2(@solid-stack/agnos@1.0.10(@solid-stack/di@1.0.4))(@solid-stack/di@1.0.4)
+        specifier: ^1.0.3
+        version: 1.0.3(@solid-stack/agnos@1.0.10(@solid-stack/di@1.0.4))(@solid-stack/di@1.0.4)
       '@solid-stack/di':
         specifier: ^1.0.4
         version: 1.0.4
@@ -386,8 +386,8 @@ packages:
   '@rolldown/pluginutils@1.0.1':
     resolution: {integrity: sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw==}
 
-  '@solid-stack/agnos-express@1.0.2':
-    resolution: {integrity: sha512-VxZlegA2K28lggCCAIySxcHKu8vG5RgTbdfF35KexUy8PaJKMismhc1rUcDQYDAPwkDZMFFfyym2PfGsFYhp3w==}
+  '@solid-stack/agnos-express@1.0.3':
+    resolution: {integrity: sha512-CUqsRqKwsZ0YHnVejc0ajMBUo68UUgqJCUXGHEBpaX0/YB6IMLey3D3x/E7o6xRRJWX3DVm/LuRU1UYVSmcKng==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       '@solid-stack/agnos': '>=1.0.0'
@@ -1255,7 +1255,7 @@ snapshots:
 
   '@rolldown/pluginutils@1.0.1': {}
 
-  '@solid-stack/agnos-express@1.0.2(@solid-stack/agnos@1.0.10(@solid-stack/di@1.0.4))(@solid-stack/di@1.0.4)':
+  '@solid-stack/agnos-express@1.0.3(@solid-stack/agnos@1.0.10(@solid-stack/di@1.0.4))(@solid-stack/di@1.0.4)':
     dependencies:
       '@solid-stack/agnos': 1.0.10(@solid-stack/di@1.0.4)
       '@solid-stack/di': 1.0.4

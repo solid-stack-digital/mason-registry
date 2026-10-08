@@ -30,9 +30,9 @@
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",
     "@clack/prompts": "^1.8.1",
-    "@solid-stack/agnos-express": "^1.0.2",
+    "@solid-stack/agnos-express": "^1.0.3",
     "@solid-stack/di": "^1.0.4",
-    "@solid-stack/mason": "1.0.38",
+    "@solid-stack/mason": "1.0.40",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^22.13.5",
